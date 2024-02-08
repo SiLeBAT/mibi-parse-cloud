@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    // Modules
+    "baseUrl": "./src",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "types": ["node", "parse"],
+    "typeRoots": ["./node_modules/@types", "./typings"],
+    "declaration": true,
+    // Emit
+    "outDir": "lib",
+    "sourceMap": true,
+    "removeComments": true,
+    "newLine": "lf",
+
+    // Interop Constraints
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Language and Environment
+    "target": "ES2019",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // Type Checking: strict mode
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictBindCallApply": true,
+    // "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    // "strictPropertyInitialization": true,
+    // "strict": true
+
+    // Type Checking
+    // "noImplicitReturns": true,
+    "noUnusedLocals": true
+    // "noUnusedParameters": true,
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/__mocks__/*.ts", "src/**/__tests__/*.ts"]
+}
