@@ -1,4 +1,3 @@
-import { getSystemInformationController } from './useCases/getSystemInformation';
+import './useCases/getSystemInformation';
 
-const FUNCTION_KEY = 'getSystemInformation';
-Parse.Cloud.define(FUNCTION_KEY, getSystemInformationController);
+console.log('System-monitoring module loaded.');
