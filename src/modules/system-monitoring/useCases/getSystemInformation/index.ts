@@ -1,3 +1,5 @@
-export { getSystemInformationController } from './get-system-information.controller';
+import { getSystemInformationController } from './get-system-information.controller';
 export { SystemInformationDTO } from './get-system-information.dto';
-export { getSystemInformation } from './get-system-information.use-case';
+
+const FUNCTION_KEY = 'getSystemInformation';
+Parse.Cloud.define(FUNCTION_KEY, getSystemInformationController);
