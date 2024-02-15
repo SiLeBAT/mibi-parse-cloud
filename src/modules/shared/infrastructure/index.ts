@@ -1,1 +1,1 @@
-export { ParseHookRequest } from './types';
+export { HTTPRequest, ParseHookRequest } from './request';

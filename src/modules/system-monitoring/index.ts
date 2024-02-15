@@ -1,3 +1,3 @@
-import './useCases/getSystemInformation';
+import './useCases';
 
-console.log('System-monitoring module loaded.');
+console.log('System monitoring module loaded.');
