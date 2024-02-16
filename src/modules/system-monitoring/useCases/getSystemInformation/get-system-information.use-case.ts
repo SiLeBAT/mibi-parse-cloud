@@ -7,9 +7,7 @@ import {
     packageInformationProvider
 } from '../../infrastructure/providers';
 
-export class GetSystemInformationUseCase
-    implements UseCase<null, SystemInformation>
-{
+class GetSystemInformationUseCase implements UseCase<null, SystemInformation> {
     constructor(
         private configurationProvider: ConfigurationProvider,
         private packageInformationProvider: PackageInformationProvider

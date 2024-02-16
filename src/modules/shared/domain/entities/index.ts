@@ -1,1 +1,2 @@
-export { Entity } from './entity';
+export * from './aggregate-root';
+export * from './entity';
