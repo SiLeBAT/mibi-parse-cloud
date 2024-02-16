@@ -5,5 +5,5 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   parserOptions: { project: ['./tsconfig.json'] },
   root: true,
-  ignorePatterns: ['src/**/*.spec.ts', 'dist/*', 'lib/*']
+  ignorePatterns: ['src/**/__mocks__/**','src/**/*.spec.ts', 'dist/*', 'lib/*', 'jest.config.js']
 };

@@ -1,7 +1,8 @@
+import { AVVCatalogueParserAntiCorruptionLayer } from 'modules/catalogue-management/legacy';
 import { UseCase } from '../../../shared/useCases';
 import { Catalogue, CatalogueCreateFromFileContentProps } from '../../domain';
 
-export class CreateAVVCatalogueUseCase<T>
+class CreateAVVCatalogueUseCase<T>
     implements UseCase<CatalogueCreateFromFileContentProps, Catalogue<T>>
 {
     constructor() {}
@@ -9,7 +10,7 @@ export class CreateAVVCatalogueUseCase<T>
     async execute({
         fileContent
     }: CatalogueCreateFromFileContentProps): Promise<Catalogue<T>> {
-        return Catalogue.create({ fileContent });
+        return AVVCatalogueParserAntiCorruptionLayer.create({ fileContent });
     }
 }
 
