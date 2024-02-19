@@ -1,2 +1,2 @@
 export * from './aggregate-root';
-export * from './entity-b';
+export * from './entity';
