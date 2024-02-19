@@ -1,6 +1,6 @@
 import { SubmissionFormInput } from '../../domain';
+import { Submission } from '../../domain/submission-b.entity';
 import { excelUnmarshalAntiCorruptionLayer } from '../../legacy';
-import { Submission } from './../../domain/submission.entity';
 import { CreateSubmissionUseCase } from './create-submission.use-case';
 
 export class CreateSubmissionFromXLSXUseCase extends CreateSubmissionUseCase {

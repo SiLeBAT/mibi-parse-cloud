@@ -1,4 +1,4 @@
-import { Catalogue } from 'modules/catalogue-management/domain';
+import { Catalogue } from '../domain';
 import { Mapper } from '../../shared/mappers';
 import {
     AVVCatalogueAttributes,

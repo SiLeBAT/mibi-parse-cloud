@@ -1,6 +1,6 @@
 import { UseCase } from '../../../shared/useCases';
 import { SubmissionFormInput } from '../../domain';
-import { Submission } from './../../domain/submission.entity';
+import { Submission } from '../../domain/submission-b.entity';
 
 export abstract class CreateSubmissionUseCase
     implements UseCase<SubmissionFormInput, Submission>

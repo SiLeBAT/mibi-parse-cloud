@@ -1,6 +1,6 @@
-import { SubmissionDTOMapper } from 'modules/submission/mappers';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
 import { SubmissionFormInput } from '../../domain';
+import { SubmissionDTOMapper } from '../../mappers';
 import { CreateSubmissionFromJSONUseCase } from './create-submission-from-json.use-case';
 import { CreateSubmissionFromXLSXUseCase } from './create-submission-from-xlsx.use-case';
 import { OrderDTO } from './create-submission.dto';

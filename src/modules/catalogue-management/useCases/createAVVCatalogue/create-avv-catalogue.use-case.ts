@@ -1,6 +1,6 @@
-import { AVVCatalogueParserAntiCorruptionLayer } from 'modules/catalogue-management/legacy';
 import { UseCase } from '../../../shared/useCases';
 import { Catalogue, CatalogueCreateFromFileContentProps } from '../../domain';
+import { AVVCatalogueParserAntiCorruptionLayer } from '../../legacy';
 
 class CreateAVVCatalogueUseCase<T>
     implements UseCase<CatalogueCreateFromFileContentProps, Catalogue<T>>
