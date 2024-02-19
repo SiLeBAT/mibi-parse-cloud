@@ -1,5 +1,5 @@
 import { SubmissionFormInput } from '../../domain';
-import { Submission } from '../../domain/submission-b.entity';
+import { Submission } from '../../domain/submission.entity';
 import { excelUnmarshalAntiCorruptionLayer } from '../../legacy';
 import { CreateSubmissionUseCase } from './create-submission.use-case';
 

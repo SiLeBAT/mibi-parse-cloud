@@ -1,6 +1,6 @@
-import { SubmissionDTOMapper } from '../../mappers';
 import { SubmissionFormInput } from '../../domain';
-import { Submission } from '../../domain/submission-b.entity';
+import { Submission } from '../../domain/submission.entity';
+import { SubmissionDTOMapper } from '../../mappers';
 import { OrderContainerDTO } from './create-submission.dto';
 import { CreateSubmissionUseCase } from './create-submission.use-case';
 

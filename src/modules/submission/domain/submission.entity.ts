@@ -1,7 +1,7 @@
 import { Entity } from '../../shared/domain/entities';
 import { EntityId } from '../../shared/domain/valueObjects';
 import { Contact } from './contact.vo';
-import { SampleEntry } from './sample-entry-b.entity';
+import { SampleEntry } from './sample-entry.entity';
 
 export type SampleEntryCollection = SampleEntry[];
 
