@@ -227,7 +227,7 @@ export class AVVCatalogueParser {
             .map(eintrag => this.getAVV303EntryFromEintrag(eintrag))
             .forEach((tempEintrag: TempEintrag) => {
                 mibiEintraege[tempEintrag.Kode] = {
-                    Text: tempEintrag.Text,
+                    Text: tempEintrag.Text.normalize('NFC'),
                     Attribute: tempEintrag.Attribute,
                     FacettenIds: tempEintrag.FacettenIds
                 };
@@ -258,7 +258,7 @@ export class AVVCatalogueParser {
             .map(eintrag => this.getAVV313TempEintragFromEintrag(eintrag))
             .forEach((tempEintrag: TempEintrag) => {
                 mibiEintraege[tempEintrag.Kode] = {
-                    Text: tempEintrag.Text,
+                    Text: tempEintrag.Text.normalize('NFC'),
                     PLZ: tempEintrag.PLZ,
                     Name: tempEintrag.Name
                 };
@@ -289,7 +289,7 @@ export class AVVCatalogueParser {
             .map(eintrag => this.getTempEintragFromEintrag(eintrag))
             .forEach((tempEintrag: TempEintrag) => {
                 mibiEintraege[tempEintrag.Kode] = {
-                    Text: tempEintrag.Text
+                    Text: tempEintrag.Text.normalize('NFC')
                 };
             });
 
@@ -317,7 +317,7 @@ export class AVVCatalogueParser {
         this.collectEintraegeWithFacetten(standardData.eintraege, []).forEach(
             (tempEintrag: TempEintrag) => {
                 mibiEintraege[tempEintrag.Kode] = {
-                    Text: tempEintrag.Text,
+                    Text: tempEintrag.Text.normalize('NFC'),
                     FacettenIds: tempEintrag.FacettenIds
                 };
             }
@@ -350,7 +350,7 @@ export class AVVCatalogueParser {
             .map(eintrag => this.getTempEintragFromEintrag(eintrag))
             .forEach((tempEintrag: TempEintrag) => {
                 mibiEintraege[tempEintrag.Kode] = {
-                    Text: tempEintrag.Text
+                    Text: tempEintrag.Text.normalize('NFC')
                 };
             });
 
@@ -396,12 +396,12 @@ export class AVVCatalogueParser {
 
         avv324Unique.forEach((tempEintrag: TempEintrag) => {
             mibiEintraege[tempEintrag.Kode] = {
-                Text: tempEintrag.Text
+                Text: tempEintrag.Text.normalize('NFC')
             };
             textEintraege[tempEintrag.Text] = tempEintrag.Kode;
             fuzzyEintraege.push({
                 Kode: tempEintrag.Kode,
-                Text: tempEintrag.Text
+                Text: tempEintrag.Text.normalize('NFC')
             });
         });
 
@@ -411,7 +411,7 @@ export class AVVCatalogueParser {
             textEintraege[bfrErreger] = '';
             fuzzyEintraege.push({
                 Kode: '',
-                Text: bfrErreger
+                Text: bfrErreger.normalize('NFC')
             });
         });
 
@@ -441,7 +441,7 @@ export class AVVCatalogueParser {
             .map(eintrag => this.getTempEintragFromEintrag(eintrag))
             .forEach((tempEintrag: TempEintrag) => {
                 mibiEintraege[tempEintrag.Kode] = {
-                    Text: tempEintrag.Text
+                    Text: tempEintrag.Text.normalize('NFC')
                 };
             });
 
@@ -469,7 +469,7 @@ export class AVVCatalogueParser {
             .map(eintrag => this.getTempEintragFromEintrag(eintrag))
             .forEach((tempEintrag: TempEintrag) => {
                 mibiEintraege[tempEintrag.Kode] = {
-                    Text: tempEintrag.Text
+                    Text: tempEintrag.Text.normalize('NFC')
                 };
             });
 
@@ -497,7 +497,7 @@ export class AVVCatalogueParser {
         this.collectEintraegeWithFacetten(standardData.eintraege).forEach(
             (tempEintrag: TempEintrag) => {
                 mibiEintraege[tempEintrag.Kode] = {
-                    Text: tempEintrag.Text,
+                    Text: tempEintrag.Text.normalize('NFC'),
                     FacettenIds:
                         tempEintrag.Basiseintrag === true
                             ? tempEintrag.FacettenIds
@@ -741,7 +741,7 @@ export class AVVCatalogueParser {
 
             mibiFacetten[begriffsId] = {
                 FacettenId: id,
-                Text: name,
+                Text: name.normalize('NFC'),
                 FacettenWerte: facettenWerte
             };
         });
@@ -758,7 +758,7 @@ export class AVVCatalogueParser {
             const text = facettenWert.wertName.name.toString();
 
             mibiFacettenWerte[begriffsId] = {
-                Text: text
+                Text: text.normalize('NFC')
             };
         });
 
