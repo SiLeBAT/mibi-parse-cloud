@@ -1,16 +1,15 @@
+import { ParseLogger } from '../core/logging-context';
+
 export interface HTTPRequest<T> {
     headers: Record<string, string>;
     log: ParseLogger;
     params: T;
 }
 
-type ParseLogger = {
-    info: (message: string) => void;
-    error: (message: string) => void;
-};
-export type ParseHookRequest<T> = {
+export type ParseHookRequest<T, V> = {
     object: T;
     log: ParseLogger;
+    context?: V;
 };
 
 export class MalformedRequestError extends Error {

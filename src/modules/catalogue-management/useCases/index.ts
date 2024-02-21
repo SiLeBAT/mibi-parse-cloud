@@ -1,2 +1,2 @@
-import './createAVVCatalogue';
+import './uploadAVVCatalogue';
 import './deleteAVVCatalogue';

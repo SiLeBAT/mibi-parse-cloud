@@ -1,16 +1,26 @@
+import {
+    getLogger,
+    setLoggingContext
+} from '../../../shared/core/logging-context';
 import { ParseHookRequest } from '../../../shared/infrastructure';
 import { AVVCatalogueObject } from '../../infrastructure/parse-types';
 
-type DeleteAVVCatalogueRequest = ParseHookRequest<AVVCatalogueObject>;
+type DeleteAVVCatalogueRequest = ParseHookRequest<
+    AVVCatalogueObject,
+    undefined
+>;
 
 export const deleteAVVCatalogueHook = async (
     request: DeleteAVVCatalogueRequest
 ) => {
-    const avvCatalogueObject: AVVCatalogueObject = request.object;
-    const file = avvCatalogueObject.get('catalogueFile');
     try {
+        const avvCatalogueObject: AVVCatalogueObject = request.object;
+        setLoggingContext(request.log);
+        const file = avvCatalogueObject.get('catalogueFile');
         file.destroy({ useMasterKey: true });
     } catch (error) {
-        request.log.error('Unable to delete file: ' + file.name());
+        getLogger().error(error.message);
+    } finally {
+        setLoggingContext(null);
     }
 };

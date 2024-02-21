@@ -1,10 +1,10 @@
-import { Catalogue } from '../domain';
 import { Mapper } from '../../shared/mappers';
+import { Catalogue } from '../domain';
 import {
     AVVCatalogueAttributes,
-    AVVCatalogueObject,
     ObjectKeys
 } from '../infrastructure/parse-types';
+import { AVVCatalogueObject } from './../infrastructure/parse-types';
 
 export class AVVCatalogueMapper extends Mapper {
     public static async toPersistence<T>(
@@ -24,9 +24,9 @@ export class AVVCatalogueMapper extends Mapper {
         }
 
         aco.set('catalogueFile', jsonFile);
-        aco.set('catalogueCode', catalogue.catalogueNumber);
-        aco.set('version', catalogue.version);
-        aco.set('validFrom', catalogue.validFrom || undefined);
+        aco.set('catalogueCode', catalogue.catalogueInformation.catalogueCode);
+        aco.set('version', catalogue.catalogueInformation.version);
+        aco.set('validFrom', catalogue.catalogueInformation.validFrom);
         return aco;
     }
 }
@@ -39,7 +39,7 @@ function fromUTF8ToBase64(utf8: string): string {
 function createFileFromCatalogue<T>(catalogue: Catalogue<T>) {
     const contentAsJson = catalogue.JSON;
     const jsonFile = new Parse.File(
-        'avv' + catalogue.catalogueNumber + '.json',
+        'avv' + catalogue.catalogueInformation.catalogueCode + '.json',
         {
             base64: fromUTF8ToBase64(contentAsJson)
         }
