@@ -1,18 +1,9 @@
-import { AggregateRoot } from '../../domain/entities';
-import { EntityId } from '../../domain/valueObjects';
-
 export abstract class AbstractRepository<
-    IProps,
-    IAttributes extends Parse.Attributes,
-    V extends Parse.Object<IAttributes>,
-    R extends AggregateRoot<IProps>
+    T extends Parse.Object<Parse.Attributes>
 > {
-    public abstract save(aggregate: R, user: Parse.User): Promise<EntityId>;
+    constructor(private objectKey: string) {}
 
-    protected abstract getOwnObjectByEId(eId: EntityId): Promise<V>;
-
-    async delete(aggregateRoot: R) {
-        const object = await this.getOwnObjectByEId(aggregateRoot.id);
-        return object.destroy({ useMasterKey: true });
+    protected getQuery() {
+        return new Parse.Query<T>(this.objectKey);
     }
 }

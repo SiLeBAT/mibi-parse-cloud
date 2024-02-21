@@ -1,15 +1,16 @@
-import { FileContentType } from '../domain';
-import {
-    Catalogue,
-    CreateFromFileContentProps
-} from '../domain/catalogue.entity';
+import { getLogger } from '../../shared/core/logging-context';
+import { CatalogueInformation, FileContent, FileContentType } from '../domain';
+import { Catalogue } from '../domain/catalogue.entity';
 import { AVVCatalogueParser, LegacyCatalog } from './avv-catalogue-parser';
 
+interface CreateFromFileContentProps {
+    fileContent: FileContent;
+}
 interface CreateFromLegacyCatalogProps<T> {
     legacyCatalog: LegacyCatalog<T>;
-    catalogueNumber: string;
+    catalogueCode: string;
     version: string;
-    validFrom: Date | null;
+    validFrom: Date;
 }
 
 class AVVCatalogueParserAntiCorruptionLayer {
@@ -20,10 +21,16 @@ class AVVCatalogueParserAntiCorruptionLayer {
         props: CreateFromFileContentProps
     ): Promise<Catalogue<T>> {
         const legacyProps = await this.parseFileContent<T>(props);
-        return Catalogue.create({
-            catalogueNumber: legacyProps.catalogueNumber,
+        getLogger().info(
+            `Legacy props parsed successfully: ${legacyProps.catalogueCode} - ${legacyProps.version} - ${legacyProps.validFrom}`
+        );
+        const catalogueInformation = await CatalogueInformation.create({
+            catalogueCode: legacyProps.catalogueCode,
             validFrom: legacyProps.validFrom,
-            version: legacyProps.version,
+            version: legacyProps.version
+        });
+        return Catalogue.create({
+            catalogueInformation,
             data: legacyProps.legacyCatalog.data,
             uId: legacyProps.legacyCatalog.uId
         });
@@ -37,18 +44,16 @@ class AVVCatalogueParserAntiCorruptionLayer {
                 const legacyCatalog = JSON.parse(fileContent.content);
                 return {
                     legacyCatalog,
-                    catalogueNumber: legacyCatalog.data.katalogNummer,
+                    catalogueCode: legacyCatalog.data.katalogNummer,
                     version: legacyCatalog.data.version,
-                    validFrom: legacyCatalog.data.gueltigAb
-                        ? new Date(legacyCatalog.data.gueltigAb)
-                        : null
+                    validFrom: new Date(legacyCatalog.data.gueltigAb)
                 };
             }
             case FileContentType.XML: {
                 const legacyCatalog = await this.avvCatalogueParser.parseXML<T>(
                     fileContent.content
                 );
-                const catalogueNumber =
+                const catalogueCode =
                     this.avvCatalogueParser.determineCatalogueNumber(
                         fileContent.content
                     );
@@ -59,10 +64,9 @@ class AVVCatalogueParserAntiCorruptionLayer {
                     this.avvCatalogueParser.determineValidFrom(
                         fileContent.content
                     );
-                const validFrom = validFromString
-                    ? new Date(validFromString)
-                    : null;
-                return { legacyCatalog, catalogueNumber, version, validFrom };
+                const validFrom = new Date(validFromString);
+
+                return { legacyCatalog, catalogueCode, version, validFrom };
             }
             default:
                 throw new Error('Filetype not supported');

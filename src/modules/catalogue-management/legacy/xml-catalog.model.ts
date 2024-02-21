@@ -25,7 +25,7 @@ export interface MetadatenTyp {
     merkmalWertTrennzeichen: string;
     mehrereWerteTrennzeichen: string;
     arbeitsversion?: boolean;
-    gueltigAb?: Date;
+    gueltigAb: Date;
     gueltigBis?: Date;
     $aktion: string;
 }

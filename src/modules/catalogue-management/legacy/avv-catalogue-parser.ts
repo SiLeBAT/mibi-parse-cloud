@@ -173,9 +173,9 @@ export class AVVCatalogueParser {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parseXML<T>(fileContent: string): Promise<LegacyCatalog<T>> {
-        const catalogueNumber = this.determineCatalogueNumber(fileContent);
+        const catalogueCode = this.determineCatalogueNumber(fileContent);
         // @ts-expect-error: Fix later
-        return this.parsingFunctions[catalogueNumber](fileContent);
+        return this.parsingFunctions[catalogueCode](fileContent);
     }
 
     determineCatalogueNumber(fileContent: string): string {
@@ -190,20 +190,17 @@ export class AVVCatalogueParser {
 
     determineValidFrom(fileContent: string): string {
         const catalogData = this.parser.parse(fileContent);
-        return (
-            this.extractDateFromGueltigAbField(
-                catalogData.katalog.metadaten.gueltigAb?.toString()
-            ) || ''
+        return this.extractDateFromGueltigAbField(
+            catalogData.katalog.metadaten.gueltigAb.toString()
         );
     }
 
     private getStandardData(catalogue: KatalogInstance) {
         return {
             version: catalogue.katalog.metadaten.versionsnummer.toString(),
-            gueltigAb:
-                this.extractDateFromGueltigAbField(
-                    catalogue.katalog.metadaten.gueltigAb?.toString()
-                ) || '',
+            gueltigAb: this.extractDateFromGueltigAbField(
+                catalogue.katalog.metadaten.gueltigAb.toString()
+            ),
             katalogName: catalogue.katalog.metadaten.katalogname.name,
             katalogNummer: catalogue.katalog.metadaten.katalognummer.toString(),
             facettenErlaubt: catalogue.katalog.metadaten.facettenErlaubt,
@@ -405,6 +402,10 @@ export class AVVCatalogueParser {
             });
         });
 
+        /* Refactor this one second: addition of additionalPathogens should     * happen external to XML parsing:
+         * 1) Parse the XML and create a JSON Catalogue
+         * 2) add the additional Pathogens to that catalogue
+         */
         const additionalPathogens = await this.getAdditionalPathogens();
 
         additionalPathogens.forEach((bfrErreger: string) => {
@@ -577,11 +578,9 @@ export class AVVCatalogueParser {
         return tempEintraege;
     }
 
-    private extractDateFromGueltigAbField(
-        dateGueltigAb: string | undefined
-    ): string | undefined {
-        const dateArray = dateGueltigAb?.split('+');
-        const gueltigAb = dateArray ? dateArray[0] : '';
+    private extractDateFromGueltigAbField(dateGueltigAb: string): string {
+        const dateArray = dateGueltigAb.split('+');
+        const gueltigAb = dateArray[0];
 
         return gueltigAb;
     }
@@ -783,12 +782,15 @@ export class AVVCatalogueParser {
         return [gemeindeBezeichnung, plz];
     }
 
+    // Refactor this one first: DB access should be handled with a properly injected repository
     private async getAdditionalPathogens(): Promise<string[]> {
         const additionalPathogensQuery =
             new Parse.Query<AdditionalPathogensObject>(
                 ObjectKeys.AdditionalPathogens
             );
-        const results = await additionalPathogensQuery.find();
+        const results = await additionalPathogensQuery.find({
+            useMasterKey: true
+        });
         const pathogens = results.map(item => {
             return item.get('pathogen');
         });

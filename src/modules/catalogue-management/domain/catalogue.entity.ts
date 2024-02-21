@@ -1,16 +1,9 @@
 import { Entity } from '../../shared/domain/entities';
 import { EntityId } from '../../shared/domain/valueObjects';
-
-import { FileContent } from './file-content.vo';
-
-export interface CreateFromFileContentProps {
-    fileContent: FileContent;
-}
+import { CatalogueInformation } from './catalogue-information.vo';
 
 export interface CatalogueProps<T> {
-    catalogueNumber: string;
-    validFrom: Date | null;
-    version: string;
+    catalogueInformation: CatalogueInformation;
     data: T;
     uId: string;
 }
@@ -23,20 +16,8 @@ export class Catalogue<T> extends Entity<CatalogueProps<T>> {
         super(props, id);
     }
 
-    get catalogueNumber(): string {
-        return this.props.catalogueNumber;
-    }
-
-    get version(): string {
-        return this.props.version;
-    }
-
-    get validFrom(): Date | null {
-        return this.props.validFrom;
-    }
-
-    set validFrom(date: Date | null) {
-        this.props.validFrom = date;
+    get catalogueInformation(): CatalogueInformation {
+        return this.props.catalogueInformation;
     }
 
     get JSON(): string {
