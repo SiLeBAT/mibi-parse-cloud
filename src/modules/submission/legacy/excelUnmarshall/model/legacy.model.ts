@@ -1,4 +1,4 @@
-import { NRL_ID_VALUE } from './../../domain';
+import { NRL_ID_VALUE } from '../../../domain';
 
 export enum SampleSheetAnalysisOption {
     OMIT,
