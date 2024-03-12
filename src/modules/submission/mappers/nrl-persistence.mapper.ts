@@ -1,7 +1,7 @@
 import { Mapper, MappingError } from '../../shared/mappers';
 import { NRLId } from '../domain/nrl-id.vo';
 import { NRLObject } from '../infrastructure';
-import { NRL } from '../legacy/model/legacy.model';
+import { NRL } from '../legacy/excelUnmarshall/model/legacy.model';
 
 export class NRLPersistenceMapper extends Mapper {
     static fromPersistence(object: NRLObject): NRL {

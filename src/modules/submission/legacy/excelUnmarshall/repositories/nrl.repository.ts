@@ -1,6 +1,6 @@
-import { ObjectKeys } from '../../infrastructure';
+import { ObjectKeys } from '../../../infrastructure';
+import { NRLPersistenceMapper } from '../../../mappers/nrl-persistence.mapper';
 import { NRL } from '../model/legacy.model';
-import { NRLPersistenceMapper } from './../../mappers/nrl-persistence.mapper';
 
 /*
  *   This repository exists to handle the legacy codebase:

@@ -1,12 +1,9 @@
 import { Entity } from '../../shared/domain/entities';
 import { EntityId } from '../../shared/domain/valueObjects';
 import { Contact } from './contact.vo';
-import { SampleEntry } from './sample-entry.entity';
 
-export type SampleEntryCollection = SampleEntry[];
-
-export type SubmissionProps = {
-    sampleEntryCollection: SampleEntryCollection;
+export type SubmissionProps<T> = {
+    sampleEntryCollection: T;
     contact: Contact;
     fileName?: string;
     customerRefNumber?: string;
@@ -14,13 +11,13 @@ export type SubmissionProps = {
     version?: string;
 };
 
-export class Submission extends Entity<SubmissionProps> {
-    static create(props: SubmissionProps, id?: EntityId): Submission {
+export class Submission<T> extends Entity<SubmissionProps<T>> {
+    static create<T>(props: SubmissionProps<T>, id?: EntityId): Submission<T> {
         const submission = new Submission(props, id);
         return submission;
     }
 
-    private constructor(props: SubmissionProps, id?: EntityId) {
+    private constructor(props: SubmissionProps<T>, id?: EntityId) {
         super(props, id);
     }
 

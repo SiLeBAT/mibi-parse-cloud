@@ -1,6 +1,7 @@
-import { Contact, Submission } from '../../domain';
+import { Contact, SampleEntry, Submission } from '../../domain';
+import { OrderDTO } from '../../dto';
 import { SubmissionDTOMapper } from '../../mappers';
-import { OrderDTO } from '../../useCases/createSubmission/create-submission.dto';
+import { SampleEntryDTOMapper } from './../sample-entry-dto.mapper';
 
 describe('Submission DTO Mapper ', () => {
     describe('Map to Submission', () => {
@@ -24,12 +25,26 @@ describe('Submission DTO Mapper ', () => {
             };
         });
         it('Should successfully create Submission from OrderDTO', () => {
-            const submission = SubmissionDTOMapper.fromDTO(orderDto);
+            const submission = SubmissionDTOMapper.fromDTO(
+                orderDto,
+                samples => {
+                    return samples.map(s =>
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
+                    );
+                }
+            );
             expect(submission).toEqual(expect.any(Submission));
         });
 
         it('Should create submission with empty string version', () => {
-            const submission = SubmissionDTOMapper.fromDTO(orderDto);
+            const submission = SubmissionDTOMapper.fromDTO(
+                orderDto,
+                samples => {
+                    return samples.map(s =>
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
+                    );
+                }
+            );
             expect(submission.version).toEqual('');
             expect(submission.fileName).toEqual('');
             expect(submission.customerRefNumber).toEqual('');
@@ -41,7 +56,14 @@ describe('Submission DTO Mapper ', () => {
             dto.sampleSet.meta.fileName = 'test';
             dto.sampleSet.meta.customerRefNumber = 'test';
             dto.sampleSet.meta.signatureDate = 'test';
-            const submission = SubmissionDTOMapper.fromDTO(orderDto);
+            const submission = SubmissionDTOMapper.fromDTO(
+                orderDto,
+                samples => {
+                    return samples.map(s =>
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
+                    );
+                }
+            );
             expect(submission.version).toEqual('test');
             expect(submission.fileName).toEqual('test');
             expect(submission.customerRefNumber).toEqual('test');
@@ -51,21 +73,36 @@ describe('Submission DTO Mapper ', () => {
             const dto = { ...orderDto };
             // @ts-expect-error
             dto.sampleSet.meta = null;
-            expect(() => SubmissionDTOMapper.fromDTO(dto)).toThrow(
-                'Unable to map OrderDTO to Submission'
-            );
+            expect(() =>
+                SubmissionDTOMapper.fromDTO(dto, samples => {
+                    return samples.map(s =>
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
+                    );
+                })
+            ).toThrow('Unable to map OrderDTO to Submission');
         });
         it('Should throw and error upon creation because of missing samples', () => {
             const dto = { ...orderDto };
             // @ts-expect-error
             dto.sampleSet.samples = null;
-            expect(() => SubmissionDTOMapper.fromDTO(dto)).toThrow(
-                'Unable to map OrderDTO to Submission'
-            );
+            expect(() =>
+                SubmissionDTOMapper.fromDTO(dto, samples => {
+                    return samples.map(s =>
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
+                    );
+                })
+            ).toThrow('Unable to map OrderDTO to Submission');
         });
 
         it('Should successfully create Submission Contact from OrderDTO', () => {
-            const submission = SubmissionDTOMapper.fromDTO(orderDto);
+            const submission = SubmissionDTOMapper.fromDTO(
+                orderDto,
+                samples => {
+                    return samples.map(s =>
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
+                    );
+                }
+            );
             expect(submission.contact).toEqual(expect.any(Contact));
             expect(submission.contact.props.instituteName).toEqual('test');
             expect(submission.contact.props.street).toEqual('test');
@@ -79,7 +116,11 @@ describe('Submission DTO Mapper ', () => {
         it('Should create a Submission with an empty samples array', () => {
             const dto = { ...orderDto };
             dto.sampleSet.samples = [];
-            const submission = SubmissionDTOMapper.fromDTO(dto);
+            const submission = SubmissionDTOMapper.fromDTO(dto, samples => {
+                return samples.map(s =>
+                    SampleEntryDTOMapper.fromDTO(s, t => t.value)
+                );
+            });
             expect(submission.sampleEntryCollection).toBeInstanceOf(Array);
             expect(submission.sampleEntryCollection.length).toEqual(0);
         });
@@ -177,14 +218,18 @@ describe('Submission DTO Mapper ', () => {
                     }
                 }
             ];
-            const submission = SubmissionDTOMapper.fromDTO(dto);
+            const submission = SubmissionDTOMapper.fromDTO(dto, samples => {
+                return samples.map(s =>
+                    SampleEntryDTOMapper.fromDTO(s, t => t.value)
+                );
+            });
             expect(submission.sampleEntryCollection).toBeInstanceOf(Array);
             expect(submission.sampleEntryCollection.length).toEqual(1);
         });
     });
 
     describe('Map to OrderDTO', () => {
-        let submission: Submission;
+        let submission: Submission<SampleEntry<string>[]>;
         beforeEach(() => {
             submission = Submission.create({
                 sampleEntryCollection: [],
@@ -217,7 +262,11 @@ describe('Submission DTO Mapper ', () => {
                     }
                 }
             };
-            const orderDTO = SubmissionDTOMapper.toDTO(submission);
+            const orderDTO = SubmissionDTOMapper.toDTO(submission, samples => {
+                return samples.map(s =>
+                    SampleEntryDTOMapper.toDTO(s, t => ({ value: t }))
+                );
+            });
             expect(orderDTO).toMatchObject(orderDto);
         });
     });

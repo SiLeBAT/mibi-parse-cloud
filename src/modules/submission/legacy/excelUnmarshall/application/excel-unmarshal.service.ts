@@ -2,7 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import 'moment/locale/de';
 import { CellObject, WorkBook, WorkSheet, read, utils } from 'xlsx';
-import { NRLId, NRL_ID_VALUE } from '../../domain';
+import { NRLId, NRL_ID_VALUE } from '../../../domain';
 import {
     Address,
     Analysis,

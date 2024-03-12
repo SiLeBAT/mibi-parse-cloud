@@ -18,44 +18,52 @@ export type AnalysisSelection = {
 };
 export type SampleEntryValue = string;
 
-export type SampleEntryProps = {
-    sample_id: SampleEntryValue;
-    sample_id_avv: SampleEntryValue;
-    partial_sample_id: SampleEntryValue;
-    pathogen_avv: SampleEntryValue;
-    pathogen_text: SampleEntryValue;
-    sampling_date: SampleEntryValue;
-    isolation_date: SampleEntryValue;
-    sampling_location_avv: SampleEntryValue;
-    sampling_location_zip: SampleEntryValue;
-    sampling_location_text: SampleEntryValue;
-    animal_avv: SampleEntryValue;
-    matrix_avv: SampleEntryValue;
-    animal_matrix_text: SampleEntryValue;
-    primary_production_avv: SampleEntryValue;
-    control_program_avv: SampleEntryValue;
-    sampling_reason_avv: SampleEntryValue;
-    program_reason_text: SampleEntryValue;
-    operations_mode_avv: SampleEntryValue;
-    operations_mode_text: SampleEntryValue;
-    vvvo: SampleEntryValue;
-    program_avv: SampleEntryValue;
-    comment: SampleEntryValue;
-    nrl: SampleEntryValue;
-    urgency: SampleEntryValue;
+export type SampleEntryTuple = {
+    value: string;
+    oldValue?: string;
+};
+
+export type SampleEntryProps<T> = {
+    sample_id: T;
+    sample_id_avv: T;
+    partial_sample_id: T;
+    pathogen_avv: T;
+    pathogen_text: T;
+    sampling_date: T;
+    isolation_date: T;
+    sampling_location_avv: T;
+    sampling_location_zip: T;
+    sampling_location_text: T;
+    animal_avv: T;
+    matrix_avv: T;
+    animal_matrix_text: T;
+    primary_production_avv: T;
+    control_program_avv: T;
+    sampling_reason_avv: T;
+    program_reason_text: T;
+    operations_mode_avv: T;
+    operations_mode_text: T;
+    vvvo: T;
+    program_avv: T;
+    comment: T;
+    nrl: string;
+    urgency: string;
     analysis: Partial<AnalysisSelection>;
 };
 
-export class SampleEntry extends Entity<SampleEntryProps> {
-    static create(props: SampleEntryProps, id?: EntityId): SampleEntry {
+export class SampleEntry<T> extends Entity<SampleEntryProps<T>> {
+    static create<T>(
+        props: SampleEntryProps<T>,
+        id?: EntityId
+    ): SampleEntry<T> {
         const sampleEntry = new SampleEntry(props, id);
         return sampleEntry;
     }
 
-    private constructor(props: SampleEntryProps, id?: EntityId) {
+    private constructor(props: SampleEntryProps<T>, id?: EntityId) {
         super(props, id);
     }
-    get data(): SampleEntryProps {
+    get data(): SampleEntryProps<T> {
         return this.props;
     }
 }

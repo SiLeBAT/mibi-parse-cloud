@@ -1,3 +1,5 @@
+import { array, object, string } from 'yup';
+
 interface AddressDTO {
     instituteName: string;
     department?: string;
@@ -62,7 +64,7 @@ type AVVAttributes =
     | 'program_avv'
     | 'comment';
 
-interface SampleDataEntryDTO {
+export interface SampleDataEntryDTO {
     value: string;
     errors?: SampleValidationErrorDTO[];
     correctionOffer?: string[];
@@ -92,3 +94,27 @@ export interface OrderDTO {
 export interface OrderContainerDTO {
     order: OrderDTO;
 }
+
+export const orderContainerDTOSchema = object({
+    order: object({
+        sampleSet: object({
+            samples: array().required(),
+            meta: object({
+                sender: object({
+                    instituteName: string().required(),
+                    department: string(),
+                    street: string().required(),
+                    zip: string().required(),
+                    city: string().required(),
+                    contactPerson: string().required(),
+                    telephone: string().required(),
+                    email: string().required()
+                }),
+                fileName: string(),
+                customerRefNumber: string(),
+                signatureDate: string(),
+                version: string()
+            }).required()
+        }).required()
+    })
+});

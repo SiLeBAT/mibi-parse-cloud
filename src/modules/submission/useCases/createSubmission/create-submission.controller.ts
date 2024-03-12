@@ -1,9 +1,10 @@
 import { HTTPRequest } from '../../../shared/infrastructure/request';
-import { SubmissionFormInput } from '../../domain';
+import { SampleEntry, Submission, SubmissionFormInput } from '../../domain';
+import { OrderDTO } from '../../dto';
 import { SubmissionDTOMapper } from '../../mappers';
+import { SampleEntryDTOMapper } from '../../mappers/sample-entry-dto.mapper';
 import { CreateSubmissionFromJSONUseCase } from './create-submission-from-json.use-case';
 import { CreateSubmissionFromXLSXUseCase } from './create-submission-from-xlsx.use-case';
-import { OrderDTO } from './create-submission.dto';
 import { SubmissionCreationFailedError } from './create-submission.error';
 import { CreateSubmissionUseCase } from './create-submission.use-case';
 
@@ -45,8 +46,18 @@ const createSubmissionController = async (
     try {
         const createSubmission: CreateSubmissionUseCase =
             CreateSubmissionUseCaseFactory(type);
-        const submission = await createSubmission.execute(submissionFormInput);
-        return { order: SubmissionDTOMapper.toDTO(submission) };
+        const submission: Submission<SampleEntry<string>[]> =
+            await createSubmission.execute(submissionFormInput);
+        return {
+            order: SubmissionDTOMapper.toDTO<SampleEntry<string>[]>(
+                submission,
+                samples => {
+                    return samples.map(s =>
+                        SampleEntryDTOMapper.toDTO(s, t => ({ value: t }))
+                    );
+                }
+            )
+        };
     } catch (error) {
         throw new SubmissionCreationFailedError(
             'Unable to create a submission',
@@ -76,7 +87,7 @@ function CreateSubmissionUseCaseFactory(
     }
 }
 
-const CreateSubmissionRequestValidationSchema = {
+const CreateSubmissionRequestValidation = {
     fields: {
         data: {
             required: true,
@@ -100,4 +111,4 @@ const CreateSubmissionRequestValidationSchema = {
         }
     }
 };
-export { CreateSubmissionRequestValidationSchema, createSubmissionController };
+export { CreateSubmissionRequestValidation, createSubmissionController };
