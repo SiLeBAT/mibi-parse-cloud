@@ -1,5 +1,5 @@
-import { FileInformation } from 'modules/submission/domain/file-information.vo';
-import { NRLId } from 'modules/submission/domain/nrl-id.vo';
+import { FileInformation } from '../../domain/file-information.vo';
+import { NRLId } from '../../domain/nrl-id.vo';
 import { SampleEntry, Submission } from '../../domain';
 import { SampleEntryTuple } from '../../domain/sample-entry.entity';
 import { ObjectKeys } from './../../infrastructure/parse-types';

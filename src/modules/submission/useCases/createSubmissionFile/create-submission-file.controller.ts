@@ -1,6 +1,6 @@
 import { orderContainerDTOSchema } from './../../dto/submission.dto';
 
-import { SubmissionDTOMapper } from 'modules/submission/mappers';
+import { SubmissionDTOMapper } from '../../mappers';
 import { string } from 'yup';
 import { setLoggingContext } from '../../../shared/core/logging-context';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
