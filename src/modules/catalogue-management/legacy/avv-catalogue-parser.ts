@@ -226,7 +226,10 @@ export class AVVCatalogueParser {
                 mibiEintraege[tempEintrag.Kode] = {
                     Text: tempEintrag.Text.normalize('NFC'),
                     Attribute: tempEintrag.Attribute,
-                    FacettenIds: tempEintrag.FacettenIds
+                    FacettenIds:
+                        tempEintrag.Basiseintrag === true
+                            ? tempEintrag.FacettenIds
+                            : []
                 };
             });
         const mibiFacetten = this.getMibiFacetten(facetten);
@@ -315,7 +318,10 @@ export class AVVCatalogueParser {
             (tempEintrag: TempEintrag) => {
                 mibiEintraege[tempEintrag.Kode] = {
                     Text: tempEintrag.Text.normalize('NFC'),
-                    FacettenIds: tempEintrag.FacettenIds
+                    FacettenIds:
+                        tempEintrag.Basiseintrag === true
+                            ? tempEintrag.FacettenIds
+                            : []
                 };
             }
         );
@@ -771,8 +777,12 @@ export class AVVCatalogueParser {
     ): [string, string] {
         const GEMEINDEBEZEICHNUNG_ID = 1401;
         const PLZ_ID = 1403;
+        const ignoreAction = 'DELETE';
 
-        if (attribut.$attributid === GEMEINDEBEZEICHNUNG_ID) {
+        if (
+            attribut.$attributid === GEMEINDEBEZEICHNUNG_ID &&
+            !(attribut.$aktion === ignoreAction)
+        ) {
             gemeindeBezeichnung = attribut.text;
         }
         if (attribut.$attributid === PLZ_ID) {
