@@ -1,3 +1,3 @@
+import { logger } from '../../system/logging';
 import './useCases';
-
-console.log('Submission module loaded.');
+logger.info('Parse Cloud: Submission module loaded.');
