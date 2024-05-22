@@ -44,6 +44,7 @@ const createSubmissionController = async (
     );
 
     try {
+        // Get the right factory depending on submission type
         const createSubmission: CreateSubmissionUseCase =
             CreateSubmissionUseCaseFactory(type);
         const submission: Submission<SampleEntry<string>[]> =

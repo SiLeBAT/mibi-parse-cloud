@@ -1,3 +1,3 @@
+import { logger } from '../../system/logging';
 import './useCases';
-
-console.log('System monitoring module loaded.');
+logger.info('Parse Cloud: System monitoring module loaded.');

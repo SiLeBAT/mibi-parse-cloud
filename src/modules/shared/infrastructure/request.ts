@@ -4,6 +4,7 @@ export interface HTTPRequest<T> {
     headers: Record<string, string>;
     log: ParseLogger;
     params: T;
+    user: Parse.User;
 }
 
 export type ParseHookRequest<T, V> = {

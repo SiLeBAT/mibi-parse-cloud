@@ -13,9 +13,9 @@ type DeleteAVVCatalogueRequest = ParseHookRequest<
 export const deleteAVVCatalogueHook = async (
     request: DeleteAVVCatalogueRequest
 ) => {
+    const avvCatalogueObject: AVVCatalogueObject = request.object;
+    setLoggingContext(request.log);
     try {
-        const avvCatalogueObject: AVVCatalogueObject = request.object;
-        setLoggingContext(request.log);
         const file = avvCatalogueObject.get('catalogueFile');
         file.destroy({ useMasterKey: true });
     } catch (error) {
