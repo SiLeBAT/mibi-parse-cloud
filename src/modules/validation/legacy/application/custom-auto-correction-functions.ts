@@ -107,6 +107,94 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
     };
 }
 
+function autoCorrectAVV319(catalogService: CatalogService): CorrectionFunction {
+    const catalogName = 'avv319';
+    const property: SampleProperty = 'matrix_avv';
+    const loggerMessage =
+        'Initializing auto-correction: Final pipe after Facettes (AVV-319) & creating closure';
+
+    return autoCorrectFinalPipeAfterFacettes(
+        catalogService,
+        catalogName,
+        property,
+        loggerMessage
+    );
+}
+
+function autoCorrectAVV339(catalogService: CatalogService): CorrectionFunction {
+    const catalogName = 'avv339';
+    const property: SampleProperty = 'animal_avv';
+    const loggerMessage =
+        'Initializing auto-correction: Final pipe after Facettes (AVV-339) & creating closure';
+
+    return autoCorrectFinalPipeAfterFacettes(
+        catalogService,
+        catalogName,
+        property,
+        loggerMessage
+    );
+}
+
+function autoCorrectAVV303(catalogService: CatalogService): CorrectionFunction {
+    const catalogName = 'avv303';
+    const property: SampleProperty = 'operations_mode_avv';
+    const loggerMessage =
+        'Initializing auto-correction: Final pipe after Facettes (AVV-303) & creating closure';
+
+    return autoCorrectFinalPipeAfterFacettes(
+        catalogService,
+        catalogName,
+        property,
+        loggerMessage
+    );
+}
+
+function autoCorrectFinalPipeAfterFacettes(
+    catalogService: CatalogService,
+    catalogName: string,
+    property: string,
+    loggerMessage: string
+): CorrectionFunction {
+    const catalog = catalogService.getAVVCatalog(catalogName);
+    console.log(loggerMessage);
+
+    const searchCache: Record<string, CorrectionSuggestions> = {};
+
+    return (sampleData: SampleData): CorrectionSuggestions | null => {
+        const originalValue = sampleData[property].value;
+        const trimmedEntry = originalValue.trim();
+
+        // Ignore empty entries
+        if (!trimmedEntry) {
+            return null;
+        }
+
+        // ignore values without facette infos
+        if (!catalog.hasFacettenInfo(trimmedEntry)) {
+            return null;
+        }
+
+        // Return cached result
+        if (searchCache[trimmedEntry]) {
+            console.log('Returning cached result for ', trimmedEntry);
+            return searchCache[trimmedEntry];
+        }
+
+        const regex = /-\d+/;
+        if (regex.test(trimmedEntry) && trimmedEntry.endsWith('|')) {
+            searchCache[trimmedEntry] = createCacheEntry(
+                property,
+                originalValue,
+                [trimmedEntry.slice(0, -1)],
+                109
+            );
+            return searchCache[trimmedEntry];
+        }
+
+        return null;
+    };
+}
+
 // Utility functions
 function createCacheEntry(
     field: SampleProperty,
@@ -210,4 +298,9 @@ function createCatalogEnhancements(
         .value();
 }
 
-export { autoCorrectAVV324 };
+export {
+    autoCorrectAVV303,
+    autoCorrectAVV319,
+    autoCorrectAVV324,
+    autoCorrectAVV339
+};

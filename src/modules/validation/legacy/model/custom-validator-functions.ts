@@ -273,10 +273,19 @@ function inAVVFacettenCatalog(
                     found =
                         found &&
                         currentFacetten.every(facettenValue => {
+                            const matches = facettenValue.match(/-/g);
+
                             const [facettenBeginnId, facettenEndeIds] =
-                                facettenValue.split('-');
-                            const facettenEndeIdList =
-                                facettenEndeIds.split(':');
+                                matches && matches.length === 1
+                                    ? facettenValue.split('-')
+                                    : [''];
+                            facettenValue.split('-');
+                            const facettenEndeIdList = facettenEndeIds
+                                ? facettenEndeIds.split(':')
+                                : [''];
+                            // const facettenEndeIdList =
+                            //     facettenEndeIds.split(':');
+
                             const facette =
                                 catalog.getFacetteWithBegriffsId(
                                     facettenBeginnId

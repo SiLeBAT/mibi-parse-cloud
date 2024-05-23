@@ -5,7 +5,12 @@ import {
     SampleData
 } from '../model/legacy.model';
 import { CatalogService } from './catalog.service';
-import { autoCorrectAVV324 } from './custom-auto-correction-functions';
+import {
+    autoCorrectAVV303,
+    autoCorrectAVV319,
+    autoCorrectAVV324,
+    autoCorrectAVV339
+} from './custom-auto-correction-functions';
 import { ValidationErrorProvider } from './validation-error-provider.service';
 
 export class FormAutoCorrectionService {
@@ -46,5 +51,8 @@ export class FormAutoCorrectionService {
 
     private registerCorrectionFunctions() {
         this.correctionFunctions.push(autoCorrectAVV324(this.catalogService));
+        this.correctionFunctions.push(autoCorrectAVV319(this.catalogService));
+        this.correctionFunctions.push(autoCorrectAVV339(this.catalogService));
+        this.correctionFunctions.push(autoCorrectAVV303(this.catalogService));
     }
 }
