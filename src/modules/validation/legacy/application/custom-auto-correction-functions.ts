@@ -5,7 +5,6 @@ import {
     ADVCatalogEntry,
     AVV324Data,
     CatalogEnhancement,
-    CatalogService,
     CorrectionFunction,
     CorrectionSuggestions,
     FuzzyEintrag,
@@ -14,6 +13,7 @@ import {
     SampleProperty,
     SearchAlias
 } from '../model/legacy.model';
+import { CatalogService } from './catalog.service';
 
 function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
     const catalogName = 'avv324';

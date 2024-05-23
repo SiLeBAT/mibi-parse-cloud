@@ -10,7 +10,7 @@ import {
     MibiFacette,
     MibiFacettenEintrag,
     MibiFacettenWert
-} from '../model/catalog.model';
+} from '../model/legacy.model';
 
 export class AVVCatalog<T extends AVVCatalogData> {
     constructor(private data: T, private uId: string = '') {}

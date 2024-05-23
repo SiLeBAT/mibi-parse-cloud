@@ -299,12 +299,12 @@ export interface Sample {
     supplementAVV313Data(zip: string, city: string): void;
 }
 
-interface AVV313Eintrag extends MibiEintrag {
+export interface AVV313Eintrag extends MibiEintrag {
     PLZ: string;
     Name: string;
 }
 
-interface MibiFacettenEintrag extends MibiEintrag {
+export interface MibiFacettenEintrag extends MibiEintrag {
     FacettenIds: number[];
     Attribute?: string;
 }
@@ -316,7 +316,7 @@ interface MibiFacetten {
 export interface MibiCatalogFacettenData extends MibiCatalogData {
     facetten: MibiFacetten;
 }
-interface MibiFacette {
+export interface MibiFacette {
     FacettenId: number;
     Text: string;
     FacettenWerte: MibiFacettenWerte;
@@ -326,10 +326,10 @@ interface MibiFacettenWerte {
     [key: string]: MibiFacettenWert;
 }
 
-interface MibiFacettenWert {
+export interface MibiFacettenWert {
     Text: string;
 }
-interface MibiEintrag {
+export interface MibiEintrag {
     Text: string;
 }
 interface MibiEintraege {
