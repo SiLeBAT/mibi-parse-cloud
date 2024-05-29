@@ -1,4 +1,4 @@
-import { Email } from './../../domain';
+import { Email } from '../../../system-monitoring/domain';
 
 export class ConfigurationProvider {
     public async getSupportContact(): Promise<Email | null> {
