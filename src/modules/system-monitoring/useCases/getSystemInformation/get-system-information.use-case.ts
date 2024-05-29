@@ -1,11 +1,11 @@
-import { UseCase } from '../../../shared/useCases';
-import { SystemInformation } from '../../domain';
 import {
     ConfigurationProvider,
     PackageInformationProvider,
     configurationProvider,
     packageInformationProvider
-} from '../../infrastructure/providers';
+} from '../../../shared/infrastructure/providers';
+import { UseCase } from '../../../shared/useCases';
+import { SystemInformation } from '../../domain';
 
 class GetSystemInformationUseCase implements UseCase<null, SystemInformation> {
     constructor(

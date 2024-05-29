@@ -1,5 +1,5 @@
 import pjson from '../../../../../package.json';
-import { SemanticVersion } from './../../domain';
+import { SemanticVersion } from '../../../system-monitoring/domain';
 import { ProviderError } from './provider.error';
 
 export class PackageInformationProvider {
