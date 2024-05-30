@@ -1,0 +1,45 @@
+{
+  "className": "Additional_Pathogens",
+  "fields": {
+    "objectId": {
+      "type": "String"
+    },
+    "createdAt": {
+      "type": "Date"
+    },
+    "updatedAt": {
+      "type": "Date"
+    },
+    "ACL": {
+      "type": "ACL"
+    },
+    "pathogen": {
+      "type": "String",
+      "required": true
+    }
+  },
+  "classLevelPermissions": {
+    "find": {
+    },
+    "count": {
+    },
+    "get": {
+    },
+    "create": {
+    },
+    "update": {
+    },
+    "delete": {
+    },
+    "addField": {
+    },
+    "protectedFields": {
+      "*": []
+    }
+  },
+  "indexes": {
+    "_id_": {
+      "_id": 1
+    }
+  }
+}
