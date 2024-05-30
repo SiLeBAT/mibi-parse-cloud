@@ -1,0 +1,49 @@
+{
+  "className": "Analysis_Procedure",
+  "fields": {
+    "objectId": {
+      "type": "String"
+    },
+    "createdAt": {
+      "type": "Date"
+    },
+    "updatedAt": {
+      "type": "Date"
+    },
+    "ACL": {
+      "type": "ACL"
+    },
+    "value": {
+      "type": "String",
+      "required": true
+    },
+    "key": {
+      "type": "Number",
+      "required": true
+    }
+  },
+  "classLevelPermissions": {
+    "find": {
+    },
+    "count": {
+    },
+    "get": {
+    },
+    "create": {
+    },
+    "update": {
+    },
+    "delete": {
+    },
+    "addField": {
+    },
+    "protectedFields": {
+      "*": []
+    }
+  },
+  "indexes": {
+    "_id_": {
+      "_id": 1
+    }
+  }
+}
