@@ -1,3 +1,5 @@
+import { logger } from '../../../system/logging';
+
 export async function createSchema(
     schemaName: string,
     schema: Parse.Schema,
@@ -5,12 +7,12 @@ export async function createSchema(
 ) {
     try {
         await schema.get();
-        console.log(
+        logger.verbose(
             `System Update: Schema for ${schemaName} already exists. Skipping creation`
         );
         return true;
     } catch (error) {
-        console.log(
+        logger.verbose(
             `System Update: Schema for ${schemaName} does not exist.  Will create it.`
         );
     }
@@ -18,6 +20,6 @@ export async function createSchema(
     creationFunction();
 
     await schema.save();
-    console.log('System Update: Finished creating Schema for ' + schemaName);
+    logger.info('System Update: Finished creating Schema for ' + schemaName);
     return true;
 }
