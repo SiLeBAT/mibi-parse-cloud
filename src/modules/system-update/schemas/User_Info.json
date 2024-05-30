@@ -25,27 +25,13 @@
     }
   },
   "classLevelPermissions": {
-    "find": {
-      "*": true
-    },
-    "count": {
-      "*": true
-    },
-    "get": {
-      "*": true
-    },
-    "create": {
-      "*": true
-    },
-    "update": {
-      "*": true
-    },
-    "delete": {
-      "*": true
-    },
-    "addField": {
-      "*": true
-    },
+    "find": {},
+    "count": {},
+    "get": {},
+    "create": {},
+    "update": {},
+    "delete": {},
+    "addField": {},
     "protectedFields": {
       "*": []
     }
