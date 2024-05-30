@@ -8,6 +8,16 @@ export async function mp35CreateUserInfo() {
         userInfoSchema
             .addPointer('user', '_User', { required: true })
             .addPointer('institute', 'institutions');
+
+        userInfoSchema.setCLP({
+            find: {},
+            count: {},
+            get: {},
+            create: {},
+            update: {},
+            delete: {},
+            addField: {}
+        });
     };
     return createSchema(schemaName, userInfoSchema, creationFunction);
 }
