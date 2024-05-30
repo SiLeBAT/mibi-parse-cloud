@@ -1,5 +1,6 @@
 import { mp35CreateUserInfo } from './mp35-create-user-info';
 import { mp39CreateNRL } from './mp39-create-nrl';
+import { mp35CreateAVVCatalogue } from './mp37-create-avv-catalogue';
 
 export interface UpdateFunc {
     (): Promise<boolean>;
@@ -10,5 +11,6 @@ export interface UpdateFunc {
  */
 export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp35CreateUserInfo,
-    mp39CreateNRL
+    mp39CreateNRL,
+    mp35CreateAVVCatalogue
 ];
