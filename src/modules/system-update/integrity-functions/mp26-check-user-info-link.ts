@@ -1,3 +1,4 @@
+import { logger } from '../../../system/logging';
 export async function mp26CreateUserInfoLink() {
     const query_User = new Parse.Query(Parse.User);
     const users = await query_User.find({ useMasterKey: true });
@@ -8,7 +9,7 @@ export async function mp26CreateUserInfoLink() {
         const userInfo = await queryUserInfo.find();
 
         if (userInfo.length > 0) {
-            console.log(
+            logger.verbose(
                 'CreateUserInfoLink: User Info already exists for user id: ' +
                     user.id
             );
@@ -18,7 +19,7 @@ export async function mp26CreateUserInfoLink() {
         queryUsers.equalTo('email', user.getEmail());
         const old_user = await queryUsers.find();
         if (old_user.length !== 1) {
-            console.error(
+            logger.warn(
                 'CreateUserInfoLink: No unique entry found in users collection for user id:  ' +
                     user.id
             );
