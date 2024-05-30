@@ -1,6 +1,7 @@
 import { mp35CreateUserInfo } from './mp35-create-user-info';
 import { mp35CreateAVVCatalogue } from './mp37-create-avv-catalogue';
 import { mp38CreateAdditionalPathogens } from './mp38-create-additional-pathogens';
+import { mp39CreateNRL } from './mp39-create-nrl';
 import { mp40CreateAnalysisProcedure } from './mp40-create-analysis-procedure';
 import { mp41CreateTemplateFile } from './mp41-create-template-file';
 
@@ -16,5 +17,6 @@ export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp35CreateAVVCatalogue,
     mp41CreateTemplateFile,
     mp40CreateAnalysisProcedure,
-    mp38CreateAdditionalPathogens
+    mp38CreateAdditionalPathogens,
+    mp39CreateNRL
 ];
