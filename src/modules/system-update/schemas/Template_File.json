@@ -1,0 +1,49 @@
+{
+  "className": "Template_File",
+  "fields": {
+    "objectId": {
+      "type": "String"
+    },
+    "createdAt": {
+      "type": "Date"
+    },
+    "updatedAt": {
+      "type": "Date"
+    },
+    "ACL": {
+      "type": "ACL"
+    },
+    "templateFile": {
+      "type": "File",
+      "required": true
+    },
+    "key": {
+      "type": "String",
+      "required": false
+    }
+  },
+  "classLevelPermissions": {
+    "find": {
+    },
+    "count": {
+    },
+    "get": {
+    },
+    "create": {
+    },
+    "update": {
+    },
+    "delete": {
+    },
+    "addField": {
+    },
+    "protectedFields": {
+      "*": []
+    }
+  },
+  "indexes": {
+    "_id_": {
+      "_id": 1
+    }
+  }
+}
