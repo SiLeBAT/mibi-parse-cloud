@@ -4,7 +4,9 @@ export class ValidationErrorRepository {
 
     async retrieve(): Promise<Parse.Object[]> {
         const query = new Parse.Query('validationerrors');
-        const validationErrors: Parse.Object[] = await query.find();
+        const validationErrors: Parse.Object[] = await query.find({
+            useMasterKey: true
+        });
         return validationErrors;
     }
 

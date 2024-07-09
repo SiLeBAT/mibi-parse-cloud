@@ -11,7 +11,7 @@ export class StateRepository {
 
     async retrieve(): Promise<State[]> {
         const query = new Parse.Query('states');
-        const states: Parse.Object[] = await query.find();
+        const states: Parse.Object[] = await query.find({ useMasterKey: true });
         return states.map(state => this.mapToState(state));
     }
 

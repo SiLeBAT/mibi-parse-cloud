@@ -27,7 +27,7 @@ export class NRLRepository {
         const query = new Parse.Query(ObjectKeys.NRL);
         query.include(procedure);
         query.equalTo('name', nrl.toString());
-        const nrlObject = await query.first();
+        const nrlObject = await query.first({ useMasterKey: true });
         if (!nrlObject) {
             return {};
         }

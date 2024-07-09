@@ -12,7 +12,9 @@ export class NRLRepository {
         const query = new Parse.Query(ObjectKeys.NRL);
         query.include('standardProcedures');
         query.include('optionalProcedures');
-        const nrlObjects: Parse.Object[] = await query.find();
+        const nrlObjects: Parse.Object[] = await query.find({
+            useMasterKey: true
+        });
         const result = nrlObjects.map(nrl =>
             NRLPersistenceMapper.fromPersistence(nrl)
         );

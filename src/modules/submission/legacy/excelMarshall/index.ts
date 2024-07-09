@@ -1,6 +1,6 @@
+import { SampleEntry, Submission } from '../../domain';
 import { FileInformation } from '../../domain/file-information.vo';
 import { NRLId } from '../../domain/nrl-id.vo';
-import { SampleEntry, Submission } from '../../domain';
 import { SampleEntryTuple } from '../../domain/sample-entry.entity';
 import { ObjectKeys } from './../../infrastructure/parse-types';
 import { JSONMarshalService } from './application/json-marshal.service';
@@ -145,7 +145,7 @@ const fileRepository = {
     getFileBuffer: async (key: string) => {
         const query = new Parse.Query(ObjectKeys.TEMPLATE_FILE);
         query.equalTo('key', key.toUpperCase());
-        const templateFileObject = await query.first();
+        const templateFileObject = await query.first({ useMasterKey: true });
         if (!templateFileObject) {
             throw Error("Can't find template file with key: " + key);
         }
