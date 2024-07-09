@@ -3,9 +3,9 @@ import { Submission } from '../../domain/submission.entity';
 import { OrderContainerDTO } from '../../dto';
 import { SubmissionDTOMapper } from '../../mappers';
 import { SampleEntryDTOMapper } from '../../mappers/sample-entry-dto.mapper';
-import { CreateSubmissionUseCase } from './create-submission.use-case';
+import { ParseSampleDataUseCase } from './parse-sample-data.use-case';
 
-export class CreateSubmissionFromJSONUseCase extends CreateSubmissionUseCase {
+export class ParseFromJSONUseCase extends ParseSampleDataUseCase {
     async execute(
         params: SubmissionFormInput
     ): Promise<Submission<SampleEntry<string>[]>> {

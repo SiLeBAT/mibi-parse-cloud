@@ -3,25 +3,25 @@ import { SampleEntry, Submission, SubmissionFormInput } from '../../domain';
 import { OrderDTO } from '../../dto';
 import { SubmissionDTOMapper } from '../../mappers';
 import { SampleEntryDTOMapper } from '../../mappers/sample-entry-dto.mapper';
-import { CreateSubmissionFromJSONUseCase } from './create-submission-from-json.use-case';
-import { CreateSubmissionFromXLSXUseCase } from './create-submission-from-xlsx.use-case';
-import { SubmissionCreationFailedError } from './create-submission.error';
-import { CreateSubmissionUseCase } from './create-submission.use-case';
+import { ParseFromJSONUseCase } from './parse-from-json.use-case';
+import { ParseFromXLSXUseCase } from './parse-from-xlsx.use-case';
+import { SubmissionCreationFailedError } from './parse-sample-data.error';
+import { ParseSampleDataUseCase } from './parse-sample-data.use-case';
 
 enum RESOURCE_VIEW_TYPE {
     JSON,
     XLSX
 }
 
-type CreateSubmissionResponse = {
+type ParseSampleDataResponse = {
     order: OrderDTO;
 };
-type CreateSubmissionRequestParameters = {
+type ParseSampleDataRequestParameters = {
     readonly data: string;
     readonly filename: string;
     readonly type: 'xml' | 'json';
 };
-type CreateSubmissionRequest = HTTPRequest<CreateSubmissionRequestParameters>;
+type ParseSampleDataRequest = HTTPRequest<ParseSampleDataRequestParameters>;
 
 /*
  * The job of the Controller is simply to:
@@ -32,9 +32,9 @@ type CreateSubmissionRequest = HTTPRequest<CreateSubmissionRequestParameters>;
  * Request validation is handled previously by the validator function.
  */
 
-const createSubmissionController = async (
-    request: CreateSubmissionRequest
-): Promise<CreateSubmissionResponse> => {
+const parseSampleDataController = async (
+    request: ParseSampleDataRequest
+): Promise<ParseSampleDataResponse> => {
     const type = getResourceViewType(request.params.type);
     const submissionFormInput: SubmissionFormInput = SubmissionFormInput.create(
         {
@@ -45,7 +45,7 @@ const createSubmissionController = async (
 
     try {
         // Get the right factory depending on submission type
-        const createSubmission: CreateSubmissionUseCase =
+        const createSubmission: ParseSampleDataUseCase =
             CreateSubmissionUseCaseFactory(type);
         const submission: Submission<SampleEntry<string>[]> =
             await createSubmission.execute(submissionFormInput);
@@ -77,18 +77,18 @@ function getResourceViewType(typeString: string = 'json'): RESOURCE_VIEW_TYPE {
 
 function CreateSubmissionUseCaseFactory(
     type: RESOURCE_VIEW_TYPE
-): CreateSubmissionUseCase {
+): ParseSampleDataUseCase {
     switch (type) {
         case RESOURCE_VIEW_TYPE.XLSX:
-            return new CreateSubmissionFromXLSXUseCase();
+            return new ParseFromXLSXUseCase();
         case RESOURCE_VIEW_TYPE.JSON:
         default: {
-            return new CreateSubmissionFromJSONUseCase();
+            return new ParseFromJSONUseCase();
         }
     }
 }
 
-const CreateSubmissionRequestValidation = {
+const ParseSampleDataRequestValidation = {
     fields: {
         data: {
             required: true,
@@ -112,4 +112,4 @@ const CreateSubmissionRequestValidation = {
         }
     }
 };
-export { CreateSubmissionRequestValidation, createSubmissionController };
+export { parseSampleDataController, ParseSampleDataRequestValidation };

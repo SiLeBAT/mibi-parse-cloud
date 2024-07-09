@@ -1,5 +1,8 @@
-import { SampleEntryProps } from '../../submission/domain';
-import { SampleEntry, SampleEntryTuple } from '../domain/sample-entry.entity';
+import {
+    SampleEntry,
+    SampleEntryProps,
+    SampleEntryTuple
+} from '../domain/sample-entry.entity';
 import { ValidationParameter } from './../domain';
 import { AVVFormatProvider } from './application/avv-format-provider.service';
 import { CatalogService } from './application/catalog.service';
