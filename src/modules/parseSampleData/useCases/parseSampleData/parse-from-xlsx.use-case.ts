@@ -1,9 +1,9 @@
 import { SampleEntry, SubmissionFormInput } from '../../domain';
 import { Submission } from '../../domain/submission.entity';
 import { excelUnmarshalAntiCorruptionLayer } from '../../legacy';
-import { CreateSubmissionUseCase } from './create-submission.use-case';
+import { ParseSampleDataUseCase } from './parse-sample-data.use-case';
 
-export class CreateSubmissionFromXLSXUseCase extends CreateSubmissionUseCase {
+export class ParseFromXLSXUseCase extends ParseSampleDataUseCase {
     async execute(
         params: SubmissionFormInput
     ): Promise<Submission<SampleEntry<string>[]>> {

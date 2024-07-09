@@ -1,2 +1,2 @@
-import './createSubmission';
+import './parseSampleData';
 import './createSubmissionFile';
