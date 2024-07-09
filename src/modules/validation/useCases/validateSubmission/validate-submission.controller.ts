@@ -65,9 +65,26 @@ const validateSubmissionController = async (
             data: sampleData,
             options: validationOptions
         });
-        const validatedSubmission =
-            validateSubmission.execute(validationParameter);
-        return validatedSubmission;
+        const validatedSubmission: SampleEntry<SampleEntryTuple>[] =
+            await validateSubmission.execute(validationParameter);
+
+        const result: OrderContainerDTO = {
+            order: {
+                sampleSet: {
+                    samples: validatedSubmission.map(
+                        (sampleEntry: SampleEntry<SampleEntryTuple>) => {
+                            return SampleEntryDTOMapper.toDTO(
+                                sampleEntry,
+                                t => t
+                            );
+                        }
+                    ),
+                    meta: submittedOrder.order.sampleSet.meta
+                }
+            }
+        };
+
+        return result;
     } catch (error) {
         throw new SubmissionValidationFailedError(
             'Unable to validate submission',
@@ -85,4 +102,4 @@ const ValidateSubmissionRequestValidation = {
         }
     }
 };
-export { ValidateSubmissionRequestValidation, validateSubmissionController };
+export { validateSubmissionController, ValidateSubmissionRequestValidation };
