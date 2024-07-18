@@ -16,6 +16,8 @@ import {
     dependentFields,
     inAVVCatalog,
     inAVVFacettenCatalog,
+    hasObligatoryFacettenValues,
+    isHierarchyCode,
     inCatalog,
     matchADVNumberOrString,
     matchAVVCodeOrString,
@@ -92,6 +94,12 @@ class SampleValidator implements Validator {
         validate.validators.inAVVFacettenCatalog = inAVVFacettenCatalog(
             this.catalogService
         );
+        validate.validators.hasObligatoryFacettenValues =
+            hasObligatoryFacettenValues(this.catalogService);
+        validate.validators.isHierarchyCode = isHierarchyCode(
+            this.catalogService
+        );
+
         validate.validators.matchADVNumberOrString = matchADVNumberOrString(
             this.catalogService
         );

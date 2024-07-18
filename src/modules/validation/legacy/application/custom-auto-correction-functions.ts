@@ -19,7 +19,6 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
     const catalogName = 'avv324';
     const property: SampleProperty = 'pathogen_avv';
     const catalog = catalogService.getAVVCatalog<AVV324Data>(catalogName);
-
     const options = getFuseOptions();
 
     const catalogEnhancements = createCatalogEnhancements(
@@ -50,9 +49,8 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
         }
 
         // Check AVV codes
-        const avvKode = /^\d+\|\d+\|$/;
         if (
-            avvKode.test(trimmedEntry) &&
+            catalog.isBasicCode(trimmedEntry) &&
             catalog.containsEintragWithAVVKode(trimmedEntry)
         ) {
             const eintrag = catalog.getEintragWithAVVKode(trimmedEntry);
@@ -127,8 +125,9 @@ function doFuzzySearch(
     fuse: Fuse<ADVCatalogEntry | FuzzyEintrag>,
     options: ResultOptions
 ) {
-    const { property, alias, original } = { ...options };
-    let { numberOfResults } = { ...options };
+    // eslint-disable-next-line
+    let { property, numberOfResults, alias, original } = { ...options };
+
     // remove fuse extended search flags
     value = value.replace(/[|='!^$]/g, ' ');
     // remove special chars

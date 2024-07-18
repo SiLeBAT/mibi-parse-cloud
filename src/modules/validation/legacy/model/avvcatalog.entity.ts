@@ -9,10 +9,29 @@ import {
     MibiEintrag,
     MibiFacette,
     MibiFacettenEintrag,
-    MibiFacettenWert
+    MibiFacettenWert,
+    MibiFacettenzuordnung
 } from '../model/legacy.model';
 
 export class AVVCatalog<T extends AVVCatalogData> {
+    private readonly basicCodeRegex: RegExp = /^\d+\|\d+\|$/;
+    private readonly facettenPartRegex =
+        /((\d+-\d+(:\d+)*)?(,\d+-\d+(:\d+)*)*)?/;
+    private readonly basicCodeRegexSource =
+        this.basicCodeRegex.source.substring(
+            1,
+            this.basicCodeRegex.source.length - 1
+        );
+    private readonly facettenPartRegexSource = this.facettenPartRegex.source;
+    // facettenCodeRegex: /^(\d+\|\d+\|)((\d+-\d+(:\d+)*)?(,\d+-\d+(:\d+)*)*)?$/
+    private readonly facettenCodeRegex = new RegExp(
+        '^(' +
+            this.basicCodeRegexSource +
+            ')' +
+            this.facettenPartRegexSource +
+            '$'
+    );
+
     constructor(private data: T, private uId: string = '') {}
 
     containsEintragWithAVVKode(kode: string): boolean {
@@ -161,10 +180,25 @@ export class AVVCatalog<T extends AVVCatalogData> {
         return generatedText;
     }
 
-    hasFacettenInfo(kode: string): boolean {
-        const regexFacettenCode = /^\d+\|\d+\|\d+[-:\d,|]*$/;
+    getObligatoryFacettenzuordnungen(kode: string): MibiFacettenzuordnung[] {
+        if (this.isFacettenCatalog()) {
+            const eintrag = this.getEintragWithAVVKode(
+                kode
+            ) as MibiFacettenEintrag;
+            return eintrag.Facettenzuordnungen
+                ? eintrag.Facettenzuordnungen
+                : [];
+        }
 
-        return this.isFacettenCatalog() && regexFacettenCode.test(kode);
+        return [];
+    }
+
+    hasFacettenInfo(kode: string): boolean {
+        return this.isFacettenCatalog() && this.facettenCodeRegex.test(kode);
+    }
+
+    isBasicCode(kode: string): boolean {
+        return this.basicCodeRegex.test(kode);
     }
 
     private isFacettenCatalog() {
