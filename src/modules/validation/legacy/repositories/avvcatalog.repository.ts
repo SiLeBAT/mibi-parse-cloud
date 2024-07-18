@@ -41,7 +41,6 @@ export class AVVCatalogRepository {
         console.log(
             `${this.constructor.name}.${this.initialise.name}, loading AVV Catalog data from Filesystem.`
         );
-
         await Promise.all(
             this.catalogNames.map(async catalogName => {
                 return loadJSONFile(`${catalogName}.json`, this.dataDir)

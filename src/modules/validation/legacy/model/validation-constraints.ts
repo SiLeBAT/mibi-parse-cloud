@@ -632,12 +632,27 @@ export const baseConstraints: ValidationConstraints = {
         inAVVFacettenCatalog: {
             error: 99,
             catalog: 'avv339'
+        },
+
+        isHierarchyCode: {
+            error: 110,
+            catalog: 'avv339'
         }
     },
 
     matrix_avv: {
         inAVVFacettenCatalog: {
             error: 33,
+            catalog: 'avv319'
+        },
+
+        hasObligatoryFacettenValues: {
+            error: 112,
+            catalog: 'avv319'
+        },
+
+        isHierarchyCode: {
+            error: 110,
             catalog: 'avv319'
         }
     },
@@ -676,6 +691,11 @@ export const baseConstraints: ValidationConstraints = {
 
         noPlanprobeForNRL_AR: {
             error: 95
+        },
+
+        isHierarchyCode: {
+            error: 111,
+            catalog: 'avv326'
         }
     },
 

@@ -306,7 +306,14 @@ export interface AVV313Eintrag extends MibiEintrag {
 
 export interface MibiFacettenEintrag extends MibiEintrag {
     FacettenIds: number[];
+    Facettenzuordnungen?: MibiFacettenzuordnung[];
     Attribute?: string;
+}
+
+export interface MibiFacettenzuordnung {
+    FacettenId: number;
+    FacettenwertId: number;
+    Festgelegt: boolean;
 }
 
 interface MibiFacetten {
@@ -315,9 +322,25 @@ interface MibiFacetten {
 
 export interface MibiCatalogFacettenData extends MibiCatalogData {
     facetten: MibiFacetten;
+    facettenIds?: MibiFacettenIds;
 }
+
+export interface MibiFacettenIds {
+    [key: string]: MibiFacettenId;
+}
+
+export interface MibiFacettenId {
+    [key: string]: MibiFacettenWertId;
+}
+
+export interface MibiFacettenWertId {
+    FacettenNameBegriffsId: number;
+    WertNameBegriffsId: number;
+}
+
 export interface MibiFacette {
     FacettenId: number;
+    MehrfachAuswahl: boolean;
     Text: string;
     FacettenWerte: MibiFacettenWerte;
 }
@@ -331,6 +354,7 @@ export interface MibiFacettenWert {
 }
 export interface MibiEintrag {
     Text: string;
+    Basiseintrag: boolean;
 }
 interface MibiEintraege {
     [key: string]: MibiEintrag | AVV313Eintrag | MibiFacettenEintrag;
