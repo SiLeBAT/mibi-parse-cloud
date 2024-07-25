@@ -446,6 +446,73 @@ function isHierarchyCode(
     };
 }
 
+function multipleFacettenAllowed(
+    catalogService: CatalogService
+): ValidatorFunction<InCatalogOptions> {
+    return (
+        value: string,
+        options: InCatalogOptions,
+        key: SampleProperty,
+        attributes: SampleDataValues
+    ) => {
+        const trimmedValue = value.trim();
+        if (attributes[key]) {
+            const [begriffsIdEintrag, id, facettenValues] =
+                trimmedValue.split('|');
+            const catalogName = options.catalog;
+            const catalog =
+                catalogService.getAVVCatalog<MibiCatalogFacettenData>(
+                    catalogName
+                );
+            if (catalog) {
+                if (begriffsIdEintrag && id) {
+                    const avvKode = catalog.assembleAVVKode(
+                        begriffsIdEintrag,
+                        id
+                    );
+
+                    if (!catalog.containsEintragWithAVVKode(avvKode)) {
+                        return null;
+                    }
+
+                    if (!facettenValues) {
+                        return null;
+                    }
+
+                    const eintrag = catalog.getEintragWithAVVKode(avvKode);
+                    if (eintrag && eintrag.Basiseintrag === false) {
+                        return null;
+                    }
+
+                    const facettenMap = createFacettenMap(facettenValues);
+                    const keys = Array.from(facettenMap.keys());
+                    const found = keys.some(key => {
+                        let hasNotAllowedMultipleFacetten = false;
+                        const facette = catalog.getFacetteWithBegriffsId(
+                            key.toString()
+                        );
+
+                        if (facette && facette.MehrfachAuswahl === false) {
+                            const facettenValues = facettenMap.get(key);
+                            if (facettenValues) {
+                                hasNotAllowedMultipleFacetten =
+                                    facettenValues.length > 1;
+                            }
+                        }
+
+                        return hasNotAllowedMultipleFacetten;
+                    });
+
+                    if (found) {
+                        return { ...options.message };
+                    }
+                }
+            }
+        }
+        return null;
+    };
+}
+
 function createFacettenMap(facettenValues: string): Map<number, number[]> {
     const facettenMap: Map<number, number[]> = new Map();
     const facetten = facettenValues.split(',');
@@ -913,6 +980,7 @@ export {
     inAVVFacettenCatalog,
     hasObligatoryFacettenValues,
     isHierarchyCode,
+    multipleFacettenAllowed,
     inCatalog,
     matchADVNumberOrString,
     matchAVVCodeOrString,

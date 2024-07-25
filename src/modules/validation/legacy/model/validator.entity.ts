@@ -18,6 +18,7 @@ import {
     inAVVFacettenCatalog,
     hasObligatoryFacettenValues,
     isHierarchyCode,
+    multipleFacettenAllowed,
     inCatalog,
     matchADVNumberOrString,
     matchAVVCodeOrString,
@@ -99,7 +100,9 @@ class SampleValidator implements Validator {
         validate.validators.isHierarchyCode = isHierarchyCode(
             this.catalogService
         );
-
+        validate.validators.multipleFacettenAllowed = multipleFacettenAllowed(
+            this.catalogService
+        );
         validate.validators.matchADVNumberOrString = matchADVNumberOrString(
             this.catalogService
         );

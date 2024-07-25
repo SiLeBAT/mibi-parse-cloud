@@ -637,6 +637,11 @@ export const baseConstraints: ValidationConstraints = {
         isHierarchyCode: {
             error: 110,
             catalog: 'avv339'
+        },
+
+        multipleFacettenAllowed: {
+            error: 109,
+            catalog: 'avv339'
         }
     },
 
@@ -653,6 +658,11 @@ export const baseConstraints: ValidationConstraints = {
 
         isHierarchyCode: {
             error: 110,
+            catalog: 'avv319'
+        },
+
+        multipleFacettenAllowed: {
+            error: 109,
             catalog: 'avv319'
         }
     },
@@ -714,6 +724,11 @@ export const baseConstraints: ValidationConstraints = {
 
         inAVVFacettenCatalog: {
             error: 46,
+            catalog: 'avv303'
+        },
+
+        multipleFacettenAllowed: {
+            error: 109,
             catalog: 'avv303'
         }
     },
