@@ -10,5 +10,23 @@ export async function mp66UpdateUserInfo() {
             .addString('lastName', { required: true })
             .addString('email', { required: true });
     };
-    return updateSchema(schemaName, userInfoSchema, updateFunction);
+
+    const guardFunction = async () => {
+        const schemaData = await userInfoSchema.get();
+
+        if (
+            schemaData.fields['firstName'] ||
+            schemaData.fields['lastName'] ||
+            schemaData.fields['email']
+        ) {
+            return false;
+        }
+        return true;
+    };
+    return updateSchema(
+        schemaName,
+        userInfoSchema,
+        updateFunction,
+        guardFunction
+    );
 }

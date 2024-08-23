@@ -1,5 +1,6 @@
 import { logger } from '../../../system/logging';
 
+// Should be used for creating a schema.  For an update of an already existing schema, see update-schema
 export async function createSchema(
     schemaName: string,
     schema: Parse.Schema,
