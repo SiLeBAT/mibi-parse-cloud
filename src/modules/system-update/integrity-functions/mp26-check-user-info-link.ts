@@ -1,5 +1,5 @@
 import { logger } from '../../../system/logging';
-export async function mp26CreateUserInfoLink() {
+export async function mp26CheckUserInfoLink() {
     const query_User = new Parse.Query(Parse.User);
     const users = await query_User.find({ useMasterKey: true });
 

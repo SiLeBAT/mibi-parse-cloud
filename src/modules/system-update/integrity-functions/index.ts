@@ -1,10 +1,9 @@
-import { mp26CreateUserInfoLink } from './mp26-check-user-info-link';
+import { mp26CheckUserInfoLink } from './mp26-check-user-info-link';
 
 export interface IntegrityFunc {
     (): Promise<boolean>;
 }
 /* +++++++ IMPORTANT +++++++
- * New functions to extend or alter the db schema should be added here, at the BOTTOM of the array.
- * DO NOT REMOVE OR ALTER THE EXISTING ARRAY ENTRIES.
+ * New functions to check the data integrity should be added here.  Order is not important.
  */
-export const CHECK_FUNCTION_ARRAY: IntegrityFunc[] = [mp26CreateUserInfoLink];
+export const CHECK_FUNCTION_ARRAY: IntegrityFunc[] = [mp26CheckUserInfoLink];
