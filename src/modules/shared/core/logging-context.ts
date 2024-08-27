@@ -11,6 +11,8 @@ let logger: ParseLogger | null = {
         console.error(message);
     }
 };
+
+// This is required if you want the cloud code to log to the dashboard log instead of just the OS console
 function setLoggingContext(newLogger: ParseLogger | null) {
     logger = newLogger;
 }

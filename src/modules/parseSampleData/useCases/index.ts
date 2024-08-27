@@ -1,2 +1,0 @@
-import './parseSampleData';
-import './createSubmissionFile';
