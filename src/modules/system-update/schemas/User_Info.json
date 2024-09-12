@@ -20,18 +20,39 @@
     },
     "institute": {
       "type": "Pointer",
-      "targetClass": "institutions",
-      "required": false
+      "targetClass": "institutions"
+    },
+    "lastName": {
+      "type": "String",
+      "required": true
+    },
+    "firstName": {
+      "type": "String",
+      "required": true
     }
   },
   "classLevelPermissions": {
-    "find": {},
-    "count": {},
-    "get": {},
-    "create": {},
-    "update": {},
-    "delete": {},
-    "addField": {},
+    "find": {
+      "*": true
+    },
+    "count": {
+      "*": true
+    },
+    "get": {
+      "*": true
+    },
+    "create": {
+      "*": true
+    },
+    "update": {
+      "*": true
+    },
+    "delete": {
+      "*": true
+    },
+    "addField": {
+      "*": true
+    },
     "protectedFields": {
       "*": []
     }

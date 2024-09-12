@@ -1,3 +1,4 @@
+import { EntityId } from '../../../shared/domain/valueObjects';
 import { UseCase } from '../../../shared/useCases';
 import {
     AnnotatedSampleDataEntry,
@@ -14,19 +15,23 @@ import {
 
 type SubmitOrderInput = {
     order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>;
+    submitterId: EntityId;
 };
 export class SubmitOrderUseCase
     implements UseCase<SubmitOrderInput, Promise<SampleSet>>
 {
     constructor() {}
 
-    async execute({ order }: SubmitOrderInput): Promise<SampleSet> {
+    async execute({
+        order,
+        submitterId
+    }: SubmitOrderInput): Promise<SampleSet> {
         const sampleSet = SampleSet.create({
             data: order.sampleEntryCollection
         });
 
         const validatedSubmission = await validateOrder.execute({
-            userId: order.customer.id,
+            submitterId,
             sampleSet
         });
 
@@ -42,7 +47,9 @@ export class SubmitOrderUseCase
         }
         const { submissionAntiCorruptionLayer } = await antiCorruptionLayers;
         const submissionACLayer = await submissionAntiCorruptionLayer;
+
         await submissionACLayer.sendSamples(order);
+
         return validatedSubmission;
     }
 }

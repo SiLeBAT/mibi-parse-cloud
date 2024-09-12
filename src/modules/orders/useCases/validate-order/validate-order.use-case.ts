@@ -11,17 +11,16 @@ import { createValidationOptions } from '../create-validation-options';
 
 export class ValidateOrderUseCase
     implements
-        UseCase<{ userId: EntityId | null; sampleSet: SampleSet }, SampleSet>
-{
+    UseCase<{ submitterId: EntityId | null; sampleSet: SampleSet }, SampleSet> {
     async execute({
-        userId,
+        submitterId,
         sampleSet
     }: {
-        userId: EntityId | null;
+        submitterId: EntityId | null;
         sampleSet: SampleSet;
     }): Promise<SampleSet> {
         const validationOptions = await createValidationOptions.execute({
-            userId
+            submitterId
         });
 
         const validationParameter = await ValidationParameter.create({

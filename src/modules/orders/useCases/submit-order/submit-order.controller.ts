@@ -1,4 +1,5 @@
 import { setLoggingContext } from '../../../shared/core/logging-context';
+import { EntityId } from '../../../shared/domain/valueObjects';
 import { HTTPRequest } from '../../../shared/infrastructure';
 import {
     AnnotatedSampleDataEntry,
@@ -10,6 +11,7 @@ import { SERVER_ERROR_CODE } from '../../domain/enums';
 import { OrderDTO, SampleDTO } from '../../dto';
 import { SampleEntryDTOMapper } from '../../mappers';
 import { OrderDTOMapper } from '../../mappers/order-dto.mapper';
+import { createSubmitterId } from '../create-submitter-id';
 import {
     AutoCorrectedInputError,
     InvalidInputError
@@ -20,6 +22,7 @@ type SubmitOrderRequestParameters = {
     readonly order: OrderDTO;
     readonly comment?: string;
     readonly receiveAs?: string;
+    readonly userEmail: string;
 };
 type SubmitOrderRequest = HTTPRequest<SubmitOrderRequestParameters>;
 
@@ -49,6 +52,8 @@ const submitOrderController = async (
     try {
         setLoggingContext(request.log);
 
+        const submitterId: EntityId = await createSubmitterId.execute(request);
+
         const order: Order<SampleEntryCollection> =
             await OrderDTOMapper.fromDTO(
                 requestDTO.order,
@@ -66,7 +71,8 @@ const submitOrderController = async (
             );
 
         const validatedSubmission = await submitOrderUseCase.execute({
-            order
+            order,
+            submitterId
         });
 
         const result = {
