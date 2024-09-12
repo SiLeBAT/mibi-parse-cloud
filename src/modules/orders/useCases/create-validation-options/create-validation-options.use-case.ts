@@ -4,29 +4,28 @@ import { ValidationOptions } from '../../domain/validation-parameter.vo';
 import { createCustomer } from '../create-customer';
 
 type CreateValidationOptionsParams = {
-    userId: EntityId | null;
+    submitterId: EntityId | null;
 };
 
 export class CreateValidationOptionsUseCase
-    implements UseCase<CreateValidationOptionsParams, ValidationOptions>
-{
-    constructor() {}
+    implements UseCase<CreateValidationOptionsParams, ValidationOptions> {
+    constructor() { }
 
     async execute({
-        userId
+        submitterId
     }: CreateValidationOptionsParams): Promise<ValidationOptions> {
         const options = {
             state: ''
         };
-        if (userId !== null) {
+        if (submitterId !== null) {
             try {
                 const customer = await createCustomer.execute({
-                    userId
+                    userId: submitterId
                 });
                 options.state = customer.getStateAbbreviation();
             } catch (error) {
                 console.error(
-                    `Unable to retrieve user information for user: ${userId.value}. Ignoring state information.`
+                    `Unable to retrieve user information for user: ${submitterId.value}. Ignoring state information.`
                 );
                 options.state = '';
             }

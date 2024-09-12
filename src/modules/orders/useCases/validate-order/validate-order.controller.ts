@@ -1,4 +1,3 @@
-import { EntityId } from '../../../shared/domain/valueObjects';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
 import {
     AnnotatedSampleDataEntry,
@@ -8,17 +7,18 @@ import {
 } from '../../domain';
 import { OrderContainerDTO, SampleDTO } from '../../dto';
 import { SampleEntryDTOMapper } from '../../mappers';
+import { createSubmitterId } from '../create-submitter-id';
 
 import { OrderValidationFailedError } from './validate-order.error';
 import { validateOrder } from './validate-order.use-case';
 
 type ValidateOrderResponse = OrderContainerDTO;
-type ValidateOrderRequestParameters = OrderContainerDTO;
+interface ValidateOrderRequestParameters extends OrderContainerDTO {
+    userEmail: string;
+}
 type ValidateOrderRequest = HTTPRequest<ValidateOrderRequestParameters>;
 
-function hasUser(request: ValidateOrderRequest): boolean {
-    return Boolean(request.user);
-}
+
 /*
  * The job of the Controller is simply to:
  * 1) Accept the input
@@ -31,11 +31,15 @@ function hasUser(request: ValidateOrderRequest): boolean {
 const validateOrderController = async (
     request: ValidateOrderRequest
 ): Promise<ValidateOrderResponse> => {
+    let submitterId = null;
     try {
-        let userId = null;
-        if (hasUser(request)) {
-            userId = EntityId.create({ value: request.user.id });
-        }
+        submitterId = await createSubmitterId.execute(request);
+    } catch (error) {
+        request.log.error("Unable to determine submitter. SubmitterId not set.")
+        request.log.error(error.message)
+    }
+    try {
+
         const submittedOrder: ValidateOrderRequestParameters = request.params;
 
         const sampleData: SampleEntry<SampleEntryTuple>[] =
@@ -46,7 +50,7 @@ const validateOrderController = async (
         const sampleSet = SampleSet.create({ data: sampleData });
 
         const validatedSubmission: SampleSet = await validateOrder.execute({
-            userId,
+            submitterId,
             sampleSet
         });
 

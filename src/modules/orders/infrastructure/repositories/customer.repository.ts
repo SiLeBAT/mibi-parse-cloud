@@ -41,18 +41,21 @@ export class CustomerRepository extends AbstractRepository<UserInformationObject
     async getCustomerByUserId(userId: EntityId): Promise<Customer> {
         const tempUser = new Parse.User();
         tempUser.id = userId.value;
+
         const userObject = await this.userRepo.getObjectByEntityId(userId);
         const query = this.getQuery();
         query.equalTo('user', tempUser);
         const results: UserInformationObject[] = await query.find({
             useMasterKey: true
         });
+
         const userInformationObject = results[0];
         const institute = userInformationObject.get('institute');
         const instituteId = EntityId.create({ value: institute.id });
         const instituteObject = await this.instituteRepo.getObjectByEntityId(
             instituteId
         );
+
         const customer = CustomerPersistenceMapper.toDomain(
             userObject,
             userInformationObject,

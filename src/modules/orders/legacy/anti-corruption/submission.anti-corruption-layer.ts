@@ -122,6 +122,7 @@ export class SubmissionAntiCorruptionLayer {
         };
 
         const splittedSampleSets = this.splitSampleSet(sampleSet);
+
         const nrlSampleSets = splittedSampleSets.map(sampleSet =>
             this.createNRLSampleSet(sampleSet)
         );
@@ -151,6 +152,7 @@ export class SubmissionAntiCorruptionLayer {
         }
 
         this.sendToNRLs(nrlPayloads, applicantMetaData);
+
         this.sendToUser(userPayloads, applicantMetaData);
     }
 
@@ -373,6 +375,7 @@ export class SubmissionAntiCorruptionLayer {
                 sample,
                 nrlDataFeatures
             );
+
             this.expandSampleWithNrlData(sample, nrlData);
         });
 
@@ -399,20 +402,22 @@ export class SubmissionAntiCorruptionLayer {
 
         for (const props in nrlDataFeatures) {
             const nrlDataFeatureProperties = nrlDataFeatures[props];
+
             const catalog = this.catalogService.getAVVCatalog(
                 nrlDataFeatureProperties.catalog
             );
+
             const avvProperty = nrlDataFeatureProperties.avvProperty;
             const textValue = catalog.getTextWithAVVKode(
                 sample.getAnnotatedData()[avvProperty].value
             );
+
             nrlSampleData[props] = {
                 value: textValue,
                 errors: [],
                 correctionOffer: []
             };
         }
-
         return nrlSampleData as NrlSampleData;
     }
 

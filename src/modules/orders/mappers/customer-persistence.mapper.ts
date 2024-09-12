@@ -13,34 +13,38 @@ export class CustomerPersistenceMapper extends Mapper {
         instituteObject: InstituteObject
     ): Promise<Customer> {
         try {
+
+            const contact = Contact.create({
+                instituteName: instituteObject.get('name1'),
+                street: instituteObject.get('address1').street,
+                zip: instituteObject.get('zip'),
+                city: instituteObject.get('city'),
+                telephone: instituteObject.get('phone'),
+                email: await Email.create({
+                    value: userObject.get('email')
+                }),
+                stateShort:
+                    Bundesland[
+                    instituteObject.get(
+                        'state_short'
+                    ) as keyof typeof Bundesland
+                    ]
+            });
+            const firstName = await Name.create({
+                value: userInformationObject.get('firstName')
+            })
+            const lastName = await Name.create({
+                value: userInformationObject.get('lastName')
+            });
             const props: CustomerProps = {
-                contact: Contact.create({
-                    instituteName: instituteObject.get('name1'),
-                    street: instituteObject.get('address1').street,
-                    zip: instituteObject.get('zip'),
-                    city: instituteObject.get('city'),
-                    telephone: instituteObject.get('phone'),
-                    email: await Email.create({
-                        value: userObject.get('email')
-                    }),
-                    stateShort:
-                        Bundesland[
-                            instituteObject.get(
-                                'state_short'
-                            ) as keyof typeof Bundesland
-                        ]
-                }),
-                firstName: await Name.create({
-                    value: userInformationObject.get('firstName')
-                }),
-                lastName: await Name.create({
-                    value: userInformationObject.get('lastName')
-                }),
+                contact,
+                firstName,
+                lastName,
                 customerRefNumber: ''
             };
             return Customer.create(props);
         } catch (e) {
-            console.error('Could not construct Log Entry from Object.');
+            console.error('Could not construct Customer from Object.');
             throw e;
         }
     }
