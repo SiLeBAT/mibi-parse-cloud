@@ -6,7 +6,7 @@ export async function mp26CheckUserInfoLink() {
     users.forEach(async user => {
         const queryUserInfo = new Parse.Query('User_Info');
         queryUserInfo.equalTo('user', user);
-        const userInfo = await queryUserInfo.find();
+        const userInfo = await queryUserInfo.find({ useMasterKey: true });
 
         if (userInfo.length > 0) {
             logger.verbose(
@@ -17,7 +17,7 @@ export async function mp26CheckUserInfoLink() {
         }
         const queryUsers = new Parse.Query('users');
         queryUsers.equalTo('email', user.getEmail());
-        const old_user = await queryUsers.find();
+        const old_user = await queryUsers.find({ useMasterKey: true });
         if (old_user.length !== 1) {
             logger.warn(
                 'CreateUserInfoLink: No unique entry found in users collection for user id:  ' +
@@ -29,6 +29,8 @@ export async function mp26CheckUserInfoLink() {
         const newUserInfo = new Parse.Object('User_Info');
         newUserInfo.set('user', user);
         newUserInfo.set('institute', old_user[0]!.get('institution'));
+        newUserInfo.set('firstName', old_user[0]!.get('firstName'));
+        newUserInfo.set('lastName', old_user[0]!.get('lastName'));
 
         newUserInfo.save(null, { useMasterKey: true });
     });
