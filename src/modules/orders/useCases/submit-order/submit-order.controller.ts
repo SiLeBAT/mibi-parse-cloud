@@ -93,6 +93,7 @@ const submitOrderController = async (
 
         return result;
     } catch (error) {
+        request.log.error(JSON.stringify(error));
         if (error instanceof InvalidInputError) {
             const errorDTO: InvalidInputErrorDTO = {
                 code: SERVER_ERROR_CODE.INVALID_INPUT,
