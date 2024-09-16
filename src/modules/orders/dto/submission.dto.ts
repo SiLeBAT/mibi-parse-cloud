@@ -26,7 +26,7 @@ interface AnalysisDTO {
         active: boolean;
     };
 }
-interface SampleSetMetaDTO {
+export interface SampleSetMetaDTO {
     sender: AddressDTO;
     fileName?: string;
     customerRefNumber?: string;

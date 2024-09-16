@@ -5,4 +5,9 @@ import { UserRepository } from './user.repository';
 const customerRepository = new CustomerRepository(ObjectKeys.UserInformation);
 const userRepository = new UserRepository();
 
-export { CustomerRepository, customerRepository, userRepository, UserRepository };
+export {
+    CustomerRepository,
+    customerRepository,
+    userRepository,
+    UserRepository
+};
