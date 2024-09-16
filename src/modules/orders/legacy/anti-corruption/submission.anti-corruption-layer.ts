@@ -1,5 +1,7 @@
+import { getLogger } from 'nodemailer/lib/shared';
 import {
     AnnotatedSampleDataEntry,
+    Customer,
     NRL_ID_VALUE,
     Order,
     SampleEntry
@@ -32,6 +34,7 @@ import {
 } from './../model/legacy.model';
 
 export class SubmissionAntiCorruptionLayer {
+    private logger = getLogger();
     private appName: string;
     private overrideRecipient: string;
     private readonly DEFAULT_FILE_NAME = 'Einsendebogen';
@@ -48,82 +51,14 @@ export class SubmissionAntiCorruptionLayer {
     async sendSamples(
         order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>
     ): Promise<void> {
-        const applicantMetaData: ApplicantMetaData = {
-            user: {
-                firstName: order.customer.firstName.value,
-                lastName: order.customer.lastName.value,
-                email: order.customer.contact.props.email.value,
-                institution: {
-                    stateShort: order.customer.contact.stateShort.toString(),
-                    name: order.customer.contact.instituteName,
-                    city: order.customer.contact.city,
-                    zip: order.customer.contact.zip
-                },
-                getFullName: function (): string {
-                    return this.firstName + ' ' + this.lastName;
-                }
-            },
-            comment: order.comment,
-            receiveAs: ReceiveAs.PDF
-        };
+        const applicantMetaData: ApplicantMetaData =
+            this.createLegacyApplicationMetaData(order.customer, order.comment);
 
-        const sampleSet: SampleSet = {
-            samples: order.sampleEntryCollection.map(entry => {
-                return Sample.create(
-                    {
-                        sample_id: entry.data.sample_id,
-                        sample_id_avv: entry.data.sample_id_avv,
-                        partial_sample_id: entry.data.partial_sample_id,
-                        pathogen_avv: entry.data.pathogen_avv,
-                        pathogen_text: entry.data.pathogen_text,
-                        sampling_date: entry.data.sampling_date,
-                        isolation_date: entry.data.isolation_date,
-                        sampling_location_avv: entry.data.sampling_location_avv,
-                        sampling_location_zip: entry.data.sampling_location_zip,
-                        sampling_location_text:
-                            entry.data.sampling_location_text,
-                        animal_avv: entry.data.animal_avv,
-                        matrix_avv: entry.data.matrix_avv,
-                        animal_matrix_text: entry.data.animal_matrix_text,
-                        primary_production_avv:
-                            entry.data.primary_production_avv,
-                        control_program_avv: entry.data.program_avv,
-                        sampling_reason_avv: entry.data.sampling_reason_avv,
-                        program_reason_text: entry.data.program_reason_text,
-                        operations_mode_avv: entry.data.operations_mode_avv,
-                        operations_mode_text: entry.data.operations_mode_text,
-                        vvvo: entry.data.vvvo,
-                        program_avv: entry.data.program_avv,
-                        comment: entry.data.comment
-                    },
-                    {
-                        nrl: NRLId.create(entry.data.nrl).value,
-                        urgency:
-                            Urgency[entry.data.urgency as keyof typeof Urgency],
-                        analysis: entry.data.analysis
-                    }
-                );
-            }),
-            meta: {
-                sender: {
-                    instituteName: order.customer.contact.instituteName,
-                    street: order.customer.contact.street,
-                    zip: order.customer.contact.zip,
-                    city: order.customer.contact.city,
-                    contactPerson: order.customer.fullName,
-                    telephone: order.customer.contact.telephone,
-                    email: order.customer.contact.email.value
-                },
-                fileName: order.submissionFormInfo?.fileName || '',
-                customerRefNumber: order.customer.customerRefNumber,
-                signatureDate: order.signatureDate,
-                version: order.submissionFormInfo?.version || ''
-            }
-        };
+        const sampleSet: SampleSet = this.createLegacySampleSet(order);
 
-        const splittedSampleSets = this.splitSampleSet(sampleSet);
+        const splitSampleSets = this.splitSampleSet(sampleSet);
 
-        const nrlSampleSets = splittedSampleSets.map(sampleSet =>
+        const nrlSampleSets = splitSampleSets.map(sampleSet =>
             this.createNRLSampleSet(sampleSet)
         );
 
@@ -137,14 +72,14 @@ export class SubmissionAntiCorruptionLayer {
         switch (applicantMetaData.receiveAs) {
             case ReceiveAs.PDF:
                 userPayloads = await this.createPayloads(
-                    splittedSampleSets,
+                    splitSampleSets,
                     sampleSheet => this.pdfCreatorService.createPDF(sampleSheet)
                 );
                 break;
             case ReceiveAs.EXCEL:
             default:
                 userPayloads = await this.createPayloads(
-                    splittedSampleSets,
+                    splitSampleSets,
                     sampleSheet =>
                         this.jsonMarshalService.createExcel(sampleSheet)
                 );
@@ -156,21 +91,127 @@ export class SubmissionAntiCorruptionLayer {
         this.sendToUser(userPayloads, applicantMetaData);
     }
 
+    private createLegacySampleSet(
+        order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>
+    ): SampleSet {
+        try {
+            return {
+                samples: order.sampleEntryCollection.map(entry => {
+                    return Sample.create(
+                        {
+                            sample_id: entry.data.sample_id,
+                            sample_id_avv: entry.data.sample_id_avv,
+                            partial_sample_id: entry.data.partial_sample_id,
+                            pathogen_avv: entry.data.pathogen_avv,
+                            pathogen_text: entry.data.pathogen_text,
+                            sampling_date: entry.data.sampling_date,
+                            isolation_date: entry.data.isolation_date,
+                            sampling_location_avv:
+                                entry.data.sampling_location_avv,
+                            sampling_location_zip:
+                                entry.data.sampling_location_zip,
+                            sampling_location_text:
+                                entry.data.sampling_location_text,
+                            animal_avv: entry.data.animal_avv,
+                            matrix_avv: entry.data.matrix_avv,
+                            animal_matrix_text: entry.data.animal_matrix_text,
+                            primary_production_avv:
+                                entry.data.primary_production_avv,
+                            control_program_avv: entry.data.program_avv,
+                            sampling_reason_avv: entry.data.sampling_reason_avv,
+                            program_reason_text: entry.data.program_reason_text,
+                            operations_mode_avv: entry.data.operations_mode_avv,
+                            operations_mode_text:
+                                entry.data.operations_mode_text,
+                            vvvo: entry.data.vvvo,
+                            program_avv: entry.data.program_avv,
+                            comment: entry.data.comment
+                        },
+                        {
+                            nrl: NRLId.create(entry.data.nrl).value,
+                            urgency:
+                                Urgency[
+                                    entry.data.urgency as keyof typeof Urgency
+                                ],
+                            analysis: entry.data.analysis
+                        }
+                    );
+                }),
+                meta: {
+                    sender: {
+                        instituteName: order.customer.contact.instituteName,
+                        street: order.customer.contact.street,
+                        zip: order.customer.contact.zip,
+                        city: order.customer.contact.city,
+                        contactPerson: order.customer.fullName,
+                        telephone: order.customer.contact.telephone,
+                        email: order.customer.contact.email.value
+                    },
+                    fileName: order.submissionFormInfo?.fileName || '',
+                    customerRefNumber: order.customer.customerRefNumber,
+                    signatureDate: order.signatureDate,
+                    version: order.submissionFormInfo?.version || ''
+                }
+            };
+        } catch (error) {
+            this.logger.error(
+                'Unable to create legacy Sample Set: ' + error.msg
+            );
+            throw error;
+        }
+    }
+
+    private createLegacyApplicationMetaData(
+        customer: Customer,
+        comment: string
+    ): ApplicantMetaData {
+        try {
+            return {
+                user: {
+                    firstName: customer.firstName.value,
+                    lastName: customer.lastName.value,
+                    email: customer.contact.props.email.value,
+                    institution: {
+                        stateShort: customer.contact.stateShort.toString(),
+                        name: customer.contact.instituteName,
+                        city: customer.contact.city,
+                        zip: customer.contact.zip
+                    },
+                    getFullName: function (): string {
+                        return this.firstName + ' ' + this.lastName;
+                    }
+                },
+                comment,
+                receiveAs: ReceiveAs.PDF
+            };
+        } catch (error) {
+            this.logger.error(
+                'Unable to create legacy ApplicationMetaData: ' + error.msg
+            );
+            throw error;
+        }
+    }
+
     private splitSampleSet(sampleSet: SampleSet): SampleSet[] {
-        const splittedSampleSetMap = new Map<string, SampleSet>();
-        sampleSet.samples.forEach(sample => {
-            const nrl = sample.getNRL();
-            let splittedSampleSet = splittedSampleSetMap.get(nrl);
-            if (!splittedSampleSet) {
-                splittedSampleSet = {
-                    samples: [],
-                    meta: { ...sampleSet.meta }
-                };
-                splittedSampleSetMap.set(nrl, splittedSampleSet);
-            }
-            splittedSampleSet.samples.push(sample);
-        });
-        return Array.from(splittedSampleSetMap.values());
+        try {
+            const splittedSampleSetMap = new Map<string, SampleSet>();
+            sampleSet.samples.forEach(sample => {
+                const nrl = sample.getNRL();
+                let splittedSampleSet = splittedSampleSetMap.get(nrl);
+                if (!splittedSampleSet) {
+                    splittedSampleSet = {
+                        samples: [],
+                        meta: { ...sampleSet.meta }
+                    };
+                    splittedSampleSetMap.set(nrl, splittedSampleSet);
+                }
+                splittedSampleSet.samples.push(sample);
+            });
+            return Array.from(splittedSampleSetMap.values());
+        } catch (error) {
+            this.logger.error('Unable to split sample set: ' + error.msg);
+            throw error;
+        }
     }
 
     private async createPayloads(
@@ -188,60 +229,82 @@ export class SubmissionAntiCorruptionLayer {
         sampleSet: SampleSet,
         creatorFunc: (sampleSheet: SampleSheet) => Promise<FileBuffer>
     ): Promise<Payload> {
-        const sampleSheet =
-            await this.sampleSheetService.fromSampleSetToSampleSheet(sampleSet);
+        try {
+            const sampleSheet =
+                await this.sampleSheetService.fromSampleSetToSampleSheet(
+                    sampleSet
+                );
 
-        const fileBuffer = await creatorFunc(sampleSheet);
+            const fileBuffer = await creatorFunc(sampleSheet);
 
-        const nrl = sampleSet.samples[0].getNRL();
-        const fileName = this.amendFileName(
-            sampleSet.meta.fileName || this.DEFAULT_FILE_NAME,
-            '_' + nrl + '_validated',
-            fileBuffer.extension
-        );
+            const nrl = sampleSet.samples[0].getNRL();
+            const fileName = this.amendFileName(
+                sampleSet.meta.fileName || this.DEFAULT_FILE_NAME,
+                '_' + nrl + '_validated',
+                fileBuffer.extension
+            );
 
-        return {
-            buffer: fileBuffer.buffer,
-            fileName: fileName,
-            mime: fileBuffer.mimeType,
-            nrl: nrl
-        };
+            return {
+                buffer: fileBuffer.buffer,
+                fileName: fileName,
+                mime: fileBuffer.mimeType,
+                nrl: nrl
+            };
+        } catch (error) {
+            this.logger.error('Unable to create payload: ' + error.msg);
+            throw error;
+        }
     }
 
     private sendToNRLs(
         payloads: Payload[],
         applicantMetaData: ApplicantMetaData
     ): void {
-        payloads.forEach(payload => {
-            const orderNotificationMetaData =
-                this.resolveOrderNotificationMetaData(
-                    applicantMetaData,
-                    payload.nrl
+        try {
+            payloads.forEach(payload => {
+                const orderNotificationMetaData =
+                    this.resolveOrderNotificationMetaData(
+                        applicantMetaData,
+                        payload.nrl
+                    );
+
+                const newOrderNotification = this.createNewOrderNotification(
+                    this.createNotificationAttachment(payload),
+                    orderNotificationMetaData
                 );
 
-            const newOrderNotification = this.createNewOrderNotification(
-                this.createNotificationAttachment(payload),
-                orderNotificationMetaData
+                this.notificationService.sendNotification(newOrderNotification);
+            });
+        } catch (error) {
+            this.logger.error(
+                'Unable to send notification to NRL ' + error.msg
             );
-
-            this.notificationService.sendNotification(newOrderNotification);
-        });
+            throw error;
+        }
     }
 
     private sendToUser(
         payloads: Payload[],
         applicantMetaData: ApplicantMetaData
     ): void {
-        const attachments = payloads.map(file =>
-            this.createNotificationAttachment(file)
-        );
+        try {
+            const attachments = payloads.map(file =>
+                this.createNotificationAttachment(file)
+            );
 
-        const newOrderCopyNotification = this.createNewOrderCopyNotification(
-            attachments,
-            applicantMetaData
-        );
+            const newOrderCopyNotification =
+                this.createNewOrderCopyNotification(
+                    attachments,
+                    applicantMetaData
+                );
 
-        this.notificationService.sendNotification(newOrderCopyNotification);
+            this.notificationService.sendNotification(newOrderCopyNotification);
+        } catch (error) {
+            this.logger.error(
+                'Unable to send notification to User ' + error.msg
+            );
+            throw error;
+        }
     }
 
     private createNotificationAttachment(payload: Payload): Attachment {
@@ -335,90 +398,98 @@ export class SubmissionAntiCorruptionLayer {
     }
 
     private createNRLSampleSet(sampleSet: SampleSet): SampleSet {
-        const nrlDataFeatures: NrlDataFeatures = {
-            sampling_location_text_avv: {
-                catalog: 'avv313',
-                avvProperty: 'sampling_location_avv'
-            },
-            animal_text_avv: {
-                catalog: 'avv339',
-                avvProperty: 'animal_avv'
-            },
-            matrix_text_avv: {
-                catalog: 'avv319',
-                avvProperty: 'matrix_avv'
-            },
-            primary_production_text_avv: {
-                catalog: 'avv316',
-                avvProperty: 'primary_production_avv'
-            },
-            control_program_text_avv: {
-                catalog: 'avv322',
-                avvProperty: 'control_program_avv'
-            },
-            sampling_reason_text_avv: {
-                catalog: 'avv326',
-                avvProperty: 'sampling_reason_avv'
-            },
-            operations_mode_text_avv: {
-                catalog: 'avv303',
-                avvProperty: 'operations_mode_avv'
-            },
-            program_text_avv: {
-                catalog: 'avv328',
-                avvProperty: 'program_avv'
-            }
-        };
+        try {
+            const nrlDataFeatures: NrlDataFeatures = {
+                sampling_location_text_avv: {
+                    catalog: 'avv313',
+                    avvProperty: 'sampling_location_avv'
+                },
+                animal_text_avv: {
+                    catalog: 'avv339',
+                    avvProperty: 'animal_avv'
+                },
+                matrix_text_avv: {
+                    catalog: 'avv319',
+                    avvProperty: 'matrix_avv'
+                },
+                primary_production_text_avv: {
+                    catalog: 'avv316',
+                    avvProperty: 'primary_production_avv'
+                },
+                control_program_text_avv: {
+                    catalog: 'avv322',
+                    avvProperty: 'control_program_avv'
+                },
+                sampling_reason_text_avv: {
+                    catalog: 'avv326',
+                    avvProperty: 'sampling_reason_avv'
+                },
+                operations_mode_text_avv: {
+                    catalog: 'avv303',
+                    avvProperty: 'operations_mode_avv'
+                },
+                program_text_avv: {
+                    catalog: 'avv328',
+                    avvProperty: 'program_avv'
+                }
+            };
 
-        sampleSet.samples.forEach(sample => {
-            const nrlData: Partial<NrlSampleData> = this.getNrlDataForSample(
-                sample,
-                nrlDataFeatures
-            );
+            sampleSet.samples.forEach(sample => {
+                const nrlData: Partial<NrlSampleData> =
+                    this.getNrlDataForSample(sample, nrlDataFeatures);
 
-            this.expandSampleWithNrlData(sample, nrlData);
-        });
+                this.expandSampleWithNrlData(sample, nrlData);
+            });
 
-        const nrlSampleSet: SampleSet = {
-            meta: sampleSet.meta,
-            samples: sampleSet.samples.map(sample => sample.clone())
-        };
+            const nrlSampleSet: SampleSet = {
+                meta: sampleSet.meta,
+                samples: sampleSet.samples.map(sample => sample.clone())
+            };
 
-        nrlSampleSet.samples.forEach(sample => {
-            this.replaceEmptySampleIDWithSampleIDAVV(sample);
-            this.moveAVV313Data(sample);
-            this.removeGeneratedTiereMatrixText(sample);
-            this.removeSampleDataDuplicates(sample);
-        });
+            nrlSampleSet.samples.forEach(sample => {
+                this.replaceEmptySampleIDWithSampleIDAVV(sample);
+                this.moveAVV313Data(sample);
+                this.removeGeneratedTiereMatrixText(sample);
+                this.removeSampleDataDuplicates(sample);
+            });
 
-        return nrlSampleSet;
+            return nrlSampleSet;
+        } catch (error) {
+            this.logger.error('Unable to create NRL sample set: ' + error.msg);
+            throw error;
+        }
     }
 
     private getNrlDataForSample(
         sample: Sample,
         nrlDataFeatures: NrlDataFeatures
     ): Partial<NrlSampleData> {
-        const nrlSampleData: Partial<NrlSampleData> = {};
+        try {
+            const nrlSampleData: Partial<NrlSampleData> = {};
 
-        for (const props in nrlDataFeatures) {
-            const nrlDataFeatureProperties = nrlDataFeatures[props];
+            for (const props in nrlDataFeatures) {
+                const nrlDataFeatureProperties = nrlDataFeatures[props];
 
-            const catalog = this.catalogService.getAVVCatalog(
-                nrlDataFeatureProperties.catalog
-            );
+                const catalog = this.catalogService.getAVVCatalog(
+                    nrlDataFeatureProperties.catalog
+                );
 
-            const avvProperty = nrlDataFeatureProperties.avvProperty;
-            const textValue = catalog.getTextWithAVVKode(
-                sample.getAnnotatedData()[avvProperty].value
-            );
+                const avvProperty = nrlDataFeatureProperties.avvProperty;
+                const textValue = catalog.getTextWithAVVKode(
+                    sample.getAnnotatedData()[avvProperty].value
+                );
 
-            nrlSampleData[props] = {
-                value: textValue,
-                errors: [],
-                correctionOffer: []
-            };
+                nrlSampleData[props] = {
+                    value: textValue,
+                    errors: [],
+                    correctionOffer: []
+                };
+            }
+            return nrlSampleData as NrlSampleData;
+        } catch (error) {
+            this.logger.error('Unable to get NRL data for Sample ' + error.msg);
+            throw error;
         }
-        return nrlSampleData as NrlSampleData;
     }
 
     private expandSampleWithNrlData(
