@@ -40,4 +40,8 @@ export class Order<T> extends Entity<OrderProps<T>> {
     get comment(): string {
         return this.props.comment;
     }
+
+    setCustomer(customer: Customer) {
+        this.props.customer = customer;
+    }
 }

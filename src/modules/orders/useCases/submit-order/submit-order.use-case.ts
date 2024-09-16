@@ -36,13 +36,16 @@ export class SubmitOrderUseCase
         });
 
         if (validatedSubmission.hasErrors()) {
-            throw new InvalidInputError('Contains errors', new Error());
+            throw new InvalidInputError(
+                'Input validation failed',
+                new Error('Input validation failed')
+            );
         }
 
         if (validatedSubmission.hasAutoCorrections()) {
             throw new AutoCorrectedInputError(
                 'Has been auto-corrected',
-                new Error()
+                new Error('Has been auto-corrected')
             );
         }
         const { submissionAntiCorruptionLayer } = await antiCorruptionLayers;

@@ -18,7 +18,6 @@ interface ValidateOrderRequestParameters extends OrderContainerDTO {
 }
 type ValidateOrderRequest = HTTPRequest<ValidateOrderRequestParameters>;
 
-
 /*
  * The job of the Controller is simply to:
  * 1) Accept the input
@@ -35,11 +34,12 @@ const validateOrderController = async (
     try {
         submitterId = await createSubmitterId.execute(request);
     } catch (error) {
-        request.log.error("Unable to determine submitter. SubmitterId not set.")
-        request.log.error(error.message)
+        request.log.error(
+            'Unable to determine submitter. SubmitterId not set.'
+        );
+        request.log.error(error.message);
     }
     try {
-
         const submittedOrder: ValidateOrderRequestParameters = request.params;
 
         const sampleData: SampleEntry<SampleEntryTuple>[] =

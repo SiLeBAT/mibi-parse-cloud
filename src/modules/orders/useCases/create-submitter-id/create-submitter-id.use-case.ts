@@ -12,20 +12,23 @@ interface HasUserEmail {
 type CreateSubmitterIdParams<T extends HasUserEmail> = HTTPRequest<T>;
 
 export class CreateSubmitterIdUseCase<T extends HasUserEmail>
-    implements UseCase<CreateSubmitterIdParams<T>, EntityId> {
-    constructor(private userRepository: UserRepository) { }
+    implements UseCase<CreateSubmitterIdParams<T>, EntityId>
+{
+    constructor(private userRepository: UserRepository) {}
 
-    async execute<T extends HasUserEmail>(request: CreateSubmitterIdParams<T>): Promise<EntityId> {
+    async execute<T extends HasUserEmail>(
+        request: CreateSubmitterIdParams<T>
+    ): Promise<EntityId> {
         if (request.user) {
-            return EntityId.create({ value: request.user.id })
-        }
-        else {
+            return EntityId.create({ value: request.user.id });
+        } else {
             const submitterEmail = await request.params.userEmail;
             const submitterId: EntityId =
-                await this.userRepository.getIdForEmail(await Email.create({ value: submitterEmail }));
+                await this.userRepository.getIdForEmail(
+                    await Email.create({ value: submitterEmail })
+                );
             return submitterId;
         }
-
     }
 }
 

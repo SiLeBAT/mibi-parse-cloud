@@ -13,7 +13,6 @@ export class CustomerPersistenceMapper extends Mapper {
         instituteObject: InstituteObject
     ): Promise<Customer> {
         try {
-
             const contact = Contact.create({
                 instituteName: instituteObject.get('name1'),
                 street: instituteObject.get('address1').street,
@@ -25,14 +24,14 @@ export class CustomerPersistenceMapper extends Mapper {
                 }),
                 stateShort:
                     Bundesland[
-                    instituteObject.get(
-                        'state_short'
-                    ) as keyof typeof Bundesland
+                        instituteObject.get(
+                            'state_short'
+                        ) as keyof typeof Bundesland
                     ]
             });
             const firstName = await Name.create({
                 value: userInformationObject.get('firstName')
-            })
+            });
             const lastName = await Name.create({
                 value: userInformationObject.get('lastName')
             });

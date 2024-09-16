@@ -11,7 +11,11 @@ import { createValidationOptions } from '../create-validation-options';
 
 export class ValidateOrderUseCase
     implements
-    UseCase<{ submitterId: EntityId | null; sampleSet: SampleSet }, SampleSet> {
+        UseCase<
+            { submitterId: EntityId | null; sampleSet: SampleSet },
+            SampleSet
+        >
+{
     async execute({
         submitterId,
         sampleSet

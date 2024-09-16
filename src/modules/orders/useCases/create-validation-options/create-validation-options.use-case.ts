@@ -8,8 +8,9 @@ type CreateValidationOptionsParams = {
 };
 
 export class CreateValidationOptionsUseCase
-    implements UseCase<CreateValidationOptionsParams, ValidationOptions> {
-    constructor() { }
+    implements UseCase<CreateValidationOptionsParams, ValidationOptions>
+{
+    constructor() {}
 
     async execute({
         submitterId

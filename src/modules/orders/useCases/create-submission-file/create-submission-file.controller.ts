@@ -27,6 +27,7 @@ const createSubmissionFileController = async (
     try {
         setLoggingContext(request.log);
         const orderContainerDTO = request.params;
+
         const order: Order<SampleEntry<SampleEntryTuple>[]> =
             await OrderDTOMapper.fromDTO(
                 orderContainerDTO.order,

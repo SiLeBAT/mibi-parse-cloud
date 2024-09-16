@@ -1,15 +1,8 @@
-import {
-    Contact,
-    Customer,
-    Order,
-    OrderProps,
-    SubmissionFormInfo
-} from '../domain';
+import { Order, OrderProps, SubmissionFormInfo } from '../domain';
 import { OrderDTO, SampleDTO } from '../dto/submission.dto';
 
-import { Email, Name } from '../../shared/domain/valueObjects';
 import { Mapper, MappingError } from '../../shared/mappers';
-import { Bundesland } from '../domain/enums';
+import { CustomerDTOMapper } from './customer-dto.mapper';
 
 export class OrderDTOMapper extends Mapper {
     static toDTO<T>(
@@ -53,27 +46,7 @@ export class OrderDTOMapper extends Mapper {
         try {
             const props: OrderProps<T> = {
                 sampleEntryCollection: mapperFunction(order.sampleSet.samples),
-                customer: Customer.create({
-                    contact: Contact.create({
-                        ...order.sampleSet.meta.sender,
-                        stateShort: Bundesland.UNKNOWN,
-                        email: await Email.create({
-                            value: order.sampleSet.meta.sender.email
-                        })
-                    }),
-                    firstName: await Name.create({
-                        value: order.sampleSet.meta.sender.contactPerson.split(
-                            ' '
-                        )[0]
-                    }),
-                    lastName: await Name.create({
-                        value: order.sampleSet.meta.sender.contactPerson.split(
-                            ' '
-                        )[1]
-                    }),
-                    customerRefNumber:
-                        order.sampleSet.meta.customerRefNumber || ''
-                }),
+                customer: await CustomerDTOMapper.fromDTO(order.sampleSet.meta),
                 submissionFormInfo: SubmissionFormInfo.create({
                     fileName: order.sampleSet.meta.fileName || '',
                     version: order.sampleSet.meta.version || ''
