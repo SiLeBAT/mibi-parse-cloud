@@ -5,6 +5,7 @@ import readFilePromise from 'fs-readfile-promise';
 import handlebars from 'handlebars';
 import nodemailer, { SentMessageInfo } from 'nodemailer';
 
+import { getLogger } from 'nodemailer/lib/shared';
 import {
     EmailData,
     MailConfiguration,
@@ -15,6 +16,8 @@ import {
 export class MailService {
     private host = 'localhost';
     private port = 25;
+
+    private logger = getLogger();
 
     private viewsDir = __dirname + '/views/de/';
 
@@ -83,7 +86,7 @@ export class MailService {
                     );
                     break;
                 default:
-                    console.log('Unknown notification type', {
+                    this.logger.warn('Unknown notification type', {
                         notification: data.type
                     });
             }
@@ -129,23 +132,23 @@ export class MailService {
                 mailOptions,
                 (error: Error | null, info: SentMessageInfo) => {
                     if (error) {
-                        console.error(
+                        this.logger.error(
                             `Error sending mail. error=${String(
                                 error
                             )} mailSubject="${mailOptions.subject}"`
                         );
                         return error;
                     } else {
-                        console.log('Email sent', {
+                        this.logger.info('Email sent', {
                             subject: mailOptions.subject
                         });
-                        console.log(JSON.stringify(info));
+                        this.logger.info(JSON.stringify(info));
                         return info;
                     }
                 }
             );
         } catch (error) {
-            console.error(
+            this.logger.error(
                 `Error sending mail. error=${error} mailSubject="${mailOptions.subject}"`
             );
             throw error;

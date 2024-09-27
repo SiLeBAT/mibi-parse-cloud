@@ -45,7 +45,7 @@ export class SubmissionAntiCorruptionLayer {
         private nrlService: NRLService,
         private sampleSheetService: SampleSheetService,
         private catalogService: CatalogService
-    ) {}
+    ) { }
 
     async sendSamples(
         order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>
@@ -130,7 +130,7 @@ export class SubmissionAntiCorruptionLayer {
                             nrl: NRLId.create(entry.data.nrl).value,
                             urgency:
                                 Urgency[
-                                    entry.data.urgency as keyof typeof Urgency
+                                entry.data.urgency as keyof typeof Urgency
                                 ],
                             analysis: entry.data.analysis
                         }
@@ -386,11 +386,9 @@ export class SubmissionAntiCorruptionLayer {
             },
             meta: this.notificationService.createEmailNotificationMetaData(
                 recipient,
-                `Neuer Auftrag von ${
-                    orderNotificationMetaData.user.institution.city ||
-                    '<unbekannt>'
-                } an ${
-                    orderNotificationMetaData.recipient.name || '<unbekannt>'
+                `Neuer Auftrag von ${orderNotificationMetaData.user.institution.city ||
+                '<unbekannt>'
+                } an ${orderNotificationMetaData.recipient.name || '<unbekannt>'
                 }`,
                 [],
                 [dataset]

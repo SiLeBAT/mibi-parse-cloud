@@ -16,10 +16,10 @@ export class GetServerConfigUseCase implements UseCase<null, ServerConfig> {
             );
         }
 
-        return ServerConfig.create({
-            appName: config.get('appName'),
-            jobRecipient: config.get('jobRecipient'),
-            supportContact: config.get('supportContact')
+        return ServerConfig.createFromStrings({
+            appName: config.get('appName') || '',
+            jobRecipient: config.get('jobRecipient') || '',
+            supportContact: config.get('supportContact') || ''
         });
     }
 }
