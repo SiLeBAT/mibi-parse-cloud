@@ -1,15 +1,17 @@
 import {
-    ConfigurationProvider,
     PackageInformationProvider,
-    configurationProvider,
     packageInformationProvider
 } from '../../../shared/infrastructure/providers';
 import { UseCase } from '../../../shared/useCases';
 import { SystemInformation } from '../../domain';
+import {
+    getServerConfig,
+    GetServerConfigUseCase
+} from './../../../shared/useCases';
 
 class GetSystemInformationUseCase implements UseCase<null, SystemInformation> {
     constructor(
-        private configurationProvider: ConfigurationProvider,
+        private getServerConfig: GetServerConfigUseCase,
         private packageInformationProvider: PackageInformationProvider
     ) {}
 
@@ -18,8 +20,8 @@ class GetSystemInformationUseCase implements UseCase<null, SystemInformation> {
         const lastChange =
             await this.packageInformationProvider.getDateOfLastChange();
 
-        const supportContact =
-            await this.configurationProvider.getSupportContact();
+        const supportContact = (await this.getServerConfig.execute())
+            .supportContact;
 
         const systemInformation: SystemInformation = SystemInformation.create({
             version,
@@ -31,7 +33,7 @@ class GetSystemInformationUseCase implements UseCase<null, SystemInformation> {
 }
 
 const getSystemInformation = new GetSystemInformationUseCase(
-    configurationProvider,
+    getServerConfig,
     packageInformationProvider
 );
 

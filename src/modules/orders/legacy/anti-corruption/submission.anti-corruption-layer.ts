@@ -1,4 +1,5 @@
 import { getLogger } from 'nodemailer/lib/shared';
+import { getServerConfig } from '../../../shared/useCases/get-server-config';
 import {
     AnnotatedSampleDataEntry,
     Customer,
@@ -35,8 +36,6 @@ import {
 
 export class SubmissionAntiCorruptionLayer {
     private logger = getLogger();
-    private appName: string;
-    private overrideRecipient: string;
     private readonly DEFAULT_FILE_NAME = 'Einsendebogen';
     private readonly IMPORTED_FILE_EXTENSION = '.xlsx';
     constructor(
@@ -256,22 +255,23 @@ export class SubmissionAntiCorruptionLayer {
         }
     }
 
-    private sendToNRLs(
+    private async sendToNRLs(
         payloads: Payload[],
         applicantMetaData: ApplicantMetaData
-    ): void {
+    ): Promise<void> {
         try {
-            payloads.forEach(payload => {
+            payloads.forEach(async payload => {
                 const orderNotificationMetaData =
                     this.resolveOrderNotificationMetaData(
                         applicantMetaData,
                         payload.nrl
                     );
 
-                const newOrderNotification = this.createNewOrderNotification(
-                    this.createNotificationAttachment(payload),
-                    orderNotificationMetaData
-                );
+                const newOrderNotification =
+                    await this.createNewOrderNotification(
+                        this.createNotificationAttachment(payload),
+                        orderNotificationMetaData
+                    );
 
                 this.notificationService.sendNotification(newOrderNotification);
             });
@@ -283,17 +283,17 @@ export class SubmissionAntiCorruptionLayer {
         }
     }
 
-    private sendToUser(
+    private async sendToUser(
         payloads: Payload[],
         applicantMetaData: ApplicantMetaData
-    ): void {
+    ): Promise<void> {
         try {
             const attachments = payloads.map(file =>
                 this.createNotificationAttachment(file)
             );
 
             const newOrderCopyNotification =
-                this.createNewOrderCopyNotification(
+                await this.createNewOrderCopyNotification(
                     attachments,
                     applicantMetaData
                 );
@@ -328,15 +328,18 @@ export class SubmissionAntiCorruptionLayer {
         };
     }
 
-    private createNewOrderCopyNotification(
+    private async createNewOrderCopyNotification(
         datasets: Attachment[],
         applicantMetaData: ApplicantMetaData
-    ): Notification<NewDatasetCopyNotificationPayload, EmailNotificationMeta> {
+    ): Promise<
+        Notification<NewDatasetCopyNotificationPayload, EmailNotificationMeta>
+    > {
         const fullName = applicantMetaData.user.getFullName();
+        const appName = (await this.getAppName()) || '';
         return {
             type: NotificationType.NOTIFICATION_SENT,
             payload: {
-                appName: this.appName,
+                appName,
                 name: fullName,
                 comment: applicantMetaData.comment
             },
@@ -349,15 +352,32 @@ export class SubmissionAntiCorruptionLayer {
         };
     }
 
-    private createNewOrderNotification(
+    private async getOverrideRecipient(metaDataEmail: string) {
+        const config = await getServerConfig.execute();
+        const overrideRecipient = config.jobRecipient;
+        return overrideRecipient ? overrideRecipient.value : metaDataEmail;
+    }
+
+    private async getAppName() {
+        const config = await getServerConfig.execute();
+        return config.appName;
+    }
+
+    private async createNewOrderNotification(
         dataset: Attachment,
         orderNotificationMetaData: OrderNotificationMetaData
-    ): Notification<NewDatasetNotificationPayload, EmailNotificationMeta> {
+    ): Promise<
+        Notification<NewDatasetNotificationPayload, EmailNotificationMeta>
+    > {
+        const recipient = await this.getOverrideRecipient(
+            orderNotificationMetaData.recipient.email
+        );
+        const appName = (await this.getAppName()) || '';
         return {
             type: NotificationType.REQUEST_JOB,
 
             payload: {
-                appName: this.appName,
+                appName,
                 firstName: orderNotificationMetaData.user.firstName,
                 lastName: orderNotificationMetaData.user.lastName,
                 email: orderNotificationMetaData.user.email,
@@ -365,9 +385,7 @@ export class SubmissionAntiCorruptionLayer {
                 comment: orderNotificationMetaData.comment
             },
             meta: this.notificationService.createEmailNotificationMetaData(
-                this.overrideRecipient
-                    ? this.overrideRecipient
-                    : orderNotificationMetaData.recipient.email,
+                recipient,
                 `Neuer Auftrag von ${
                     orderNotificationMetaData.user.institution.city ||
                     '<unbekannt>'
