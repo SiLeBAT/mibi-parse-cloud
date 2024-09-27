@@ -10,7 +10,6 @@ import {
 
 export class NotificationService {
     private notificationName = 'mibi-notification';
-
     private sender: EventEmitter = new EventEmitter();
 
     sendNotification<T, V extends NotificationMeta>(
