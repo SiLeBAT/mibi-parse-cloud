@@ -1,11 +1,20 @@
+import { isEmpty, isUndefined } from 'lodash';
 import { object, string } from 'yup';
 import { Email } from './email.vo';
 import { ValueObject, ValueObjectProps } from './value-object';
 
-interface ServerConfigProps extends ValueObjectProps {
+interface ServerConfigBaseProps extends ValueObjectProps {
     appName?: string;
+}
+
+interface ServerConfigProps extends ServerConfigBaseProps {
     jobRecipient?: Email;
     supportContact?: Email;
+}
+
+interface ServerConfigStringProps extends ServerConfigBaseProps {
+    jobRecipient?: string;
+    supportContact?: string;
 }
 
 export class ServerConfig extends ValueObject<ServerConfigProps> {
@@ -38,5 +47,31 @@ export class ServerConfig extends ValueObject<ServerConfigProps> {
             props
         );
         return new ServerConfig(validatedProps);
+    }
+
+    public static async createFromStrings(
+        props: ServerConfigStringProps
+    ): Promise<ServerConfig> {
+        const validatedProps = await ServerConfig.serverConfigSchema.validate(
+            props
+        );
+
+        const serverConfigProps: ServerConfigProps = {
+            appName: validatedProps.appName
+        };
+        if (!isEmpty(props.jobRecipient) && !isUndefined(props.jobRecipient)) {
+            serverConfigProps.jobRecipient = await Email.create({
+                value: props.jobRecipient
+            });
+        }
+        if (
+            !isEmpty(props.supportContact) &&
+            !isUndefined(props.supportContact)
+        ) {
+            serverConfigProps.supportContact = await Email.create({
+                value: props.supportContact
+            });
+        }
+        return new ServerConfig(serverConfigProps);
     }
 }
