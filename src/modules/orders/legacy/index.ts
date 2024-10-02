@@ -1,3 +1,4 @@
+import { nrlCache } from '../../shared/infrastructure';
 import { ObjectKeys } from '../infrastructure';
 import {
     ExcelMarshallAntiCorruptionLayer,
@@ -24,7 +25,6 @@ import { ValidationErrorProvider } from './application/validation-error-provider
 import { pdfConstants, sampleSheetConstants } from './model/legacy.model';
 import { initialiseRepository as avvCatalogRepositoryInit } from './repositories/avvcatalog.repository';
 import { initialiseRepository as catalogRepositoryInit } from './repositories/catalog.repository';
-import { nrlRepository } from './repositories/nrl.repository';
 import { initialiseRepository as searchAliasRepositoryInit } from './repositories/search-alias.repository';
 import { stateRepository } from './repositories/state.repository';
 import { validationErrorRepository } from './repositories/validation-error.repository';
@@ -82,7 +82,7 @@ const antiCorruptionLayers = (async function init() {
     );
 
     const avvFormatProvider = new AVVFormatProvider(stateRepository);
-    const nrlService = new NRLService(nrlRepository);
+    const nrlService = new NRLService(nrlCache);
 
     const sampleSheetService = new SampleSheetService(nrlService);
     const jSONMarshalService = new JSONMarshalService(

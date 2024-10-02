@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { NRL_ID_VALUE } from '../../domain';
+import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { CatalogService } from '../application/catalog.service';
 import {
     AVVCatalogData,

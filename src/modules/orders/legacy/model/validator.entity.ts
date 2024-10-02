@@ -1,7 +1,7 @@
 import moment from 'moment';
 import validate from 'validate.js';
 
-import { NRL_ID_VALUE } from '../../domain';
+import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { CatalogService } from '../application/catalog.service';
 import {
     ValidationConstraints,
