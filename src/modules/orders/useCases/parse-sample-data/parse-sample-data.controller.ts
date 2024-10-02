@@ -48,9 +48,11 @@ const parseSampleDataController = async (
         // Get the right factory depending on submission type
         const createOrder: ParseSampleDataUseCase =
             CreateOrderUseCaseFactory(type);
+
         const order: Order<SampleEntry<string>[]> = await createOrder.execute(
             submissionFormInput
         );
+
         return {
             order: SubmissionDTOMapper.toDTO<SampleEntry<string>[]>(
                 order,

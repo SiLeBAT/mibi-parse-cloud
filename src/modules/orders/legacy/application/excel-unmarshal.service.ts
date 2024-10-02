@@ -2,7 +2,8 @@ import moment from 'moment';
 import 'moment/locale/de';
 import { CellObject, read, utils, WorkBook, WorkSheet } from 'xlsx';
 
-import { NRL_ID_VALUE, NRLId } from '../../domain';
+import { NRL_ID_VALUE, NRLId } from '../../../shared/domain/valueObjects';
+import { nrlCache } from '../../../shared/infrastructure';
 import {
     Address,
     Analysis,
@@ -32,7 +33,6 @@ import {
     META_SENDER_ZIP_CITY_CELL,
     META_SIGNATURE_DATE_CELL,
     META_URGENCY_CELL,
-    NRL,
     SAMPLE_DATA_HEADER_ROW_MARKER,
     SampleData,
     SampleSheetAnalysis,
@@ -43,7 +43,7 @@ import {
     Urgency,
     VALID_SHEET_NAME
 } from '../model/legacy.model';
-import { NRLRepository, nrlRepository } from '../repositories/nrl.repository';
+import { NRLService } from './nrl.service';
 
 export class ExcelUnmarshalService {
     constructor(private factory: SampleFactory) {}
@@ -53,10 +53,12 @@ export class ExcelUnmarshalService {
         fileName: string
     ): Promise<UnmarshalSampleSheet> {
         const workSheet: WorkSheet = await this.fromFileToWorkSheet(buffer);
+        const samples = this.fromWorksheetToData(workSheet);
 
+        const meta = this.getMetaDataFromFileData(workSheet, fileName);
         return {
-            samples: this.fromWorksheetToData(workSheet),
-            meta: this.getMetaDataFromFileData(workSheet, fileName)
+            samples,
+            meta
         };
     }
 
@@ -295,13 +297,17 @@ export class ExcelUnmarshalService {
 
     private fromWorksheetToData(workSheet: WorkSheet): UnmarshalSample[] {
         const lineNumber = this.getSampleDataHeaderRow(workSheet);
+
         const data = utils.sheet_to_json<Record<string, string>>(workSheet, {
             header: FORM_PROPERTIES,
             range: lineNumber,
             defval: ''
         });
+
         const cleanedData = this.fromDataToCleanedSamples(data);
+
         const formattedData: UnmarshalSample[] = this.formatData(cleanedData);
+
         return formattedData;
     }
 
@@ -311,6 +317,7 @@ export class ExcelUnmarshalService {
                 string,
                 AnnotatedSampleDataEntry
             > = {};
+
             for (const props in sample) {
                 if (this.isDateField(props)) {
                     sample[props] = this.parseDate(sample[props]);
@@ -319,6 +326,7 @@ export class ExcelUnmarshalService {
                     sample[props]
                 );
             }
+
             return this.factory.createSample(annotatedSampleData as SampleData);
         });
         return formattedData;
@@ -401,11 +409,13 @@ class SampleFactory {
     constructor(private nrlService: NRLService) {}
     createSample(data: SampleData): UnmarshalSample {
         const pathogen = data['pathogen_avv'].value;
+
         const nrl = this.nrlService.getNRLForPathogen(pathogen);
         const defaultAnalysis: Partial<Analysis> = {
             ...this.nrlService.getStandardAnalysisFor(nrl),
             ...this.nrlService.getOptionalAnalysisFor(nrl)
         };
+
         return UnmarshalSample.create(data, {
             nrl,
             analysis: defaultAnalysis,
@@ -414,97 +424,7 @@ class SampleFactory {
     }
 }
 
-class NRLService {
-    private nrlCache: NRL[] = [];
-    constructor(private parseNrlRepository: NRLRepository) {
-        this.parseNrlRepository
-            .retrieve()
-            .then((data: NRL[]) => (this.nrlCache = data))
-            .catch((error: Error) => {
-                throw error;
-            });
-    }
-
-    getNRLForPathogen(pathogen: string): NRL_ID_VALUE {
-        if (!pathogen) {
-            return NRL_ID_VALUE.UNKNOWN;
-        }
-
-        for (const nrlConfig of this.nrlCache) {
-            for (const selector of nrlConfig.selectors) {
-                const regexp = new RegExp(selector, 'i');
-                if (regexp.test(pathogen)) {
-                    return nrlConfig.id;
-                }
-            }
-        }
-        return NRL_ID_VALUE.UNKNOWN;
-    }
-
-    getOptionalAnalysisFor(nrl: NRL_ID_VALUE): Partial<Analysis> {
-        const found = this.nrlCache.find(n => n.id === nrl);
-        if (!found) {
-            return {};
-        }
-        const analysis: Partial<Analysis> = {};
-
-        found.optionalProcedures.reduce((acc, p) => {
-            this.setValueForAnalysisKey(p.key, acc, false);
-            return acc;
-        }, analysis);
-
-        return analysis;
-    }
-
-    getStandardAnalysisFor(nrl: NRL_ID_VALUE): Partial<Analysis> {
-        const found = this.nrlCache.find(n => n.id === nrl);
-        if (!found) {
-            return {};
-        }
-        const analysis: Partial<Analysis> = {};
-        found.standardProcedures.reduce((acc, p) => {
-            this.setValueForAnalysisKey(p.key, acc, true);
-            return acc;
-        }, analysis);
-
-        return analysis;
-    }
-
-    private setValueForAnalysisKey(
-        key: number,
-        analysis: Partial<Analysis>,
-        value: boolean
-    ): void {
-        switch (key) {
-            case 0:
-                analysis.species = value;
-                break;
-            case 1:
-                analysis.serological = value;
-                break;
-            case 2:
-                analysis.resistance = value;
-                break;
-            case 3:
-                analysis.vaccination = value;
-                break;
-            case 4:
-                analysis.molecularTyping = value;
-                break;
-            case 5:
-                analysis.toxin = value;
-                break;
-            case 6:
-                analysis.esblAmpCCarbapenemasen = value;
-                break;
-            case 7:
-                analysis.sample = value;
-                break;
-        }
-    }
-}
-
-const nrlService = new NRLService(nrlRepository);
+const nrlService = new NRLService(nrlCache);
 const sampleFactory = new SampleFactory(nrlService);
 const excelUnmarshalService = new ExcelUnmarshalService(sampleFactory);
 

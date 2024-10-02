@@ -1,8 +1,8 @@
 import { Contact, Customer } from '../domain';
 
-import { Name } from '../../shared/domain/valueObjects';
+import { Email, Name } from '../../shared/domain/valueObjects';
 import { Mapper, MappingError } from '../../shared/mappers';
-import { Email } from '../../system-monitoring/domain';
+
 import { Bundesland } from '../domain/enums';
 import { SampleSetMetaDTO } from '../dto/submission.dto';
 

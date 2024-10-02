@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { NRL_ID_VALUE } from '../../domain';
+import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { NRLService } from '../application/nrl.service';
 import {
     Analysis,

@@ -1,9 +1,12 @@
 import { getLogger } from 'nodemailer/lib/shared';
+import {
+    NRL_ID_VALUE,
+    NRLId
+} from '../../../shared/domain/valueObjects/nrl-id.vo';
 import { getServerConfig } from '../../../shared/useCases/get-server-config';
 import {
     AnnotatedSampleDataEntry,
     Customer,
-    NRL_ID_VALUE,
     Order,
     SampleEntry
 } from '../../domain';
@@ -15,7 +18,6 @@ import { NRLService } from '../application/nrl.service';
 import { PDFCreatorService } from '../application/pdf-creator.service';
 import { SampleSheetService } from '../application/sample-sheet.service';
 import { Sample } from '../model/sample.entity';
-import { NRLId } from './../../domain/nrl-id.vo';
 import {
     ApplicantMetaData,
     Attachment,
@@ -45,7 +47,7 @@ export class SubmissionAntiCorruptionLayer {
         private nrlService: NRLService,
         private sampleSheetService: SampleSheetService,
         private catalogService: CatalogService
-    ) { }
+    ) {}
 
     async sendSamples(
         order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>
@@ -130,7 +132,7 @@ export class SubmissionAntiCorruptionLayer {
                             nrl: NRLId.create(entry.data.nrl).value,
                             urgency:
                                 Urgency[
-                                entry.data.urgency as keyof typeof Urgency
+                                    entry.data.urgency as keyof typeof Urgency
                                 ],
                             analysis: entry.data.analysis
                         }
@@ -322,7 +324,7 @@ export class SubmissionAntiCorruptionLayer {
         return {
             ...applicantMetaData,
             recipient: {
-                email: this.nrlService.getEmailForNRL(nrl),
+                email: this.nrlService.getEmailForNRL(nrl).value,
                 name: nrl.toString()
             }
         };
@@ -386,9 +388,11 @@ export class SubmissionAntiCorruptionLayer {
             },
             meta: this.notificationService.createEmailNotificationMetaData(
                 recipient,
-                `Neuer Auftrag von ${orderNotificationMetaData.user.institution.city ||
-                '<unbekannt>'
-                } an ${orderNotificationMetaData.recipient.name || '<unbekannt>'
+                `Neuer Auftrag von ${
+                    orderNotificationMetaData.user.institution.city ||
+                    '<unbekannt>'
+                } an ${
+                    orderNotificationMetaData.recipient.name || '<unbekannt>'
                 }`,
                 [],
                 [dataset]

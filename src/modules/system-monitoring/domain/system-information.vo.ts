@@ -1,8 +1,8 @@
 import {
+    Email,
     ValueObject,
     ValueObjectProps
 } from '../../shared/domain/valueObjects';
-import { Email } from './email.vo';
 import { SemanticVersion } from './semantic-version.vo';
 
 interface SystemInformationProps extends ValueObjectProps {

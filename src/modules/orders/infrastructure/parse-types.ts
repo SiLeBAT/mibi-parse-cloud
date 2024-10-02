@@ -22,9 +22,6 @@ export interface InstituteAttributes extends Parse.Attributes {
 }
 
 export interface InstituteObject extends Parse.Object<InstituteAttributes> {}
-export interface NRLAttributes extends Parse.Attributes {}
-
-export interface NRLObject extends Parse.Object<NRLAttributes> {}
 
 export interface UserInformationAttributes extends Parse.Attributes {
     institute: InstituteObject;
@@ -36,9 +33,22 @@ export interface UserInformationAttributes extends Parse.Attributes {
 export interface UserInformationObject
     extends Parse.Object<UserInformationAttributes> {}
 
-export interface NRLAttributes extends Parse.Attributes {}
+export interface NRLAttributes extends Parse.Attributes {
+    standardProcedures: AnalysisProcedureObject[];
+    optionalProcedures: AnalysisProcedureObject[];
+    name: string;
+    selectors: string[];
+}
 
 export interface NRLObject extends Parse.Object<NRLAttributes> {}
+
+export interface AnalysisProcedureAttributes extends Parse.Attributes {
+    value: string;
+    key: number;
+}
+
+export interface AnalysisProcedureObject
+    extends Parse.Object<AnalysisProcedureAttributes> {}
 
 export interface TemplateFileAttributes extends Parse.Attributes {
     templateFile: Parse.File;

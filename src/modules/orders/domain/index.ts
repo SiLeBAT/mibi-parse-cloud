@@ -1,7 +1,6 @@
 export { Contact } from './contact.vo';
 export { Customer, CustomerProps } from './customer.entity';
 export { FileInformation } from './file-information.vo';
-export { NRLId, NRL_ID_VALUE } from './nrl-id.vo';
 export { Order, OrderProps } from './order.entity';
 export {
     AnnotatedSampleDataEntry,

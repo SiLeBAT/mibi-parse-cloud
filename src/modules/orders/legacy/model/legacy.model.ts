@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { NRL_ID_VALUE } from '../../domain';
 
+import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { ReceiveAs } from '../../domain/enums';
 import { CatalogService } from '../application/catalog.service';
 import { sampleSheetPDFConfig } from './sample-sheet-pdf.config';
@@ -48,17 +48,7 @@ export interface ResultOptions {
     numberOfResults: number;
     property: SampleProperty;
 }
-export interface NRL {
-    selectors: string[];
-    id: NRL_ID_VALUE;
-    email: string;
-    standardProcedures: AnalysisProcedure[];
-    optionalProcedures: AnalysisProcedure[];
-}
-interface AnalysisProcedure {
-    value: string;
-    key: number;
-}
+
 export interface Analysis {
     species: boolean;
     serological: boolean;

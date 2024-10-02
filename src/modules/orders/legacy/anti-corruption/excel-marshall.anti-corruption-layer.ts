@@ -1,6 +1,6 @@
+import { NRLId } from '../../../shared/domain/valueObjects';
 import {
     FileInformation,
-    NRLId,
     Order,
     SampleEntry,
     SampleEntryTuple

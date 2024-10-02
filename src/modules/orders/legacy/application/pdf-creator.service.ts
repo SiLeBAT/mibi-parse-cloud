@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { NRL_ID_VALUE } from '../../domain';
+import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import {
     Address,
     FileBuffer,

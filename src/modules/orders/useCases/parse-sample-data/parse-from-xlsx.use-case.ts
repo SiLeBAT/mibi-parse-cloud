@@ -10,6 +10,7 @@ export class ParseFromXLSXUseCase extends ParseSampleDataUseCase {
         const buff = Buffer.from(await file.getData(), 'base64');
         const { excelUnmarshalAntiCorruptionLayer } =
             await antiCorruptionLayers;
+
         const submission =
             await excelUnmarshalAntiCorruptionLayer.convertExcelToJSJson(
                 buff,

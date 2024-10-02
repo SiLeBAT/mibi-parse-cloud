@@ -1,7 +1,4 @@
-import {
-    ValueObject,
-    ValueObjectProps
-} from '../../shared/domain/valueObjects';
+import { ValueObject, ValueObjectProps } from './value-object';
 
 interface NRLIdProps extends ValueObjectProps {
     id: NRL_ID_VALUE;
@@ -35,7 +32,7 @@ export class NRLId extends ValueObject<NRLIdProps> {
         const nrlId = new NRLId({ id });
         return nrlId;
     }
-    private static mapNRLStringToEnum(nrlString: string): NRL_ID_VALUE {
+    public static mapNRLStringToEnum(nrlString: string): NRL_ID_VALUE {
         switch (nrlString.trim()) {
             case 'Konsiliarlabor für Vibrionen':
             case 'KL-Vibrio':
