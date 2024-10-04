@@ -1,6 +1,6 @@
+import { NRL } from '../../../shared/domain/entities';
 import { AbstractRepository } from '../../../shared/infrastructure';
-import { NRL } from '../../domain/nrl.entity';
-import { NRLPersistenceMapper } from '../../mappers/nrl-persistence.mapper';
+import { NRLPersistenceMapper } from '../../mappers';
 import { NRLObject, ObjectKeys } from '../parse-types';
 
 export class NRLRepository extends AbstractRepository<NRLObject> {

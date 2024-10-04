@@ -2,11 +2,11 @@ import {
     PackageInformationProvider,
     packageInformationProvider
 } from '../../../shared/infrastructure/providers';
-import { UseCase } from '../../../shared/useCases';
 import { SystemInformation } from '../../domain';
 import {
     getServerConfig,
-    GetServerConfigUseCase
+    GetServerConfigUseCase,
+    UseCase
 } from './../../../shared/useCases';
 
 class GetSystemInformationUseCase implements UseCase<null, SystemInformation> {

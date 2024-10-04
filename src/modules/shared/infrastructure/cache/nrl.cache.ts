@@ -1,4 +1,4 @@
-import { NRL } from '../../../system-monitoring/domain/nrl.entity';
+import { NRL } from '../../domain/entities';
 import { NRL_ID_VALUE, NRLId } from '../../domain/valueObjects/nrl-id.vo';
 import { BaseCache } from './base.cache';
 

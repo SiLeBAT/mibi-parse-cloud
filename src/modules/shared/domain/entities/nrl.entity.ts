@@ -1,10 +1,10 @@
-import { Entity } from '../../shared/domain/entities';
+import { Entity } from '.';
 import {
     AnalysisProcedure,
     Email,
     EntityId,
     NRL_ID_VALUE
-} from '../../shared/domain/valueObjects';
+} from '../valueObjects';
 
 export interface NRLProps {
     selectors: string[];

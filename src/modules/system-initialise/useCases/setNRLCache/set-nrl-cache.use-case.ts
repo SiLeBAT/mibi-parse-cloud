@@ -1,6 +1,6 @@
 import { NRLCache, nrlCache } from '../../../shared/infrastructure';
 import { UseCase } from '../../../shared/useCases';
-import { nrlRepository, NRLRepository } from '../../infrastructure/repository';
+import { nrlRepository, NRLRepository } from '../../infrastructure';
 
 class SetNRLCacheUseCase implements UseCase<null, Promise<void>> {
     constructor(
@@ -9,7 +9,7 @@ class SetNRLCacheUseCase implements UseCase<null, Promise<void>> {
     ) {}
 
     async execute(): Promise<void> {
-        this.nrlRepository
+        return await this.nrlRepository
             .retrieve()
             .then(data => {
                 this.nrlCache.setNRLs(data);
@@ -22,4 +22,4 @@ class SetNRLCacheUseCase implements UseCase<null, Promise<void>> {
 
 const setNRLCache = new SetNRLCacheUseCase(nrlCache, nrlRepository);
 
-export { setNRLCache };
+export { setNRLCache, SetNRLCacheUseCase };

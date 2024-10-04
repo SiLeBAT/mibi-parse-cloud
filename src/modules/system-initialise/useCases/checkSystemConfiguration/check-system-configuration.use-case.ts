@@ -42,4 +42,4 @@ class CheckSystemConfigurationUseCase implements UseCase<null, null> {
 
 const checkSystemConfiguration = new CheckSystemConfigurationUseCase();
 
-export { checkSystemConfiguration };
+export { checkSystemConfiguration, CheckSystemConfigurationUseCase };
