@@ -1,11 +1,11 @@
 import { NRLObject } from '../../orders/infrastructure';
+import { NRL } from '../../shared/domain/entities/nrl.entity';
 import {
     AnalysisProcedure,
     Email,
     NRLId
 } from '../../shared/domain/valueObjects';
 import { Mapper, MappingError } from '../../shared/mappers';
-import { NRL } from '../domain/nrl.entity';
 
 export class NRLPersistenceMapper extends Mapper {
     static async fromPersistence(object: NRLObject): Promise<NRL> {
