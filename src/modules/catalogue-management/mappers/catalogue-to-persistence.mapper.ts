@@ -1,10 +1,10 @@
-import { Mapper } from '../../shared/mappers';
-import { Catalogue } from '../domain';
 import {
     AVVCatalogueAttributes,
+    AVVCatalogueObject,
     ObjectKeys
-} from '../infrastructure/parse-types';
-import { AVVCatalogueObject } from './../infrastructure/parse-types';
+} from '../../shared/infrastructure/parse-types';
+import { Mapper } from '../../shared/mappers';
+import { Catalogue } from '../domain';
 
 export class AVVCatalogueMapper extends Mapper {
     public static async toPersistence<T>(

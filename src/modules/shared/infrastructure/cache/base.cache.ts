@@ -23,4 +23,7 @@ export abstract class BaseCache<T extends NodeCache.Key, V> {
     protected keys(): string[] {
         return this._cache.keys();
     }
+    protected flushAll() {
+        return this._cache.flushAll();
+    }
 }

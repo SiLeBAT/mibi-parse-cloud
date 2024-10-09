@@ -1,4 +1,4 @@
-import { nrlCache } from '../../shared/infrastructure';
+import { nrlCache, plzCache } from '../../shared/infrastructure';
 import { ObjectKeys } from '../infrastructure';
 import {
     ExcelMarshallAntiCorruptionLayer,
@@ -76,6 +76,7 @@ const antiCorruptionLayers = (async function init() {
     });
 
     const catalogService = new CatalogService(
+        plzCache,
         catalogRepository,
         searchAliasRepository,
         avvCatalogRepository

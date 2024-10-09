@@ -1,7 +1,8 @@
 import _ from 'lodash';
 
+import { PLZCache } from '../../../shared/infrastructure';
 import { AVVCatalog } from '../model/avvcatalog.entity';
-import { Catalog } from '../model/catalog.entity';
+import { Catalog, createCatalog } from '../model/catalog.entity';
 import {
     AVVCatalogData,
     CatalogData,
@@ -13,13 +14,23 @@ import { SearchAliasRepository } from '../repositories/search-alias.repository';
 
 export class CatalogService {
     constructor(
+        private plzCache: PLZCache,
         private catalogRepository: CatalogRepository,
         private searchAliasRepository: SearchAliasRepository,
         private avvCatalogRepository: AVVCatalogRepository
     ) {}
 
     getCatalog<T extends CatalogData>(catalogName: string): Catalog<T> {
-        return this.catalogRepository.getCatalog<T>(catalogName);
+        switch (catalogName) {
+            case 'plz': {
+                return createCatalog(
+                    this.plzCache.getJSONData(),
+                    'plz'
+                ) as unknown as Catalog<T>;
+            }
+            default:
+                return this.catalogRepository.getCatalog<T>(catalogName);
+        }
     }
 
     getAVVCatalog<T extends AVVCatalogData>(

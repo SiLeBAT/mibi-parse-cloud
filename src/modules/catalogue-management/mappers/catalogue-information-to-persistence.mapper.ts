@@ -1,7 +1,7 @@
 import { getLogger } from '../../shared/core/logging-context';
+import { AVVCatalogueObject } from '../../shared/infrastructure/parse-types';
 import { Mapper, MappingError } from '../../shared/mappers';
 import { CatalogueInformation } from '../domain';
-import { AVVCatalogueObject } from '../infrastructure';
 
 export class AVVCatalogueInformationMapper extends Mapper {
     public static async fromPersistence(

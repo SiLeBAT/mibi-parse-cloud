@@ -1,6 +1,7 @@
 export type ParseLogger = {
     info: (message: string) => void;
     error: (message: string) => void;
+    warn: (message: string) => void;
 };
 
 let logger: ParseLogger | null = {
@@ -9,6 +10,9 @@ let logger: ParseLogger | null = {
     },
     error: (message: string) => {
         console.error(message);
+    },
+    warn: (message: string) => {
+        console.warn(message);
     }
 };
 
@@ -25,6 +29,9 @@ function getLogger() {
             },
             error: (message: string) => {
                 console.error(message);
+            },
+            warn: (message: string) => {
+                console.warn(message);
             }
         }
     );

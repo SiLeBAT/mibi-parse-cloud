@@ -1,1 +1,1 @@
-export * from './parse-types';
+export * from '../../shared/infrastructure/parse-types';

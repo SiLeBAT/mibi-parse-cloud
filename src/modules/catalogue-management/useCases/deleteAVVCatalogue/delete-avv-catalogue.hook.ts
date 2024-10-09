@@ -3,7 +3,7 @@ import {
     setLoggingContext
 } from '../../../shared/core/logging-context';
 import { ParseHookRequest } from '../../../shared/infrastructure';
-import { AVVCatalogueObject } from '../../infrastructure/parse-types';
+import { AVVCatalogueObject } from '../../../shared/infrastructure/parse-types';
 
 type DeleteAVVCatalogueRequest = ParseHookRequest<
     AVVCatalogueObject,

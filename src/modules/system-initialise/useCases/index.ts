@@ -4,3 +4,8 @@ export {
     afterSaveNRLHook,
     setNRLCache
 } from './setNRLCache';
+export {
+    afterDeletePLZHook,
+    afterSavePLZHook,
+    setPLZCache
+} from './setPLZCache';

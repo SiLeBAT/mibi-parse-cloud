@@ -8,7 +8,6 @@ export class CatalogRepository {
     };
     private catalogNames: string[] = [
         'adv16',
-        'plz',
         `zsp${new Date().getFullYear().toString()}`,
         `zsp${(new Date().getFullYear() + 1).toString()}`,
         `zsp${(new Date().getFullYear() - 1).toString()}`
@@ -26,16 +25,13 @@ export class CatalogRepository {
         await Promise.all(
             this.catalogNames.map(async catalogName => {
                 return loadJSONFile(`${catalogName}.json`, this.dataDir)
-                    .then(
-                        // tslint:disable-next-line:no-any
-                        (jsonData: { data: CatalogData[]; uId: string }) => {
-                            this.catalogs[catalogName] = createCatalog(
-                                jsonData.data,
-                                jsonData.uId
-                            );
-                            return;
-                        }
-                    )
+                    .then((jsonData: { data: CatalogData[]; uId: string }) => {
+                        this.catalogs[catalogName] = createCatalog(
+                            jsonData.data,
+                            jsonData.uId
+                        );
+                        return;
+                    })
                     .catch(error => {
                         console.log(
                             `Error loading catalog from json file: ${error}`

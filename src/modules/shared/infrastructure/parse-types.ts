@@ -2,8 +2,35 @@ export const ObjectKeys = {
     NRL: 'NRL',
     TEMPLATE_FILE: 'Template_File',
     UserInformation: 'User_Info',
-    Institute: 'institutions'
+    Institute: 'institutions',
+    AllowedPLZ: 'Allowed_PLZ',
+    AdditionalPathogens: 'Additional_Pathogens',
+    AVVCatalogue: 'AVV_Catalogue'
 };
+
+export interface AVVCatalogueAttributes extends Parse.Attributes {
+    version?: string;
+    validFrom?: Date;
+    catalogueFile: Parse.File;
+    catalogueCode?: string;
+}
+
+export interface AVVCatalogueObject
+    extends Parse.Object<AVVCatalogueAttributes> {}
+
+export interface AdditionalPathogensAttributes extends Parse.Attributes {
+    pathogen: string;
+}
+
+export interface AdditionalPathogensObject
+    extends Parse.Object<AdditionalPathogensAttributes> {}
+export interface AnalysisProcedureAttributes extends Parse.Attributes {
+    value: string;
+    key: number;
+}
+
+export interface AnalysisProcedureObject
+    extends Parse.Object<AnalysisProcedureAttributes> {}
 
 export interface InstituteAttributes extends Parse.Attributes {
     state_short: string;
@@ -32,6 +59,12 @@ export interface UserInformationAttributes extends Parse.Attributes {
 
 export interface UserInformationObject
     extends Parse.Object<UserInformationAttributes> {}
+
+export interface PLZAttributes extends Parse.Attributes {
+    plz: string;
+}
+
+export interface PLZObject extends Parse.Object<PLZAttributes> {}
 
 export interface NRLAttributes extends Parse.Attributes {
     standardProcedures: AnalysisProcedureObject[];

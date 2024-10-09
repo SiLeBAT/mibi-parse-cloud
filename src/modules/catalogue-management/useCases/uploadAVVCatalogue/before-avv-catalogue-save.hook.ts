@@ -4,8 +4,8 @@ import {
     setLoggingContext
 } from '../../../shared/core/logging-context';
 import { ParseHookRequest } from '../../../shared/infrastructure';
+import { AVVCatalogueObject } from '../../../shared/infrastructure/parse-types';
 import { FileContent, FileContentType } from '../../domain';
-import { AVVCatalogueObject } from '../../infrastructure/parse-types';
 import { AVVCatalogueMapper } from '../../mappers';
 import { checkForCatalogueDuplication } from '../checkForCatalogueDuplication';
 import {
