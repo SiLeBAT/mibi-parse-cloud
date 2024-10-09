@@ -169,8 +169,10 @@ export class SubmissionAntiCorruptionLayer {
         try {
             return {
                 user: {
-                    firstName: customer.firstName.value,
-                    lastName: customer.lastName.value,
+                    firstName: customer.firstName
+                        ? customer.firstName.value
+                        : '',
+                    lastName: customer.lastName ? customer.lastName.value : '',
                     email: customer.contact.props.email.value,
                     institution: {
                         stateShort: customer.contact.stateShort.toString(),

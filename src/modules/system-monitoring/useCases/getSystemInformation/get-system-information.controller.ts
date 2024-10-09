@@ -1,3 +1,4 @@
+import { loggedController } from '../../../shared/core/controller';
 import { SystemInformationDTOMapper } from '../../mappers';
 import { SystemInformationDTO } from './get-system-information.dto';
 import { getSystemInformation } from './get-system-information.use-case';
@@ -13,11 +14,12 @@ import { getSystemInformation } from './get-system-information.use-case';
 
 type GetSystemInformationResponse = SystemInformationDTO;
 
-const getSystemInformationController =
+const getSystemInformationController = loggedController(
     async (): Promise<GetSystemInformationResponse> => {
         const systemInformation = await getSystemInformation.execute();
 
         return SystemInformationDTOMapper.toDTO(systemInformation);
-    };
+    }
+);
 
 export { getSystemInformationController };

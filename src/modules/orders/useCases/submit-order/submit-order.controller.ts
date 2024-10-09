@@ -46,11 +46,13 @@ export interface InvalidInputErrorDTO extends DefaultServerErrorDTO {
 export interface AutoCorrectedInputErrorDTO extends DefaultServerErrorDTO {
     order: OrderDTO;
 }
+
 const submitOrderController = async (
     request: SubmitOrderRequest
 ): Promise<SubmitOrderResponseDTO | ErrorDTO> => {
     const requestDTO: SubmitOrderRequestParameters = request.params;
     try {
+        // Setting the logging context manually because the catch block requires request information.
         setLoggingContext(request.log);
 
         const submitterId: EntityId = await createSubmitterId.execute(request);
@@ -97,7 +99,6 @@ const submitOrderController = async (
 
         return result;
     } catch (error) {
-        request.log.error(JSON.stringify(error));
         if (error instanceof InvalidInputError) {
             const errorDTO: InvalidInputErrorDTO = {
                 code: SERVER_ERROR_CODE.INVALID_INPUT,

@@ -19,7 +19,6 @@ export class ExcelUnmarshalAntiCorruptionLayer {
                 buffer,
                 fileName
             );
-
         const order: Order<SampleEntry<string>[]> =
             await this.convertFromLegacy(legacySampleSheet);
         return order;
@@ -33,7 +32,23 @@ export class ExcelUnmarshalAntiCorruptionLayer {
             email: await Email.create({ value: sampleSheet.meta.sender.email }),
             stateShort: Bundesland.UNKNOWN
         });
-        return Order.create({
+
+        const customer = Customer.create({
+            contact: contact,
+            firstName: sampleSheet.meta.sender.contactPerson.split(' ')[0]
+                ? await Name.create({
+                      value: sampleSheet.meta.sender.contactPerson.split(' ')[0]
+                  })
+                : undefined,
+            lastName: sampleSheet.meta.sender.contactPerson.split(' ')[1]
+                ? await Name.create({
+                      value: sampleSheet.meta.sender.contactPerson.split(' ')[1]
+                  })
+                : undefined,
+            customerRefNumber: sampleSheet.meta.customerRefNumber || ''
+        });
+
+        const order = Order.create({
             sampleEntryCollection: sampleSheet.samples.map(
                 (s: UnmarshalSample) =>
                     SampleEntry.create({
@@ -68,16 +83,7 @@ export class ExcelUnmarshalAntiCorruptionLayer {
                         analysis: s.meta.analysis
                     })
             ),
-            customer: Customer.create({
-                contact: contact,
-                firstName: await Name.create({
-                    value: sampleSheet.meta.sender.contactPerson.split(' ')[0]
-                }),
-                lastName: await Name.create({
-                    value: sampleSheet.meta.sender.contactPerson.split(' ')[1]
-                }),
-                customerRefNumber: sampleSheet.meta.customerRefNumber || ''
-            }),
+            customer,
             submissionFormInfo: SubmissionFormInfo.create({
                 fileName: sampleSheet.meta.fileName || '',
                 version: sampleSheet.meta.version || ''
@@ -85,5 +91,7 @@ export class ExcelUnmarshalAntiCorruptionLayer {
             signatureDate: sampleSheet.meta.signatureDate || '',
             comment: ''
         });
+
+        return order;
     }
 }

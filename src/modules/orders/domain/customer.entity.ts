@@ -5,8 +5,8 @@ import { Bundesland } from './enums';
 
 export interface CustomerProps {
     contact: Contact;
-    firstName: Name;
-    lastName: Name;
+    firstName?: Name;
+    lastName?: Name;
     customerRefNumber: string;
 }
 
@@ -24,11 +24,11 @@ export class Customer extends Entity<CustomerProps> {
         return this.props.contact;
     }
 
-    get lastName(): Name {
+    get lastName(): Name | undefined {
         return this.props.lastName;
     }
 
-    get firstName(): Name {
+    get firstName(): Name | undefined {
         return this.props.firstName;
     }
 
