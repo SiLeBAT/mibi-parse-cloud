@@ -12,6 +12,7 @@ class SetNRLCacheUseCase implements UseCase<null, Promise<void>> {
         return await this.nrlRepository
             .retrieve()
             .then(data => {
+                this.nrlCache.removeAllData();
                 this.nrlCache.setNRLs(data);
             })
             .catch((error: Error) => {

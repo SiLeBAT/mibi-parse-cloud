@@ -1,13 +1,13 @@
 import { User } from 'parse';
 import { EntityId } from '../../../shared/domain/valueObjects';
-import { AbstractRepository } from '../../../shared/infrastructure/repositories';
-import { Customer } from '../../domain';
-import { CustomerPersistenceMapper } from '../../mappers';
 import {
     InstituteObject,
     ObjectKeys,
     UserInformationObject
-} from '../parse-types';
+} from '../../../shared/infrastructure/parse-types';
+import { AbstractRepository } from '../../../shared/infrastructure/repositories';
+import { Customer } from '../../domain';
+import { CustomerPersistenceMapper } from '../../mappers';
 
 class InnerInstituteRepo {
     async getObjectByEntityId(eId: EntityId): Promise<InstituteObject> {

@@ -15,6 +15,10 @@ class NRLCache extends BaseCache<NRL_ID_VALUE, NRL> {
     setNRLs(nrls: NRL[]) {
         return this.mset(nrls.map(nrl => ({ key: nrl.nrlId, val: nrl })));
     }
+
+    removeAllData() {
+        return this.flushAll();
+    }
 }
 
 const nrlCache = new NRLCache();

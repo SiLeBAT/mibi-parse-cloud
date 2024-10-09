@@ -1,12 +1,12 @@
 import { getLogger } from '../../../shared/core/logging-context';
 import { AbstractRepository } from '../../../shared/infrastructure';
-import { CatalogueInformation } from '../../domain';
-import { AVVCatalogueInformationMapper } from '../../mappers/catalogue-information-to-persistence.mapper';
 import {
     AVVCatalogueAttributes,
     AVVCatalogueObject,
     ObjectKeys
-} from '../parse-types';
+} from '../../../shared/infrastructure/parse-types';
+import { CatalogueInformation } from '../../domain';
+import { AVVCatalogueInformationMapper } from '../../mappers/catalogue-information-to-persistence.mapper';
 
 export class AVVCatalogueInformationRepository extends AbstractRepository<AVVCatalogueObject> {
     constructor() {

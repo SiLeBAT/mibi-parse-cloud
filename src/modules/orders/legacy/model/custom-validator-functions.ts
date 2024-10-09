@@ -169,10 +169,12 @@ function inCatalog(
 
             const catalogWithKode = _.filter(catalogs, catalog => {
                 const cat = catalogService.getCatalog(catalog);
+
                 if (cat) {
                     const key: string = options.key
                         ? options.key
                         : cat.getUniqueId();
+
                     return (
                         key && cat.containsEntryWithKeyValue(key, trimmedValue)
                     );

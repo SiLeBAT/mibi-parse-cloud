@@ -1,7 +1,10 @@
 import { NRL } from '../../../shared/domain/entities';
 import { AbstractRepository } from '../../../shared/infrastructure';
+import {
+    NRLObject,
+    ObjectKeys
+} from '../../../shared/infrastructure/parse-types';
 import { NRLPersistenceMapper } from '../../mappers';
-import { NRLObject, ObjectKeys } from '../parse-types';
 
 export class NRLRepository extends AbstractRepository<NRLObject> {
     async retrieve(): Promise<NRL[]> {

@@ -1,9 +1,10 @@
 import { XMLParser } from 'fast-xml-parser';
 import * as _ from 'lodash';
+
 import {
     AdditionalPathogensObject,
     ObjectKeys
-} from '../infrastructure/parse-types';
+} from '../../shared/infrastructure/parse-types';
 import {
     AttributWert,
     Eintrag,

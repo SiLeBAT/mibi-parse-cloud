@@ -1,10 +1,10 @@
 import { User } from 'parse';
 import { Email, Name } from '../../shared/domain/valueObjects';
+import { UserInformationObject } from '../../shared/infrastructure/parse-types';
 import { Mapper } from '../../shared/mappers';
 import { Contact, Customer, CustomerProps } from '../domain';
 import { InstituteObject } from '../infrastructure';
 import { Bundesland } from './../domain/enums';
-import { UserInformationObject } from './../infrastructure/parse-types';
 
 export class CustomerPersistenceMapper extends Mapper {
     public static async toDomain(
