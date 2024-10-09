@@ -1,3 +1,4 @@
+import { loggedController } from '../../../shared/core/controller';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
 import {
     AnnotatedSampleDataEntry,
@@ -27,56 +28,62 @@ type ValidateOrderRequest = HTTPRequest<ValidateOrderRequestParameters>;
  * Request validation is handled previously by the validator function.
  */
 
-const validateOrderController = async (
-    request: ValidateOrderRequest
-): Promise<ValidateOrderResponse> => {
-    let submitterId = null;
-    try {
-        submitterId = await createSubmitterId.execute(request);
-    } catch (error) {
-        request.log.error(
-            'Unable to determine submitter. SubmitterId not set.'
-        );
-        request.log.error(error.message);
-    }
-    try {
-        const submittedOrder: ValidateOrderRequestParameters = request.params;
+const validateOrderController = loggedController(
+    async (request: ValidateOrderRequest): Promise<ValidateOrderResponse> => {
+        let submitterId = null;
+        try {
+            submitterId = await createSubmitterId.execute(request);
+        } catch (error) {
+            request.log.error(
+                'Unable to determine submitter. SubmitterId not set.'
+            );
+            request.log.error(error.message);
+        }
+        try {
+            const submittedOrder: ValidateOrderRequestParameters =
+                request.params;
 
-        const sampleData: SampleEntry<SampleEntryTuple>[] =
-            submittedOrder.order.sampleSet.samples.map((sample: SampleDTO) => {
-                return SampleEntryDTOMapper.fromDTO(sample, t => t);
+            const sampleData: SampleEntry<SampleEntryTuple>[] =
+                submittedOrder.order.sampleSet.samples.map(
+                    (sample: SampleDTO) => {
+                        return SampleEntryDTOMapper.fromDTO(sample, t => t);
+                    }
+                );
+
+            const sampleSet = SampleSet.create({ data: sampleData });
+
+            const validatedSubmission: SampleSet = await validateOrder.execute({
+                submitterId,
+                sampleSet
             });
 
-        const sampleSet = SampleSet.create({ data: sampleData });
-
-        const validatedSubmission: SampleSet = await validateOrder.execute({
-            submitterId,
-            sampleSet
-        });
-
-        const result: OrderContainerDTO = {
-            order: {
-                sampleSet: {
-                    samples: validatedSubmission.data.map(
-                        (
-                            sampleEntry: SampleEntry<AnnotatedSampleDataEntry>
-                        ) => {
-                            return SampleEntryDTOMapper.toDTO(
-                                sampleEntry,
-                                t => t
-                            );
-                        }
-                    ),
-                    meta: submittedOrder.order.sampleSet.meta
+            const result: OrderContainerDTO = {
+                order: {
+                    sampleSet: {
+                        samples: validatedSubmission.data.map(
+                            (
+                                sampleEntry: SampleEntry<AnnotatedSampleDataEntry>
+                            ) => {
+                                return SampleEntryDTOMapper.toDTO(
+                                    sampleEntry,
+                                    t => t
+                                );
+                            }
+                        ),
+                        meta: submittedOrder.order.sampleSet.meta
+                    }
                 }
-            }
-        };
+            };
 
-        return result;
-    } catch (error) {
-        throw new OrderValidationFailedError('Unable to validate order', error);
+            return result;
+        } catch (error) {
+            throw new OrderValidationFailedError(
+                'Unable to validate order',
+                error
+            );
+        }
     }
-};
+);
 
 const ValidateOrderRequestValidation = {
     fields: {

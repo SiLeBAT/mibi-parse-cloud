@@ -1,3 +1,4 @@
+import { loggedController } from '../../../shared/core/controller';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
 import { Order, SampleEntry, SubmissionFormInput } from '../../domain';
 import { OrderDTO } from '../../dto';
@@ -33,43 +34,41 @@ type ParseSampleDataRequest = HTTPRequest<ParseSampleDataRequestParameters>;
  * Request validation is handled previously by the validator function.
  */
 
-const parseSampleDataController = async (
-    request: ParseSampleDataRequest
-): Promise<ParseSampleDataResponse> => {
-    const type = getResourceViewType(request.params.type);
-    const submissionFormInput: SubmissionFormInput = SubmissionFormInput.create(
-        {
-            data: request.params.data,
-            fileName: request.params.filename
+const parseSampleDataController = loggedController(
+    async (
+        request: ParseSampleDataRequest
+    ): Promise<ParseSampleDataResponse> => {
+        const type = getResourceViewType(request.params.type);
+        const submissionFormInput: SubmissionFormInput =
+            SubmissionFormInput.create({
+                data: request.params.data,
+                fileName: request.params.filename
+            });
+
+        try {
+            // Get the right factory depending on submission type
+            const createOrder: ParseSampleDataUseCase =
+                CreateOrderUseCaseFactory(type);
+            const order: Order<SampleEntry<string>[]> =
+                await createOrder.execute(submissionFormInput);
+            return {
+                order: SubmissionDTOMapper.toDTO<SampleEntry<string>[]>(
+                    order,
+                    samples => {
+                        return samples.map(s =>
+                            SampleEntryDTOMapper.toDTO(s, t => ({ value: t }))
+                        );
+                    }
+                )
+            };
+        } catch (error) {
+            throw new SubmissionCreationFailedError(
+                'Unable to create a submission',
+                error
+            );
         }
-    );
-
-    try {
-        // Get the right factory depending on submission type
-        const createOrder: ParseSampleDataUseCase =
-            CreateOrderUseCaseFactory(type);
-
-        const order: Order<SampleEntry<string>[]> = await createOrder.execute(
-            submissionFormInput
-        );
-
-        return {
-            order: SubmissionDTOMapper.toDTO<SampleEntry<string>[]>(
-                order,
-                samples => {
-                    return samples.map(s =>
-                        SampleEntryDTOMapper.toDTO(s, t => ({ value: t }))
-                    );
-                }
-            )
-        };
-    } catch (error) {
-        throw new SubmissionCreationFailedError(
-            'Unable to create a submission',
-            error
-        );
     }
-};
+);
 
 function getResourceViewType(typeString: string = 'json'): RESOURCE_VIEW_TYPE {
     let returnType = RESOURCE_VIEW_TYPE.JSON;

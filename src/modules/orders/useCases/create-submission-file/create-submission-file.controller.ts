@@ -1,7 +1,7 @@
 import { orderContainerDTOSchema } from '../../dto/submission.dto';
 
 import { string } from 'yup';
-import { setLoggingContext } from '../../../shared/core/logging-context';
+import { loggedController } from '../../../shared/core/controller';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
 import { Order, SampleEntry, SampleEntryTuple } from '../../domain';
 import { OrderDTO } from '../../dto';
@@ -21,11 +21,10 @@ type CreateSubmissionFileResponse = {
     data: string;
 };
 
-const createSubmissionFileController = async (
-    request: CreateSubmissionFileRequest
-): Promise<CreateSubmissionFileResponse> => {
-    try {
-        setLoggingContext(request.log);
+const createSubmissionFileController = loggedController(
+    async (
+        request: CreateSubmissionFileRequest
+    ): Promise<CreateSubmissionFileResponse> => {
         const orderContainerDTO = request.params;
 
         const order: Order<SampleEntry<SampleEntryTuple>[]> =
@@ -49,10 +48,8 @@ const createSubmissionFileController = async (
             type: fileInformation.type,
             data: fileInformation.data
         };
-    } finally {
-        setLoggingContext(null);
     }
-};
+);
 
 const CreateSubmissionFileRequestValidation = async (
     request: CreateSubmissionFileRequest
