@@ -27,6 +27,7 @@ export class AVVCatalogueMapper extends Mapper {
         aco.set('catalogueCode', catalogue.catalogueInformation.catalogueCode);
         aco.set('version', catalogue.catalogueInformation.version);
         aco.set('validFrom', catalogue.catalogueInformation.validFrom);
+        aco.set('catalogueData', catalogue.JSON);
         return aco;
     }
 }

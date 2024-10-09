@@ -2,9 +2,9 @@ import { AVVCatalog } from '../model/avvcatalog.entity';
 import {
     AVVCatalogData,
     MibiCatalogData,
-    MibiCatalogFacettenData
+    MibiCatalogFacettenData,
+    AVVCatalogObject
 } from '../model/legacy.model';
-import { loadJSONFile } from './file-loader';
 
 function createAVVCatalog<T extends AVVCatalogData>(
     data: T,
@@ -17,7 +17,8 @@ export class AVVCatalogRepository {
     private catalogs: {
         [key: string]: AVVCatalog<AVVCatalogData>;
     };
-    private catalogNames: string[] = [
+
+    private requiredCatalogNames: string[] = [
         'avv303',
         'avv313',
         'avv316',
@@ -32,41 +33,44 @@ export class AVVCatalogRepository {
         // `zsp${(new Date().getFullYear() - 1).toString()}`
     ];
 
-    constructor(private dataDir: string) {
+    constructor() {
         this.catalogs = {};
     }
 
     async initialise(): Promise<void> {
         console.log(
-            `${this.constructor.name}.${this.initialise.name}, loading AVV Catalog data from Filesystem.`
+            `${this.constructor.name}.${this.initialise.name}, loading AVV Catalog data from Database.`
         );
-        await Promise.all(
-            this.catalogNames.map(async catalogName => {
-                return loadJSONFile(`${catalogName}.json`, this.dataDir)
-                    .then(
-                        // tslint:disable-next-line:no-any
-                        (jsonData: {
-                            data: MibiCatalogData | MibiCatalogFacettenData;
-                            uId: string;
-                        }) => {
-                            this.catalogs[catalogName] = createAVVCatalog(
-                                jsonData.data,
-                                jsonData.uId
-                            );
-                            return;
-                        }
-                    )
-                    .catch(error => {
-                        console.log(
-                            `Error loading AVV catalog from json file: ${error}`
-                        );
-                    });
-            })
-        ).then(() => {
-            console.log(
-                `${this.constructor.name}.${this.initialise.name}, finished initialising AVV Catalog Repository from Filesystem.`
-            );
+        const avvCatalogues = await this.retrieve();
+        avvCatalogues.forEach(avvCatalogueObject => {
+            try {
+                const catalogName = avvCatalogueObject.catalogCode;
+                const catalogData = JSON.parse(avvCatalogueObject.catalogData);
+                const data: MibiCatalogData | MibiCatalogFacettenData =
+                    catalogData['data'];
+                const uId: string = catalogData['uId'];
+                this.catalogs[`avv${catalogName}`] = createAVVCatalog(
+                    data,
+                    uId
+                );
+            } catch (error) {
+                console.log(
+                    `Error loading AVV catalog from database: ${error}`
+                );
+            }
         });
+        this.requiredCatalogNames.forEach(catalogName => {
+            if (
+                !this.catalogs.hasOwnProperty.call(this.catalogs, catalogName)
+            ) {
+                console.error(
+                    `Error: Required AVV Catalog ${catalogName} not found in Database.`
+                );
+            }
+        });
+        console.log(
+            `${this.constructor.name}.${this.initialise.name}, finished initialising AVV Catalog Repository from Database.`
+        );
     }
 
     getAVVCatalog<T extends AVVCatalogData>(
@@ -74,14 +78,28 @@ export class AVVCatalogRepository {
     ): AVVCatalog<T> {
         return this.catalogs[catalogName] as AVVCatalog<T>;
     }
+
+    private async retrieve(): Promise<AVVCatalogObject[]> {
+        const query = new Parse.Query('AVV_Catalogue');
+        const catalogues: Parse.Object[] = await query.find({
+            useMasterKey: true
+        });
+        return catalogues.map(avvCatalog => this.mapToAVVCatalog(avvCatalog));
+    }
+    private mapToAVVCatalog(avvCatalog: Parse.Object): AVVCatalogObject {
+        return {
+            catalogCode: avvCatalog.get('catalogueCode'),
+            version: avvCatalog.get('version'),
+            validFrom: avvCatalog.get('validFrom'),
+            catalogData: avvCatalog.get('catalogueData')
+        };
+    }
 }
 
 let repo: AVVCatalogRepository;
 
-export async function initialiseRepository(
-    dataDir: string
-): Promise<AVVCatalogRepository> {
-    const repository = repo ? repo : new AVVCatalogRepository(dataDir);
+export async function initialiseRepository(): Promise<AVVCatalogRepository> {
+    const repository = repo ? repo : new AVVCatalogRepository();
     repo = repository;
     return repository.initialise().then(() => repository);
 }

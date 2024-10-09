@@ -5,6 +5,7 @@ import { mp39CreateNRL } from './mp39-create-nrl';
 import { mp40CreateAnalysisProcedure } from './mp40-create-analysis-procedure';
 import { mp41CreateTemplateFile } from './mp41-create-template-file';
 import { mp66UpdateUserInfo } from './mp66-update-user-info';
+import { mp64UpdateAVVCatalogue } from './mp64-update-avv-catalogue';
 
 export interface UpdateFunc {
     (): Promise<boolean>;
@@ -20,5 +21,6 @@ export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp40CreateAnalysisProcedure,
     mp38CreateAdditionalPathogens,
     mp39CreateNRL,
-    mp66UpdateUserInfo
+    mp66UpdateUserInfo,
+    mp64UpdateAVVCatalogue
 ];

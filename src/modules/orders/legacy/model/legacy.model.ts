@@ -380,6 +380,13 @@ export interface State {
     AVV: string[];
 }
 
+export interface AVVCatalogObject {
+    catalogCode: string;
+    version: string;
+    validFrom: Date;
+    catalogData: string;
+}
+
 export interface AVVFormatCollection {
     [key: string]: string[];
 }

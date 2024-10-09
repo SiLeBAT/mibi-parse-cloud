@@ -66,14 +66,17 @@ const antiCorruptionLayers = (async function init() {
         );
         throw error;
     });
-    const avvCatalogRepository = await avvCatalogRepositoryInit(
-        configurationService.getDataStoreConfiguration().dataDir
-    ).catch((error: Error) => {
-        console.error(
-            `Failed to initialize AVVCatalog Repository. error=${String(error)}`
-        );
-        throw error;
-    });
+
+    const avvCatalogRepository = await avvCatalogRepositoryInit().catch(
+        (error: Error) => {
+            console.error(
+                `Failed to initialize AVVCatalog Repository. error=${String(
+                    error
+                )}`
+            );
+            throw error;
+        }
+    );
 
     const catalogService = new CatalogService(
         catalogRepository,
