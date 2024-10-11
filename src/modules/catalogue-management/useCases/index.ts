@@ -1,2 +1,1 @@
 import './uploadAVVCatalogue';
-import './deleteAVVCatalogue';

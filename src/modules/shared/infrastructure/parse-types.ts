@@ -13,6 +13,7 @@ export interface AVVCatalogueAttributes extends Parse.Attributes {
     validFrom?: Date;
     catalogueFile: Parse.File;
     catalogueCode?: string;
+    catalogueData?: string;
 }
 
 export interface AVVCatalogueObject
