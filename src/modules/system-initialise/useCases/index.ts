@@ -9,3 +9,5 @@ export {
     afterSavePLZHook,
     setPLZCache
 } from './setPLZCache';
+
+export { checkCollectionsForContent } from './checkCollectionsForContent';

@@ -9,6 +9,7 @@ import {
     afterDeletePLZHook,
     afterSaveNRLHook,
     afterSavePLZHook,
+    checkCollectionsForContent,
     checkSystemConfiguration,
     setNRLCache,
     setPLZCache
@@ -16,6 +17,8 @@ import {
 
 logger.info('Parse Cloud: Checking System Configuration.');
 checkSystemConfiguration.execute();
+logger.info('Parse Cloud: Checking Collections for content.');
+checkCollectionsForContent.execute();
 
 logger.info('Parse Cloud: Creating NRL cache.');
 setNRLCache.execute();
@@ -28,3 +31,11 @@ Parse.Cloud.afterSave(ObjectKeys.AllowedPLZ, afterSavePLZHook);
 Parse.Cloud.afterDelete(ObjectKeys.AllowedPLZ, afterDeletePLZHook);
 
 logger.info('Parse Cloud: System initialise module loaded.');
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-expect-error
+Parse.Cloud.sendEmail({
+    templateName: 'exampleTemplate',
+    placeholders: { bob: 'Henry' },
+    recipient: 'dptolle@gmail.com'
+});
