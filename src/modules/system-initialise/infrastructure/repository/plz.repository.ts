@@ -1,6 +1,9 @@
 import { PLZ } from '../../../shared/domain/valueObjects/plz.vo';
 import { AbstractRepository } from '../../../shared/infrastructure';
-import { PLZObject } from '../../../shared/infrastructure/parse-types';
+import {
+    ObjectKeys,
+    PLZObject
+} from '../../../shared/infrastructure/parse-types';
 
 export class PLZRepository extends AbstractRepository<PLZObject> {
     async retrieve(): Promise<PLZ[]> {
@@ -16,3 +19,7 @@ export class PLZRepository extends AbstractRepository<PLZObject> {
         return await PLZ.create({ value });
     }
 }
+
+const plzRepository = new PLZRepository(ObjectKeys.AllowedPLZ);
+
+export { plzRepository };
