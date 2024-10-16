@@ -1,9 +1,11 @@
 import { loggedController } from '../../../shared/core/controller';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
-import { Order, SampleEntry, SubmissionFormInput } from '../../domain';
+import { Order, SampleEntryTuple, SubmissionFormInput } from '../../domain';
 import { OrderDTO } from '../../dto';
 import { SubmissionDTOMapper } from '../../mappers';
 import { SampleEntryDTOMapper } from '../../mappers/sample-entry-dto.mapper';
+import { createSubmissionFileUseCase } from '../create-submission-file/create-submission-file.use-case';
+import { SampleEntry } from './../../domain/sample-entry.entity';
 import { ParseFromJSONUseCase } from './parse-from-json.use-case';
 import { ParseFromXLSXUseCase } from './parse-from-xlsx.use-case';
 
@@ -15,9 +17,15 @@ enum RESOURCE_VIEW_TYPE {
     XLSX
 }
 
-type ParseSampleDataResponse = {
-    order: OrderDTO;
-};
+type ParseSampleDataResponse =
+    | {
+          order: OrderDTO;
+      }
+    | {
+          data: string;
+          fileName: string;
+          type: string;
+      };
 type ParseSampleDataRequestParameters = {
     readonly data: string;
     readonly filename: string;
@@ -49,18 +57,35 @@ const parseSampleDataController = loggedController(
             // Get the right factory depending on submission type
             const createOrder: ParseSampleDataUseCase =
                 CreateOrderUseCaseFactory(type);
-            const order: Order<SampleEntry<string>[]> =
+            const order: Order<SampleEntry<SampleEntryTuple>[]> =
                 await createOrder.execute(submissionFormInput);
-            return {
-                order: SubmissionDTOMapper.toDTO<SampleEntry<string>[]>(
-                    order,
-                    samples => {
-                        return samples.map(s =>
-                            SampleEntryDTOMapper.toDTO(s, t => ({ value: t }))
-                        );
-                    }
-                )
-            };
+
+            const returnType = getResourceViewType(request.headers['accept']);
+
+            switch (returnType) {
+                case RESOURCE_VIEW_TYPE.XLSX: {
+                    const fileInformation =
+                        await createSubmissionFileUseCase.execute(order);
+                    return {
+                        fileName: fileInformation.fileName,
+                        type: fileInformation.type,
+                        data: fileInformation.data
+                    };
+                    break;
+                }
+                case RESOURCE_VIEW_TYPE.JSON:
+                default: {
+                    return {
+                        order: SubmissionDTOMapper.toDTO<
+                            SampleEntry<SampleEntryTuple>[]
+                        >(order, samples => {
+                            return samples.map(s =>
+                                SampleEntryDTOMapper.toDTO(s, t => t)
+                            );
+                        })
+                    };
+                }
+            }
         } catch (error) {
             throw new SubmissionCreationFailedError(
                 'Unable to create a submission',
@@ -73,6 +98,16 @@ const parseSampleDataController = loggedController(
 function getResourceViewType(typeString: string = 'json'): RESOURCE_VIEW_TYPE {
     let returnType = RESOURCE_VIEW_TYPE.JSON;
     if (typeString.toLowerCase().includes('xml')) {
+        returnType = RESOURCE_VIEW_TYPE.XLSX;
+    }
+    if (typeString.includes('multipart/form-data')) {
+        returnType = RESOURCE_VIEW_TYPE.XLSX;
+    }
+    if (
+        typeString.includes(
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    ) {
         returnType = RESOURCE_VIEW_TYPE.XLSX;
     }
     return returnType;
