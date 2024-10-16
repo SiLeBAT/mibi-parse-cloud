@@ -1,12 +1,18 @@
 import { UseCase } from '../../../shared/useCases';
-import { Order, SampleEntry, SubmissionFormInput } from '../../domain';
+import {
+    Order,
+    SampleEntry,
+    SampleEntryTuple,
+    SubmissionFormInput
+} from '../../domain';
 
 export abstract class ParseSampleDataUseCase
-    implements UseCase<SubmissionFormInput, Order<SampleEntry<string>[]>>
+    implements
+        UseCase<SubmissionFormInput, Order<SampleEntry<SampleEntryTuple>[]>>
 {
     constructor() {}
 
     abstract execute(
         params: SubmissionFormInput
-    ): Promise<Order<SampleEntry<string>[]>>;
+    ): Promise<Order<SampleEntry<SampleEntryTuple>[]>>;
 }
