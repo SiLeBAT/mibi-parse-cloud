@@ -5,12 +5,13 @@
 import { logger } from '../../system/logging';
 import { ObjectKeys } from '../shared/infrastructure/parse-types';
 import {
+    afterDeleteAVVCatalogueHook,
     afterDeleteNRLHook,
     afterDeletePLZHook,
-    afterDeleteAVVCatalogueHook,
+    afterSaveAVVCatalogueHook,
     afterSaveNRLHook,
     afterSavePLZHook,
-    afterSaveAVVCatalogueHook,
+    checkCollectionsForContent,
     checkSystemConfiguration,
     setNRLCache,
     setPLZCache
@@ -18,6 +19,8 @@ import {
 
 logger.info('Parse Cloud: Checking System Configuration.');
 checkSystemConfiguration.execute();
+logger.info('Parse Cloud: Checking Collections for content.');
+checkCollectionsForContent.execute();
 
 logger.info('Parse Cloud: Creating NRL cache.');
 setNRLCache.execute();

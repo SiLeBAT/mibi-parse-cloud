@@ -1,5 +1,10 @@
 export { checkSystemConfiguration } from './checkSystemConfiguration';
 export {
+    afterDeleteAVVCatalogueHook,
+    afterSaveAVVCatalogueHook,
+    setAVVCatalogueCache
+} from './setAVVCatalogueCache';
+export {
     afterDeleteNRLHook,
     afterSaveNRLHook,
     setNRLCache
@@ -9,8 +14,6 @@ export {
     afterSavePLZHook,
     setPLZCache
 } from './setPLZCache';
-export {
-    afterDeleteAVVCatalogueHook,
-    afterSaveAVVCatalogueHook,
-    setAVVCatalogueCache
-} from './setAVVCatalogueCache';
+
+export { checkCollectionsForContent } from './checkCollectionsForContent';
+

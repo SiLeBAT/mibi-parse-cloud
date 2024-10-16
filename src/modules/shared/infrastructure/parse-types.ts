@@ -5,7 +5,8 @@ export const ObjectKeys = {
     Institute: 'institutions',
     AllowedPLZ: 'Allowed_PLZ',
     AdditionalPathogens: 'Additional_Pathogens',
-    AVVCatalogue: 'AVV_Catalogue'
+    AVVCatalogue: 'AVV_Catalogue',
+    AnalysisProcedure: 'Analysis_Procedure'
 };
 
 export interface AVVCatalogueAttributes extends Parse.Attributes {
