@@ -8,7 +8,7 @@ import {
     CatalogData,
     SearchAlias
 } from '../model/legacy.model';
-import { AVVCatalogRepository } from '../repositories/avvcatalog.repository';
+import { AVVCatalogueCache } from '../../../shared/infrastructure/cache/avvcatalogue.cache';
 import { CatalogRepository } from '../repositories/catalog.repository';
 import { SearchAliasRepository } from '../repositories/search-alias.repository';
 
@@ -17,7 +17,7 @@ export class CatalogService {
         private plzCache: PLZCache,
         private catalogRepository: CatalogRepository,
         private searchAliasRepository: SearchAliasRepository,
-        private avvCatalogRepository: AVVCatalogRepository
+        private avvCatalogueCache: AVVCatalogueCache
     ) {}
 
     getCatalog<T extends CatalogData>(catalogName: string): Catalog<T> {
@@ -36,7 +36,7 @@ export class CatalogService {
     getAVVCatalog<T extends AVVCatalogData>(
         catalogName: string
     ): AVVCatalog<T> {
-        return this.avvCatalogRepository.getAVVCatalog<T>(catalogName);
+        return this.avvCatalogueCache.getAVVCatalog<T>(catalogName);
     }
 
     getCatalogSearchAliases(catalogName: string) {

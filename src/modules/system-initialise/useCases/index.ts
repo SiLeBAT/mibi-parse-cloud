@@ -9,3 +9,8 @@ export {
     afterSavePLZHook,
     setPLZCache
 } from './setPLZCache';
+export {
+    afterDeleteAVVCatalogueHook,
+    afterSaveAVVCatalogueHook,
+    setAVVCatalogueCache
+} from './setAVVCatalogueCache';
