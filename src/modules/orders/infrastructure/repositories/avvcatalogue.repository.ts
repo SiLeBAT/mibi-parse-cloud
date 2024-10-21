@@ -1,10 +1,12 @@
-import { AVVCatalog } from '../model/avvcatalog.entity';
+import { AbstractRepository } from '../../../shared/infrastructure';
+import { AVVCatalogueObject } from '../../../shared/infrastructure/parse-types';
+import { AVVCatalog } from '../../legacy/model/avvcatalog.entity';
 import {
     AVVCatalogData,
     MibiCatalogData,
     MibiCatalogFacettenData,
     AVVCatalogObject
-} from '../model/legacy.model';
+} from '../../legacy/model/legacy.model';
 
 function createAVVCatalog<T extends AVVCatalogData>(
     data: T,
@@ -13,10 +15,11 @@ function createAVVCatalog<T extends AVVCatalogData>(
     return new AVVCatalog(data, uId);
 }
 
-export class AVVCatalogRepository {
-    private catalogs: {
-        [key: string]: AVVCatalog<AVVCatalogData>;
-    };
+export type AVVCatalogueCacheData = {
+    [key: string]: AVVCatalog<AVVCatalogData>;
+};
+
+export class AVVCatalogueRepository extends AbstractRepository<AVVCatalogueObject> {
     private requiredCatalogNames: string[] = [
         'avv303',
         'avv313',
@@ -27,20 +30,17 @@ export class AVVCatalogRepository {
         'avv326',
         'avv328',
         'avv339'
-        // `zsp${new Date().getFullYear().toString()}`,
-        // `zsp${(new Date().getFullYear() + 1).toString()}`,
-        // `zsp${(new Date().getFullYear() - 1).toString()}`
     ];
 
-    constructor() {
-        this.catalogs = {};
-    }
-
-    async initialise(): Promise<void> {
+    async retrieve(): Promise<AVVCatalogueCacheData> {
         console.log(
-            `${this.constructor.name}.${this.initialise.name}, loading AVV Catalog data from Database.`
+            `${this.constructor.name}.${this.retrieve.name}, loading AVV Catalog data from Database.`
         );
-        const avvCatalogues = await this.retrieve();
+
+        const catalogs: AVVCatalogueCacheData = {};
+
+        const avvCatalogues = await this.retrieveAllCatalogues();
+
         avvCatalogues.forEach(avvCatalogueObject => {
             try {
                 const catalogName = avvCatalogueObject.catalogCode;
@@ -48,38 +48,34 @@ export class AVVCatalogRepository {
                 const data: MibiCatalogData | MibiCatalogFacettenData =
                     catalogData['data'];
                 const uId: string = catalogData['uId'];
-                this.catalogs[`avv${catalogName}`] = createAVVCatalog(
-                    data,
-                    uId
-                );
+
+                const avvCatalogue = createAVVCatalog(data, uId);
+                catalogs[`avv${catalogName}`] = avvCatalogue;
             } catch (error) {
                 console.log(
-                    `Error loading AVV catalog from database: ${error}`
+                    `AVVCatalogueRepository, retrieve(), Error loading AVV catalog data from Database: ${error}`
                 );
             }
         });
+
         this.requiredCatalogNames.forEach(catalogName => {
-            if (
-                !this.catalogs.hasOwnProperty.call(this.catalogs, catalogName)
-            ) {
+            if (!catalogs.hasOwnProperty.call(catalogs, catalogName)) {
                 console.error(
                     `Error: Required AVV Catalog ${catalogName} not found in Database.`
                 );
             }
         });
+
         console.log(
-            `${this.constructor.name}.${this.initialise.name}, finished initialising AVV Catalog Repository from Database.`
+            `${this.constructor.name}.${this.retrieve.name}, finished loading AVV Catalog data from Database.`
         );
+
+        return catalogs;
     }
 
-    getAVVCatalog<T extends AVVCatalogData>(
-        catalogName: string
-    ): AVVCatalog<T> {
-        return this.catalogs[catalogName] as AVVCatalog<T>;
-    }
-
-    private async retrieve(): Promise<AVVCatalogObject[]> {
-        const query = new Parse.Query('AVV_Catalogue');
+    private async retrieveAllCatalogues(): Promise<AVVCatalogObject[]> {
+        const query = this.getQuery();
+        query.ascending('catalogueCode');
         const catalogues: Parse.Object[] = await query.find({
             useMasterKey: true
         });
@@ -93,12 +89,4 @@ export class AVVCatalogRepository {
             catalogData: avvCatalog.get('catalogueData')
         };
     }
-}
-
-let repo: AVVCatalogRepository;
-
-export async function initialiseRepository(): Promise<AVVCatalogRepository> {
-    const repository = repo ? repo : new AVVCatalogRepository();
-    repo = repository;
-    return repository.initialise().then(() => repository);
 }

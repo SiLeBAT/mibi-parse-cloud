@@ -7,11 +7,14 @@ import { ObjectKeys } from '../shared/infrastructure/parse-types';
 import {
     afterDeleteNRLHook,
     afterDeletePLZHook,
+    afterDeleteAVVCatalogueHook,
     afterSaveNRLHook,
     afterSavePLZHook,
+    afterSaveAVVCatalogueHook,
     checkSystemConfiguration,
     setNRLCache,
-    setPLZCache
+    setPLZCache,
+    setAVVCatalogueCache
 } from './useCases';
 
 logger.info('Parse Cloud: Checking System Configuration.');
@@ -26,5 +29,10 @@ logger.info('Parse Cloud: Creating PLZ cache.');
 setPLZCache.execute();
 Parse.Cloud.afterSave(ObjectKeys.AllowedPLZ, afterSavePLZHook);
 Parse.Cloud.afterDelete(ObjectKeys.AllowedPLZ, afterDeletePLZHook);
+
+logger.info('Parse Cloud: Creating AVVCatalogue cache.');
+setAVVCatalogueCache.execute();
+Parse.Cloud.afterSave(ObjectKeys.AVVCatalogue, afterSaveAVVCatalogueHook);
+Parse.Cloud.afterDelete(ObjectKeys.AVVCatalogue, afterDeleteAVVCatalogueHook);
 
 logger.info('Parse Cloud: System initialise module loaded.');

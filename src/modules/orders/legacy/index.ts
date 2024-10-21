@@ -1,4 +1,8 @@
-import { nrlCache, plzCache } from '../../shared/infrastructure';
+import {
+    nrlCache,
+    plzCache,
+    avvCatalogueCache
+} from '../../shared/infrastructure';
 import { ObjectKeys } from '../infrastructure';
 import {
     ExcelMarshallAntiCorruptionLayer,
@@ -23,7 +27,7 @@ import { SampleSheetService } from './application/sample-sheet.service';
 import { SampleService } from './application/sample.service';
 import { ValidationErrorProvider } from './application/validation-error-provider.service';
 import { pdfConstants, sampleSheetConstants } from './model/legacy.model';
-import { initialiseRepository as avvCatalogRepositoryInit } from './repositories/avvcatalog.repository';
+import { setAVVCatalogueCache } from '../../system-initialise/useCases';
 import { initialiseRepository as catalogRepositoryInit } from './repositories/catalog.repository';
 import { initialiseRepository as searchAliasRepositoryInit } from './repositories/search-alias.repository';
 import { stateRepository } from './repositories/state.repository';
@@ -67,22 +71,13 @@ const antiCorruptionLayers = (async function init() {
         throw error;
     });
 
-    const avvCatalogRepository = await avvCatalogRepositoryInit().catch(
-        (error: Error) => {
-            console.error(
-                `Failed to initialize AVVCatalog Repository. error=${String(
-                    error
-                )}`
-            );
-            throw error;
-        }
-    );
+    await setAVVCatalogueCache.execute();
 
     const catalogService = new CatalogService(
         plzCache,
         catalogRepository,
         searchAliasRepository,
-        avvCatalogRepository
+        avvCatalogueCache
     );
 
     const avvFormatProvider = new AVVFormatProvider(stateRepository);
