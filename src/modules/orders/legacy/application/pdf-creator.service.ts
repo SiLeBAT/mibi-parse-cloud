@@ -694,6 +694,7 @@ export class PDFCreatorService {
                 'avv313',
                 sampleData.sampling_location_avv.value.trim(),
                 sampleData.sampling_location_text.value.trim(),
+                sampleData.sampling_date.value.trim(),
                 'Ort'
             ),
             this.createTwoCodesToTextDataCell(
@@ -702,6 +703,7 @@ export class PDFCreatorService {
                 sampleData.animal_avv.value.trim(),
                 sampleData.matrix_avv.value.trim(),
                 sampleData.animal_matrix_text.value.trim(),
+                sampleData.sampling_date.value.trim(),
                 'Tier',
                 'Matrix',
                 false,
@@ -709,7 +711,8 @@ export class PDFCreatorService {
             ),
             this.createAdditionalDataCell(
                 'avv316',
-                sampleData.primary_production_avv.value
+                sampleData.primary_production_avv.value,
+                sampleData.sampling_date.value.trim()
             ),
             this.createTwoCodesToTextDataCell(
                 'avv322',
@@ -717,6 +720,7 @@ export class PDFCreatorService {
                 sampleData.control_program_avv.value.trim(),
                 sampleData.sampling_reason_avv.value.trim(),
                 sampleData.program_reason_text.value.trim(),
+                sampleData.sampling_date.value.trim(),
                 'Kontroll-P',
                 'Unters.-Grund'
             ),
@@ -724,13 +728,15 @@ export class PDFCreatorService {
                 'avv303',
                 sampleData.operations_mode_avv.value.trim(),
                 sampleData.operations_mode_text.value.trim(),
+                sampleData.sampling_date.value.trim(),
                 'Betrieb',
                 false
             ),
             this.createSamplesDataCell([sampleData.vvvo.value]),
             this.createAdditionalDataCell(
                 'avv328',
-                sampleData.program_avv.value
+                sampleData.program_avv.value,
+                sampleData.sampling_date.value.trim()
             ),
             this.createSamplesDataCell([sampleData.comment.value])
         ];
@@ -745,10 +751,15 @@ export class PDFCreatorService {
         };
     }
 
-    private createAdditionalDataCell(catalogName: string, codeValue: string) {
+    private createAdditionalDataCell(
+        catalogName: string,
+        codeValue: string,
+        samplingDateValue: string
+    ) {
         const catalogTextValue = this.getCatalogTextWithAVVKode(
             catalogName,
-            codeValue
+            codeValue,
+            samplingDateValue
         );
 
         return this.createSamplesDataCell([catalogTextValue]);
@@ -758,13 +769,15 @@ export class PDFCreatorService {
         catalogName: string,
         codeValue: string,
         textValue: string,
+        samplingDateValue: string,
         prefix: string,
         includingFacettenName: boolean = true
     ) {
         const pdfText: PdfText = [];
         let catalogTextValue = this.getCatalogTextWithAVVKode(
             catalogName,
-            codeValue
+            codeValue,
+            samplingDateValue
         );
 
         const hasCode = !!codeValue;
@@ -779,6 +792,7 @@ export class PDFCreatorService {
             catalogTextValue = this.getCatalogTextWithAVVKode(
                 catalogName,
                 codeValue,
+                samplingDateValue,
                 false
             );
         }
@@ -837,6 +851,7 @@ export class PDFCreatorService {
         codeValue1: string,
         codeValue2: string,
         textValue: string,
+        samplingDateValue: string,
         prefix1: string,
         prefix2: string,
         includingFacettenName1: boolean = true,
@@ -845,11 +860,13 @@ export class PDFCreatorService {
         const pdfText: PdfText = [];
         let catalogTextValue1 = this.getCatalogTextWithAVVKode(
             catalogName1,
-            codeValue1
+            codeValue1,
+            samplingDateValue
         );
         let catalogTextValue2 = this.getCatalogTextWithAVVKode(
             catalogName2,
-            codeValue2
+            codeValue2,
+            samplingDateValue
         );
 
         const cleanedUserText = textValue
@@ -886,6 +903,7 @@ export class PDFCreatorService {
             catalogTextValue1 = this.getCatalogTextWithAVVKode(
                 catalogName1,
                 codeValue1,
+                samplingDateValue,
                 false
             );
         }
@@ -893,6 +911,7 @@ export class PDFCreatorService {
             catalogTextValue2 = this.getCatalogTextWithAVVKode(
                 catalogName2,
                 codeValue2,
+                samplingDateValue,
                 false
             );
         }
@@ -1032,9 +1051,13 @@ export class PDFCreatorService {
     private getCatalogTextWithAVVKode(
         catalogName: string,
         codeValue: string,
+        samplingDateValue: string,
         includingFacettenName: boolean = true
     ): string {
-        const catalog = this.catalogService.getAVVCatalog(catalogName);
+        const catalog = this.catalogService.getAVVCatalog(
+            catalogName,
+            samplingDateValue
+        );
         const catalogTextValue = catalog.getTextWithAVVKode(
             codeValue.trim(),
             includingFacettenName

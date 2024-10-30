@@ -9,11 +9,11 @@ export const ObjectKeys = {
 };
 
 export interface AVVCatalogueAttributes extends Parse.Attributes {
-    version?: string;
-    validFrom?: Date;
+    version: string;
+    validFrom: Date;
     catalogueFile: Parse.File;
-    catalogueCode?: string;
-    catalogueData?: string;
+    catalogueCode: string;
+    catalogueData: string;
 }
 
 export interface AVVCatalogueObject

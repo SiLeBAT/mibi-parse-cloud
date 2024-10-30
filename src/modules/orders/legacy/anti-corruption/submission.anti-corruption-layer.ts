@@ -488,12 +488,16 @@ export class SubmissionAntiCorruptionLayer {
     ): Partial<NrlSampleData> {
         try {
             const nrlSampleData: Partial<NrlSampleData> = {};
+            const samplingDateValue = sample
+                .getEntryFor('sampling_date')
+                .value.trim();
 
             for (const props in nrlDataFeatures) {
                 const nrlDataFeatureProperties = nrlDataFeatures[props];
 
                 const catalog = this.catalogService.getAVVCatalog(
-                    nrlDataFeatureProperties.catalog
+                    nrlDataFeatureProperties.catalog,
+                    samplingDateValue
                 );
 
                 const avvProperty = nrlDataFeatureProperties.avvProperty;

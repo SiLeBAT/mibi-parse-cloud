@@ -1,26 +1,11 @@
+import { uniq } from 'lodash';
+import { AVVCatalogue } from '../../../shared/domain/valueObjects/avvcatalogue.vo';
 import { AbstractRepository } from '../../../shared/infrastructure';
 import { AVVCatalogueObject } from '../../../shared/infrastructure/parse-types';
-import { AVVCatalog } from '../../legacy/model/avvcatalog.entity';
-import {
-    AVVCatalogData,
-    MibiCatalogData,
-    MibiCatalogFacettenData,
-    AVVCatalogObject
-} from '../../legacy/model/legacy.model';
-
-function createAVVCatalog<T extends AVVCatalogData>(
-    data: T,
-    uId: string = ''
-): AVVCatalog<T> {
-    return new AVVCatalog(data, uId);
-}
-
-export type AVVCatalogueCacheData = {
-    [key: string]: AVVCatalog<AVVCatalogData>;
-};
+import { logger } from '../../../../system/logging';
 
 export class AVVCatalogueRepository extends AbstractRepository<AVVCatalogueObject> {
-    private requiredCatalogNames: string[] = [
+    private requiredCatalogueNames: string[] = [
         'avv303',
         'avv313',
         'avv316',
@@ -32,61 +17,55 @@ export class AVVCatalogueRepository extends AbstractRepository<AVVCatalogueObjec
         'avv339'
     ];
 
-    async retrieve(): Promise<AVVCatalogueCacheData> {
-        console.log(
-            `${this.constructor.name}.${this.retrieve.name}, loading AVV Catalog data from Database.`
+    async retrieve(): Promise<AVVCatalogue[]> {
+        logger.info(
+            `${this.constructor.name}.${this.retrieve.name}, loading AVV Catalogue data from Database.`
         );
 
-        const catalogs: AVVCatalogueCacheData = {};
-
-        const avvCatalogues = await this.retrieveAllCatalogues();
-
-        avvCatalogues.forEach(avvCatalogueObject => {
-            try {
-                const catalogName = avvCatalogueObject.catalogCode;
-                const catalogData = JSON.parse(avvCatalogueObject.catalogData);
-                const data: MibiCatalogData | MibiCatalogFacettenData =
-                    catalogData['data'];
-                const uId: string = catalogData['uId'];
-
-                const avvCatalogue = createAVVCatalog(data, uId);
-                catalogs[`avv${catalogName}`] = avvCatalogue;
-            } catch (error) {
-                console.log(
-                    `AVVCatalogueRepository, retrieve(), Error loading AVV catalog data from Database: ${error}`
-                );
-            }
-        });
-
-        this.requiredCatalogNames.forEach(catalogName => {
-            if (!catalogs.hasOwnProperty.call(catalogs, catalogName)) {
-                console.error(
-                    `Error: Required AVV Catalog ${catalogName} not found in Database.`
-                );
-            }
-        });
-
-        console.log(
-            `${this.constructor.name}.${this.retrieve.name}, finished loading AVV Catalog data from Database.`
-        );
-
-        return catalogs;
-    }
-
-    private async retrieveAllCatalogues(): Promise<AVVCatalogObject[]> {
         const query = this.getQuery();
-        query.ascending('catalogueCode');
-        const catalogues: Parse.Object[] = await query.find({
-            useMasterKey: true
-        });
-        return catalogues.map(avvCatalog => this.mapToAVVCatalog(avvCatalog));
+        const allCatalogues = await query.findAll({ useMasterKey: true });
+
+        const avvCatalogues = Promise.all(
+            allCatalogues.map(avvCatalogue =>
+                this.mapToAVVCatalog(avvCatalogue)
+            )
+        );
+
+        const catalogueNamesInDB = uniq(
+            (await avvCatalogues).map(catalogue => `avv${catalogue.name}`)
+        );
+        const absentCataloguesInDB = this.requiredCatalogueNames.filter(
+            catalogueName => !catalogueNamesInDB.includes(catalogueName)
+        );
+
+        if (absentCataloguesInDB.length > 0) {
+            logger.error(
+                `Error: Required AVV Catalogue(s) ${absentCataloguesInDB.join(
+                    ', '
+                )} not found in Database.`
+            );
+        }
+
+        logger.info(
+            `${this.constructor.name}.${this.retrieve.name}, finished loading AVV Catalogue data from Database.`
+        );
+
+        return avvCatalogues;
     }
-    private mapToAVVCatalog(avvCatalog: Parse.Object): AVVCatalogObject {
-        return {
-            catalogCode: avvCatalog.get('catalogueCode'),
-            version: avvCatalog.get('version'),
-            validFrom: avvCatalog.get('validFrom'),
-            catalogData: avvCatalog.get('catalogueData')
-        };
+
+    private async mapToAVVCatalog(
+        avvCatalogue: AVVCatalogueObject
+    ): Promise<AVVCatalogue> {
+        const validFromDate = avvCatalogue.get('validFrom');
+        const year = validFromDate.getFullYear();
+        const month = `${validFromDate.getMonth() + 1}`.padStart(2, '0');
+        const day = `${validFromDate.getDate()}`.padStart(2, '0');
+
+        return await AVVCatalogue.create({
+            name: avvCatalogue.get('catalogueCode'),
+            validFrom: `${year}-${month}-${day}`,
+            version: avvCatalogue.get('version'),
+            data: avvCatalogue.get('catalogueData')
+        });
     }
 }

@@ -32,6 +32,7 @@ import { initialiseRepository as catalogRepositoryInit } from './repositories/ca
 import { initialiseRepository as searchAliasRepositoryInit } from './repositories/search-alias.repository';
 import { stateRepository } from './repositories/state.repository';
 import { validationErrorRepository } from './repositories/validation-error.repository';
+import { logger } from '../../../system/logging';
 
 const fileRepository = {
     getFileBuffer: async (key: string) => {
@@ -71,6 +72,7 @@ const antiCorruptionLayers = (async function init() {
         throw error;
     });
 
+    logger.info('Parse Cloud: Creating AVVCatalogue cache.');
     await setAVVCatalogueCache.execute();
 
     const catalogService = new CatalogService(

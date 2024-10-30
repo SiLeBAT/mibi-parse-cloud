@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import { PLZCache } from '../../../shared/infrastructure';
-import { AVVCatalog } from '../model/avvcatalog.entity';
+import { AVVCatalog, createAVVCatalog } from '../model/avvcatalog.entity';
 import { Catalog, createCatalog } from '../model/catalog.entity';
 import {
     AVVCatalogData,
@@ -34,9 +34,17 @@ export class CatalogService {
     }
 
     getAVVCatalog<T extends AVVCatalogData>(
-        catalogName: string
+        catalogName: string,
+        samplingDate: string | null = null
     ): AVVCatalog<T> {
-        return this.avvCatalogueCache.getAVVCatalog<T>(catalogName);
+        const catalogData = this.avvCatalogueCache.getAVVCatalogueData(
+            catalogName,
+            samplingDate
+        );
+        const data = catalogData['data'] as AVVCatalogData;
+        const uId = catalogData['uId'] as string;
+
+        return createAVVCatalog(data, uId) as AVVCatalog<T>;
     }
 
     getCatalogSearchAliases(catalogName: string) {

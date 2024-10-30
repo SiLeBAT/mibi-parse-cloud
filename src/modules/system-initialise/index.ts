@@ -13,8 +13,7 @@ import {
     afterSaveAVVCatalogueHook,
     checkSystemConfiguration,
     setNRLCache,
-    setPLZCache,
-    setAVVCatalogueCache
+    setPLZCache
 } from './useCases';
 
 logger.info('Parse Cloud: Checking System Configuration.');
@@ -30,8 +29,8 @@ setPLZCache.execute();
 Parse.Cloud.afterSave(ObjectKeys.AllowedPLZ, afterSavePLZHook);
 Parse.Cloud.afterDelete(ObjectKeys.AllowedPLZ, afterDeletePLZHook);
 
-logger.info('Parse Cloud: Creating AVVCatalogue cache.');
-setAVVCatalogueCache.execute();
+logger.info('Parse Cloud: Setting AVVCatalogue hooks.');
+// AVVCatalogue Cache is created at src/modules/orders/legacy/index.ts
 Parse.Cloud.afterSave(ObjectKeys.AVVCatalogue, afterSaveAVVCatalogueHook);
 Parse.Cloud.afterDelete(ObjectKeys.AVVCatalogue, afterDeleteAVVCatalogueHook);
 

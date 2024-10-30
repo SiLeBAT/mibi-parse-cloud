@@ -11,8 +11,6 @@ const avvCatalogueRepository = new AVVCatalogueRepository(
     ObjectKeys.AVVCatalogue
 );
 
-// console.log('@@@@@@@@ orders/infrastructure/repositories/index new AVVCatalogueRepository(ObjectKeys.AVVCatalogue)')
-
 export {
     CustomerRepository,
     customerRepository,
