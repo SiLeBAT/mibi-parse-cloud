@@ -18,7 +18,6 @@ import { CatalogService } from './catalog.service';
 function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
     const catalogName = 'avv324';
     const property: SampleProperty = 'pathogen_avv';
-    const catalog = catalogService.getAVVCatalog<AVV324Data>(catalogName);
     const options = getFuseOptions();
 
     const catalogEnhancements = createCatalogEnhancements(
@@ -33,6 +32,12 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
     const searchCache: Record<string, CorrectionSuggestions> = {};
 
     return (sampleData: SampleData): CorrectionSuggestions | null => {
+        const samplingDateValue = sampleData.sampling_date.value;
+        const catalog = catalogService.getAVVCatalog<AVV324Data>(
+            catalogName,
+            samplingDateValue
+        );
+
         const originalValue = sampleData[property].value;
         const trimmedEntry = originalValue.trim();
         // Ignore empty entries

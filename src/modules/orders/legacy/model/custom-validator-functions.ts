@@ -26,6 +26,7 @@ import {
 import { AVVCatalog } from './avvcatalog.entity';
 
 moment.locale('de');
+const SAMPLING_DATE = 'sampling_date';
 
 function nrlExists(
     value: string,
@@ -111,13 +112,13 @@ function matchesIdToSpecificYear(
     let currentYear = moment();
     let nextYear = moment().add(1, 'year');
     let lastYear = moment().subtract(1, 'year');
-    if (attributes['sampling_date']) {
-        currentYear = moment(attributes['sampling_date'], 'DD.MM.YYYY');
-        nextYear = moment(attributes['sampling_date'], 'DD.MM.YYYY').add(
+    if (attributes[SAMPLING_DATE]) {
+        currentYear = moment(attributes[SAMPLING_DATE], 'DD.MM.YYYY');
+        nextYear = moment(attributes[SAMPLING_DATE], 'DD.MM.YYYY').add(
             1,
             'year'
         );
-        lastYear = moment(attributes['sampling_date'], 'DD.MM.YYYY').subtract(
+        lastYear = moment(attributes[SAMPLING_DATE], 'DD.MM.YYYY').subtract(
             1,
             'year'
         );
@@ -201,14 +202,14 @@ function inAVVCatalog(
         const trimmedValue = value.trim();
         if (attributes[key]) {
             const catalogNames = options.catalog.split(',');
-
+            const samplingDate = attributes[SAMPLING_DATE];
             const catalogWithKode = _.filter(
                 catalogNames,
                 (catalogName: string) => {
-                    const cat =
-                        catalogService.getAVVCatalog<AVVCatalogData>(
-                            catalogName
-                        );
+                    const cat = catalogService.getAVVCatalog<AVVCatalogData>(
+                        catalogName,
+                        samplingDate
+                    );
 
                     if (cat) {
                         return (
@@ -241,10 +242,14 @@ function inAVVFacettenCatalog(
             const [begriffsIdEintrag, id, facettenValues, currentAttributes] =
                 trimmedValue.split('|');
             const catalogName = options.catalog;
+            const samplingDate = attributes[SAMPLING_DATE];
+
             const catalog =
                 catalogService.getAVVCatalog<MibiCatalogFacettenData>(
-                    catalogName
+                    catalogName,
+                    samplingDate
                 );
+
             if (catalog) {
                 if (!(begriffsIdEintrag && id)) {
                     return { ...options.message };
@@ -334,9 +339,11 @@ function hasObligatoryFacettenValues(
             const [begriffsIdEintrag, id, facettenValues] =
                 trimmedValue.split('|');
             const catalogName = options.catalog;
+            const samplingDate = attributes[SAMPLING_DATE];
             const catalog =
                 catalogService.getAVVCatalog<MibiCatalogFacettenData>(
-                    catalogName
+                    catalogName,
+                    samplingDate
                 );
             if (catalog) {
                 if (begriffsIdEintrag && id) {
@@ -421,9 +428,11 @@ function isHierarchyCode(
             const [begriffsIdEintrag, id, facettenValues] =
                 trimmedValue.split('|');
             const catalogName = options.catalog;
+            const samplingDate = attributes[SAMPLING_DATE];
             const catalog =
                 catalogService.getAVVCatalog<MibiCatalogFacettenData>(
-                    catalogName
+                    catalogName,
+                    samplingDate
                 );
             if (catalog) {
                 if (begriffsIdEintrag && id) {
@@ -461,9 +470,11 @@ function multipleFacettenAllowed(
             const [begriffsIdEintrag, id, facettenValues] =
                 trimmedValue.split('|');
             const catalogName = options.catalog;
+            const samplingDate = attributes[SAMPLING_DATE];
             const catalog =
                 catalogService.getAVVCatalog<MibiCatalogFacettenData>(
-                    catalogName
+                    catalogName,
+                    samplingDate
                 );
             if (catalog) {
                 if (begriffsIdEintrag && id) {
@@ -625,8 +636,10 @@ function matchAVVCodeOrString(
         const altKey = options.alternateKey || '';
 
         if (attributes[key]) {
+            const samplingDate = attributes[SAMPLING_DATE];
             const cat = catalogService.getAVVCatalog<AVVCatalogData>(
-                options.catalog
+                options.catalog,
+                samplingDate
             );
             if (cat) {
                 const key: string = options.key

@@ -221,13 +221,17 @@ export class FormValidatorService {
         const cityEntry: AnnotatedSampleDataEntry = sample.getEntryFor(
             'sampling_location_text'
         );
+        const samplingDateValue = sample.getEntryFor('sampling_date').value;
 
         if (
             avvEntry.value !== '' &&
             zipEntry.value === '' &&
             cityEntry.value === ''
         ) {
-            const avv313Cat = this.catalogService.getAVVCatalog('avv313');
+            const avv313Cat = this.catalogService.getAVVCatalog(
+                'avv313',
+                samplingDateValue
+            );
             const catEntry = avv313Cat.getAVV313EintragWithAVVKode(
                 avvEntry.value
             );

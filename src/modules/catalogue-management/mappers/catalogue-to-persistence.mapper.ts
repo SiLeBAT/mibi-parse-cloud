@@ -15,7 +15,11 @@ export class AVVCatalogueMapper extends Mapper {
         const jsonFile = await createFileFromCatalogue(catalogue);
         if (!aco) {
             const avvCatalogueAttributes: AVVCatalogueAttributes = {
-                catalogueFile: jsonFile
+                catalogueFile: jsonFile,
+                version: catalogue.catalogueInformation.version,
+                validFrom: catalogue.catalogueInformation.validFrom,
+                catalogueCode: catalogue.catalogueInformation.catalogueCode,
+                catalogueData: catalogue.JSON
             };
             aco = new Parse.Object<AVVCatalogueAttributes>(
                 ObjectKeys.AVVCatalogue,

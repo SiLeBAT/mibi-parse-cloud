@@ -15,7 +15,16 @@ export class NotificationService {
     sendNotification<T, V extends NotificationMeta>(
         notification: Notification<T, V>
     ): void {
-        logger.info('Sending notification: ' + JSON.stringify(notification));
+        logger.info(`Sending notification:\n
+            type: ${JSON.stringify(notification.type, null, 2)},\n
+            payload: ${JSON.stringify(notification.payload, null, 2)},\n
+            meta: ${JSON.stringify(
+                notification.meta,
+                (key, value) => {
+                    return key === 'data' ? '[...]' : value;
+                },
+                2
+            )}`);
         this.sender.emit(this.notificationName, notification);
     }
 
