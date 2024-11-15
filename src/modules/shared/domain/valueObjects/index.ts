@@ -6,4 +6,5 @@ export { NRLId, NRL_ID_VALUE } from './nrl-id.vo';
 export { PLZ } from './plz.vo';
 export { ServerConfig } from './server-config.vo';
 export { AVVCatalogue } from './avvcatalogue.vo';
+export { SearchAlias } from './search-alias.vo';
 export { ValueObject, ValueObjectProps } from './value-object';

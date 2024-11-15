@@ -12,6 +12,8 @@ import {
     afterSaveNRLHook,
     afterSavePLZHook,
     checkCollectionsForContent,
+    afterDeleteSearchAliasHook,
+    afterSaveSearchAliasHook,
     checkSystemConfiguration,
     setNRLCache,
     setPLZCache
@@ -36,5 +38,10 @@ logger.info('Parse Cloud: Setting AVVCatalogue hooks.');
 // AVVCatalogue Cache is created at src/modules/orders/legacy/index.ts
 Parse.Cloud.afterSave(ObjectKeys.AVVCatalogue, afterSaveAVVCatalogueHook);
 Parse.Cloud.afterDelete(ObjectKeys.AVVCatalogue, afterDeleteAVVCatalogueHook);
+
+logger.info('Parse Cloud: Creating Search-Alias hooks.');
+// Search-Alias Cache is created at src/modules/orders/legacy/index.ts
+Parse.Cloud.afterSave(ObjectKeys.SearchAlias, afterSaveSearchAliasHook);
+Parse.Cloud.afterDelete(ObjectKeys.SearchAlias, afterDeleteSearchAliasHook);
 
 logger.info('Parse Cloud: System initialise module loaded.');

@@ -8,15 +8,15 @@ import {
     CatalogData,
     SearchAlias
 } from '../model/legacy.model';
-import { AVVCatalogueCache } from '../../../shared/infrastructure/cache/avvcatalogue.cache';
+import { AVVCatalogueCache } from '../../../shared/infrastructure/cache';
 import { CatalogRepository } from '../repositories/catalog.repository';
-import { SearchAliasRepository } from '../repositories/search-alias.repository';
+import { SearchAliasCache } from '../../../shared/infrastructure/cache';
 
 export class CatalogService {
     constructor(
         private plzCache: PLZCache,
         private catalogRepository: CatalogRepository,
-        private searchAliasRepository: SearchAliasRepository,
+        private searchAliasCache: SearchAliasCache,
         private avvCatalogueCache: AVVCatalogueCache
     ) {}
 
@@ -51,7 +51,7 @@ export class CatalogService {
         let searchAlias: SearchAlias[] = [];
 
         try {
-            searchAlias = _(this.searchAliasRepository.getAliases())
+            searchAlias = _(this.searchAliasCache.getSearchAliasCacheData())
                 .filter(
                     (e: SearchAlias) =>
                         e.catalog.toLowerCase().localeCompare(catalogName) === 0

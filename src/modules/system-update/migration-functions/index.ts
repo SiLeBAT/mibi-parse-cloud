@@ -7,7 +7,7 @@ import { mp41CreateTemplateFile } from './mp41-create-template-file';
 import { mp66UpdateUserInfo } from './mp66-update-user-info';
 import { mp87CreateAllowedPLZ } from './mp87-create-allowed-plz';
 import { mp64UpdateAVVCatalogue } from './mp64-update-avv-catalogue';
-
+import { mp86reateSearchAlias } from './mp86-create-search-alias';
 export interface UpdateFunc {
     (): Promise<boolean>;
 }
@@ -24,5 +24,6 @@ export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp39CreateNRL,
     mp66UpdateUserInfo,
     mp87CreateAllowedPLZ,
-    mp64UpdateAVVCatalogue
+    mp64UpdateAVVCatalogue,
+    mp86reateSearchAlias
 ];
