@@ -6,7 +6,8 @@ export const ObjectKeys = {
     AllowedPLZ: 'Allowed_PLZ',
     AdditionalPathogens: 'Additional_Pathogens',
     AVVCatalogue: 'AVV_Catalogue',
-    AnalysisProcedure: 'Analysis_Procedure'
+    AnalysisProcedure: 'Analysis_Procedure',
+    SearchAlias: 'Search_Alias'
 };
 
 export interface AVVCatalogueAttributes extends Parse.Attributes {
@@ -19,6 +20,15 @@ export interface AVVCatalogueAttributes extends Parse.Attributes {
 
 export interface AVVCatalogueObject
     extends Parse.Object<AVVCatalogueAttributes> {}
+
+export interface SearchAliasAttributes extends Parse.Attributes {
+    catalog: string;
+    token: string;
+    alias: string[];
+}
+
+export interface SearchAliasObject
+    extends Parse.Object<SearchAliasAttributes> {}
 
 export interface AdditionalPathogensAttributes extends Parse.Attributes {
     pathogen: string;

@@ -88,9 +88,15 @@ class AVVCatalogueCache {
         const samplingDateTime = new Date(year, month - 1, day).getTime();
 
         const catalogueDates = this.avvCatalogueDates[catalogueName];
-        const result = catalogueDates.find(
-            catalogueDate => catalogueDate.catalogueDateTime <= samplingDateTime
-        );
+        let result;
+
+        for (const catalogueDate of catalogueDates) {
+            if (catalogueDate.catalogueDateTime <= samplingDateTime) {
+                result = catalogueDate;
+            } else {
+                break;
+            }
+        }
 
         return result?.catalogueDateStr;
     }

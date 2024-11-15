@@ -17,3 +17,8 @@ export {
 
 export { checkCollectionsForContent } from './checkCollectionsForContent';
 
+export {
+    afterDeleteSearchAliasHook,
+    afterSaveSearchAliasHook,
+    setSearchAliasCache
+} from './setSearchAliasCache';
