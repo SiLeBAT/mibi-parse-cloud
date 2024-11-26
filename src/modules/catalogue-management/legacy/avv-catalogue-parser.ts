@@ -1,10 +1,7 @@
 import { XMLParser } from 'fast-xml-parser';
 import * as _ from 'lodash';
 
-import {
-    AdditionalPathogensObject,
-    ObjectKeys
-} from '../../shared/infrastructure/parse-types';
+import { pathogenRepository } from '../infrastructure/repository';
 import {
     AttributWert,
     Eintrag,
@@ -879,17 +876,12 @@ export class AVVCatalogueParser {
         return [gemeindeBezeichnung, plz];
     }
 
-    // Refactor this one first: DB access should be handled with a properly injected repository
+    // Refactor this one first: DB access should be handled with a properly injected repository -> done!
     private async getAdditionalPathogens(): Promise<string[]> {
-        const additionalPathogensQuery =
-            new Parse.Query<AdditionalPathogensObject>(
-                ObjectKeys.AdditionalPathogens
-            );
-        const results = await additionalPathogensQuery.find({
-            useMasterKey: true
-        });
-        const pathogens = results.map(item => {
-            return item.get('pathogen');
+        const allPathogens = await pathogenRepository.getAllEntries();
+
+        const pathogens = allPathogens.map(pathogen => {
+            return pathogen.pathogen;
         });
         return pathogens;
     }
