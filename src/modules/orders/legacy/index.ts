@@ -1,10 +1,15 @@
+import { logger } from '../../../system/logging';
 import {
+    avvCatalogueCache,
     nrlCache,
     plzCache,
-    avvCatalogueCache,
     searchAliasCache
 } from '../../shared/infrastructure';
-import { ObjectKeys } from '../infrastructure';
+import { ObjectKeys } from '../../shared/infrastructure/parse-types';
+import {
+    setAVVCatalogueCache,
+    setSearchAliasCache
+} from '../../system-initialise/use-cases';
 import {
     ExcelMarshallAntiCorruptionLayer,
     ExcelUnmarshalAntiCorruptionLayer,
@@ -28,12 +33,9 @@ import { SampleSheetService } from './application/sample-sheet.service';
 import { SampleService } from './application/sample.service';
 import { ValidationErrorProvider } from './application/validation-error-provider.service';
 import { pdfConstants, sampleSheetConstants } from './model/legacy.model';
-import { setAVVCatalogueCache } from '../../system-initialise/useCases';
-import { setSearchAliasCache } from '../../system-initialise/useCases';
 import { initialiseRepository as catalogRepositoryInit } from './repositories/catalog.repository';
 import { stateRepository } from './repositories/state.repository';
 import { validationErrorRepository } from './repositories/validation-error.repository';
-import { logger } from '../../../system/logging';
 
 const fileRepository = {
     getFileBuffer: async (key: string) => {

@@ -1,0 +1,1 @@
+export { userInformationRepository } from './repositories';

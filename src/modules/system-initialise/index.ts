@@ -8,16 +8,16 @@ import {
     afterDeleteAVVCatalogueHook,
     afterDeleteNRLHook,
     afterDeletePLZHook,
+    afterDeleteSearchAliasHook,
     afterSaveAVVCatalogueHook,
     afterSaveNRLHook,
     afterSavePLZHook,
-    checkCollectionsForContent,
-    afterDeleteSearchAliasHook,
     afterSaveSearchAliasHook,
+    checkCollectionsForContent,
     checkSystemConfiguration,
     setNRLCache,
     setPLZCache
-} from './useCases';
+} from './use-cases';
 
 logger.info('Parse Cloud: Checking System Configuration.');
 checkSystemConfiguration.execute();

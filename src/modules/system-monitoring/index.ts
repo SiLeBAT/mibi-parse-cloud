@@ -4,5 +4,5 @@
  * of the running system
  */
 import { logger } from '../../system/logging';
-import './useCases';
+import './use-cases';
 logger.info('Parse Cloud: System monitoring module loaded.');

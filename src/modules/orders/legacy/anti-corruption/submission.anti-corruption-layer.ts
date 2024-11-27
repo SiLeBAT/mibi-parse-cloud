@@ -3,7 +3,7 @@ import {
     NRL_ID_VALUE,
     NRLId
 } from '../../../shared/domain/valueObjects/nrl-id.vo';
-import { getServerConfig } from '../../../shared/useCases/get-server-config';
+import { getServerConfig } from '../../../shared/use-cases/get-server-config';
 import {
     AnnotatedSampleDataEntry,
     Customer,
