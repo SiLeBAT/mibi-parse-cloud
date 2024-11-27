@@ -5,5 +5,5 @@
  * - Checks for referential integrity on the db entries, if necessary
  */
 import { logger } from '../../system/logging';
-import './useCases';
+import './use-cases';
 logger.info('Parse Cloud: System update module loaded.');

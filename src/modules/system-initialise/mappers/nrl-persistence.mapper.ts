@@ -1,10 +1,10 @@
-import { NRLObject } from '../../orders/infrastructure';
 import { NRL } from '../../shared/domain/entities/nrl.entity';
 import {
     AnalysisProcedure,
     Email,
     NRLId
 } from '../../shared/domain/valueObjects';
+import { NRLObject } from '../../shared/infrastructure/parse-types';
 import { Mapper, MappingError } from '../../shared/mappers';
 
 export class NRLPersistenceMapper extends Mapper {
