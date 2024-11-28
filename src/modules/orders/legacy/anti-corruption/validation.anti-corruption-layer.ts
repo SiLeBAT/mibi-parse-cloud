@@ -48,7 +48,7 @@ export class ValidationAntiCorruptionLayer {
 
         const samples: Sample[] = validationParameter.props.data.map(
             (entry: SampleEntry<SampleEntryTuple>) => {
-                return sampleFactory.createSample({
+                const sample = sampleFactory.createSample({
                     sample_id: {
                         errors: [],
                         correctionOffer: [],
@@ -182,6 +182,13 @@ export class ValidationAntiCorruptionLayer {
                         oldValue: entry.data.comment.oldValue
                     }
                 });
+
+                sample.setAnalysis(this.nrlService, entry.data.analysis);
+                sample.setUrgency(
+                    this.fromUrgencyStringToEnum(entry.data.urgency)
+                );
+
+                return sample;
             }
         );
 
@@ -229,5 +236,15 @@ export class ValidationAntiCorruptionLayer {
         });
 
         return SampleSet.create({ data: results });
+    }
+
+    private fromUrgencyStringToEnum(urgency: string): Urgency {
+        switch (urgency.trim().toLowerCase()) {
+            case 'eilt':
+                return Urgency.URGENT;
+            case 'normal':
+            default:
+                return Urgency.NORMAL;
+        }
     }
 }

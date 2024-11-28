@@ -9,6 +9,9 @@ import {
     SampleSheetAnalysis,
     SampleSheetAnalysisOption,
     SampleSheetMetaData,
+    UnmarshalSampleSheet,
+    UnmarshalSampleSet,
+    UnmarshalSample,
     Urgency
 } from '../model/legacy.model';
 import { Sample } from '../model/sample.entity';
@@ -42,7 +45,9 @@ export class SampleSheetService {
         };
     }
 
-    fromSampleSheetToSampleSet(sampleSheet: SampleSheet): SampleSet {
+    fromSampleSheetToSampleSet(
+        sampleSheet: UnmarshalSampleSheet
+    ): UnmarshalSampleSet {
         const returnNrl = this.tryGetSingleNRL(sampleSheet.samples);
         const isInEnum = Object.values(NRL_ID_VALUE).includes(returnNrl);
         const isNotUnknown = returnNrl !== NRL_ID_VALUE.UNKNOWN;
@@ -160,12 +165,14 @@ export class SampleSheetService {
         return urgencies[0];
     }
 
-    private tryGetSingleNRL(samples: Sample[]): NRL_ID_VALUE {
+    private tryGetSingleNRL(
+        samples: UnmarshalSample[] | Sample[]
+    ): NRL_ID_VALUE {
         const nrls = _.uniq(samples.map(s => s.getNRL()));
         return nrls.length === 1 ? nrls[0] : NRL_ID_VALUE.UNKNOWN;
     }
 
-    private addMetaDataToSamples(sampleSheet: SampleSheet) {
+    private addMetaDataToSamples(sampleSheet: UnmarshalSampleSheet) {
         sampleSheet.samples.forEach(sample => {
             sample.setAnalysis(
                 this.nrlService,
