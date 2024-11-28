@@ -138,7 +138,10 @@ const antiCorruptionLayers = (async function init() {
         new ExcelMarshallAntiCorruptionLayer(sampleService);
 
     const excelUnmarshalAntiCorruptionLayer =
-        new ExcelUnmarshalAntiCorruptionLayer(excelUnmarshalService);
+        new ExcelUnmarshalAntiCorruptionLayer(
+            excelUnmarshalService,
+            sampleSheetService
+        );
     return {
         excelUnmarshalAntiCorruptionLayer,
         validationAntiCorruptionLayer,

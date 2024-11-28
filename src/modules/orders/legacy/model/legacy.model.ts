@@ -6,6 +6,7 @@ import { CatalogService } from '../application/catalog.service';
 import { sampleSheetPDFConfig } from './sample-sheet-pdf.config';
 import { sampleSheetPDFStyles } from './sample-sheet-pdf.styles';
 import { Sample } from './sample.entity';
+import { NRLService } from '../application/nrl.service';
 export enum SampleSheetAnalysisOption {
     OMIT,
     ACTIVE,
@@ -430,6 +431,12 @@ export interface UnmarshalSampleSheet {
     samples: UnmarshalSample[];
     meta: SampleSheetMetaData;
 }
+
+export interface UnmarshalSampleSet {
+    samples: UnmarshalSample[];
+    meta: SampleSetMetaData;
+}
+
 export class UnmarshalSample {
     static create(data: SampleData, meta: SampleMetaData): UnmarshalSample {
         const cleanedData = _.cloneDeep(data);
@@ -454,6 +461,21 @@ export class UnmarshalSample {
     }
     get meta() {
         return this._meta;
+    }
+
+    getNRL(): NRL_ID_VALUE {
+        return this._meta.nrl;
+    }
+
+    setAnalysis(nrlService: NRLService, analysis: Partial<Analysis>): void {
+        this._meta.analysis = {
+            ..._.cloneDeep(analysis),
+            ...nrlService.getStandardAnalysisFor(this._meta.nrl)
+        };
+    }
+
+    setUrgency(urgency: Urgency): void {
+        this._meta.urgency = urgency;
     }
 }
 
