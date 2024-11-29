@@ -6,10 +6,7 @@ import {
     searchAliasCache
 } from '../../shared/infrastructure';
 import { ObjectKeys } from '../../shared/infrastructure/parse-types';
-import {
-    setAVVCatalogueCache,
-    setSearchAliasCache
-} from '../../system-initialise/use-cases';
+import { setAVVCatalogueCache, setSearchAliasCache } from '../use-cases';
 import {
     ExcelMarshallAntiCorruptionLayer,
     ExcelUnmarshalAntiCorruptionLayer,

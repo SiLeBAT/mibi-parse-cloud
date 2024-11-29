@@ -1,6 +1,6 @@
 import { plzCache, PLZCache } from '../../../shared/infrastructure';
 import { UseCase } from '../../../shared/use-cases';
-import { PLZRepository, plzRepository } from '../../infrastructure';
+import { PLZRepository, plzRepository } from '../../infrastructure/repository';
 
 class SetPLZCacheUseCase implements UseCase<null, Promise<void>> {
     constructor(

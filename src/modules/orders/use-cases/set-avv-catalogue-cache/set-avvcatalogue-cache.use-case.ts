@@ -1,12 +1,12 @@
 import {
-    avvCatalogueRepository,
-    AVVCatalogueRepository
-} from '../../../orders/infrastructure/repositories';
-import {
     avvCatalogueCache,
     AVVCatalogueCache
 } from '../../../shared/infrastructure/cache/avvcatalogue.cache';
 import { UseCase } from '../../../shared/use-cases';
+import {
+    avvCatalogueRepository,
+    AVVCatalogueRepository
+} from '../../infrastructure/repository';
 
 class SetAVVCatalogueCacheUseCase implements UseCase<null, Promise<void>> {
     constructor(
