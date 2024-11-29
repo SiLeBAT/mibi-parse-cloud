@@ -5,7 +5,7 @@ import { UseCase } from '../../../shared/use-cases';
 import {
     userRepository,
     UserRepository
-} from '../../infrastructure/repositories';
+} from '../../infrastructure/repository';
 
 interface HasUserEmail {
     userEmail: string;

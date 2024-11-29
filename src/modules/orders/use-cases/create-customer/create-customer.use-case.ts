@@ -4,7 +4,7 @@ import { Customer } from '../../domain';
 import {
     customerRepository,
     CustomerRepository
-} from '../../infrastructure/repositories';
+} from '../../infrastructure/repository';
 
 type CreateCustomerParams = {
     userId: EntityId;

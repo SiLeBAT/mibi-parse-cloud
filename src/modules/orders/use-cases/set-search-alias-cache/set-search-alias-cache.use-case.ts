@@ -1,12 +1,12 @@
 import {
-    searchAliasRepository,
-    SearchAliasRepository
-} from '../../../orders/infrastructure/repositories';
-import {
     searchAliasCache,
     SearchAliasCache
 } from '../../../shared/infrastructure/cache/search-alias.cache';
 import { UseCase } from '../../../shared/use-cases';
+import {
+    searchAliasRepository,
+    SearchAliasRepository
+} from '../../infrastructure/repository';
 
 class SetSearchAliasCacheUseCase implements UseCase<null, Promise<void>> {
     constructor(

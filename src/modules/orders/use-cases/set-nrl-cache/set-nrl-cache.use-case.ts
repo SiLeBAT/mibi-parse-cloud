@@ -1,6 +1,6 @@
 import { NRLCache, nrlCache } from '../../../shared/infrastructure';
 import { UseCase } from '../../../shared/use-cases';
-import { nrlRepository, NRLRepository } from '../../infrastructure';
+import { nrlRepository, NRLRepository } from '../../infrastructure/repository';
 
 class SetNRLCacheUseCase implements UseCase<null, Promise<void>> {
     constructor(
