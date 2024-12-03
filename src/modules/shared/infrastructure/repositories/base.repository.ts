@@ -6,10 +6,4 @@ export abstract class AbstractRepository<
     protected getQuery() {
         return new Parse.Query<T>(this.objectKey);
     }
-
-    public async isEmpty(): Promise<boolean> {
-        const query = this.getQuery();
-        const count = await query.count({ useMasterKey: true });
-        return !count;
-    }
 }

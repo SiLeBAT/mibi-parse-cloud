@@ -1,61 +1,37 @@
+import * as _ from 'lodash';
 import { logger } from '../../../../system/logging';
 import { AbstractRepository } from '../../../shared/infrastructure';
 import { UseCase } from '../../../shared/use-cases';
-import {
-    additionalPathogensRepository,
-    AdditionalPathogensRepository,
-    analysisProceduresRepository,
-    AnalysisProceduresRepository,
-    AVVCatalogRepository,
-    avvCatalogRepository,
-    nrlRepository,
-    NRLRepository,
-    plzRepository,
-    PLZRepository,
-    templateFileRepository,
-    TemplateFileRepository,
-    userInformationRepository,
-    UserInformationRepository
-} from '../../infrastructure';
 
 class CheckCollectionsForContentUseCase implements UseCase<null, null> {
-    constructor(
-        private nrlRepository: NRLRepository,
-        private plzRepository: PLZRepository,
-        private avvCatalogRepository: AVVCatalogRepository,
-        private additionalPathogensRepository: AdditionalPathogensRepository,
-        private analysisProceduresRepository: AnalysisProceduresRepository,
-        private templateFileRepository: TemplateFileRepository,
-        private userInfoRepository: UserInformationRepository
-    ) {}
+    constructor() {}
+
+    private blackList = [
+        '_User',
+        '_Role',
+        'institutions',
+        'states',
+        'users',
+        'resettokens',
+        'validationerrors',
+        'analysisprocedures',
+        'nrls',
+        'dbversioninfos',
+        '_Session'
+    ];
 
     async execute(): Promise<null> {
         try {
-            await this.checkRepository(this.nrlRepository, 'NRL Collection');
-            await this.checkRepository(
-                this.plzRepository,
-                'Allowed_PLZ Collection'
+            const schema = await Parse.Schema.all();
+            const collectionsToCheck = _.difference(
+                schema.map(r => r.className),
+                this.blackList
             );
-            await this.checkRepository(
-                this.avvCatalogRepository,
-                'AVV_Catalog Collection'
-            );
-            await this.checkRepository(
-                this.additionalPathogensRepository,
-                'Additional_Pathogens Collection'
-            );
-            await this.checkRepository(
-                this.analysisProceduresRepository,
-                'Analysis_Procedures Collection'
-            );
-            await this.checkRepository(
-                this.templateFileRepository,
-                'Template_File Collection'
-            );
-            await this.checkRepository(
-                this.userInfoRepository,
-                'User_Info Collection'
-            );
+
+            collectionsToCheck.forEach(async r => {
+                const repo = this.createTemporaryRepository(r);
+                await this.checkRepository(repo, r);
+            });
         } catch (error) {
             logger.error(
                 'Serious error: Unable to check Collections for content'
@@ -65,8 +41,11 @@ class CheckCollectionsForContentUseCase implements UseCase<null, null> {
         return null;
     }
 
-    private async checkRepository<T extends Parse.Object<Parse.Attributes>>(
-        repository: AbstractRepository<T>,
+    private createTemporaryRepository(className: string) {
+        return new TemporaryRepository(className);
+    }
+    private async checkRepository(
+        repository: TemporaryRepository,
         name: string
     ) {
         const isEmpty = await repository.isEmpty();
@@ -77,14 +56,15 @@ class CheckCollectionsForContentUseCase implements UseCase<null, null> {
     }
 }
 
-const checkCollectionsForContent = new CheckCollectionsForContentUseCase(
-    nrlRepository,
-    plzRepository,
-    avvCatalogRepository,
-    additionalPathogensRepository,
-    analysisProceduresRepository,
-    templateFileRepository,
-    userInformationRepository
-);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+class TemporaryRepository extends AbstractRepository<any> {
+    public async isEmpty(): Promise<boolean> {
+        const query = this.getQuery();
+        const count = await query.count({ useMasterKey: true });
+        return !count;
+    }
+}
+
+const checkCollectionsForContent = new CheckCollectionsForContentUseCase();
 
 export { checkCollectionsForContent, CheckCollectionsForContentUseCase };
