@@ -10,6 +10,7 @@ export enum NRL_ID_VALUE {
     NRL_VTEC = 'NRL-VTEC',
     L_Bacillus = 'L-Bacillus',
     NRL_AR = 'NRL-AR',
+    NRL_AR_Kleb = 'NRL-AR-Kleb',
     NRL_Campy = 'NRL-Campy',
     NRL_Staph = 'NRL-Staph',
     NRL_Listeria = 'NRL-Listeria',
@@ -61,6 +62,8 @@ export class NRLId extends ValueObject<NRLIdProps> {
             case 'NRL für Antibiotikaresistenz':
             case 'NRL-AR':
                 return NRL_ID_VALUE.NRL_AR;
+            case 'NRL-AR-Kleb':
+                return NRL_ID_VALUE.NRL_AR_Kleb;
             case 'Konsiliarlabor für Yersinia':
             case 'KL-Yersinia':
                 return NRL_ID_VALUE.KL_Yersinia;

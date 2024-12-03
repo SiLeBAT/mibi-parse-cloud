@@ -126,6 +126,7 @@ export const sampleSheetSamplesStrings = {
 
 export const sampleSheetNRLStrings: Record<NRL_ID_VALUE, string> = {
     'NRL-AR': 'NRL für Antibiotikaresistenz',
+    'NRL-AR-Kleb': 'NRL für Antibiotikaresistenz',
     'NRL-Campy': 'NRL für Campylobacter',
     'NRL-VTEC':
         'NRL für Escherichia coli einschließl. verotoxinbildende E. coli',
