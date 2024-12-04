@@ -429,16 +429,23 @@ export class AVVCatalogueParser {
 
         // tslint:disable-next-line
         const avv324Unique: MibiEintrag[] = _.uniqWith(avv324, _.isEqual);
+        const additionalPathogens = await this.getAdditionalPathogens();
+        const duplicatePathogens: string[] = [];
 
         avv324Unique.forEach((tempEintrag: TempEintrag) => {
+            const normalizedText = tempEintrag.Text.normalize('NFC');
+            if (additionalPathogens.includes(normalizedText)) {
+                duplicatePathogens.push(normalizedText);
+            }
+
             mibiEintraege[tempEintrag.Kode] = {
-                Text: tempEintrag.Text.normalize('NFC'),
+                Text: normalizedText,
                 Basiseintrag: tempEintrag.Basiseintrag
             };
-            textEintraege[tempEintrag.Text] = tempEintrag.Kode;
+            textEintraege[normalizedText] = tempEintrag.Kode;
             fuzzyEintraege.push({
                 Kode: tempEintrag.Kode,
-                Text: tempEintrag.Text.normalize('NFC'),
+                Text: normalizedText,
                 Basiseintrag: tempEintrag.Basiseintrag
             });
         });
@@ -447,9 +454,11 @@ export class AVVCatalogueParser {
          * 1) Parse the XML and create a JSON Catalogue
          * 2) add the additional Pathogens to that catalogue
          */
-        const additionalPathogens = await this.getAdditionalPathogens();
+        const filteredPathogens = additionalPathogens.filter(
+            pathogen => !duplicatePathogens.includes(pathogen)
+        );
 
-        additionalPathogens.forEach((bfrErreger: string) => {
+        filteredPathogens.forEach((bfrErreger: string) => {
             textEintraege[bfrErreger] = '';
             fuzzyEintraege.push({
                 Kode: '',
