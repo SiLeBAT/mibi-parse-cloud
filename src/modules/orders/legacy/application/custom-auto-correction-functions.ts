@@ -192,7 +192,7 @@ function getFuseOptions(): Fuse.IFuseOptions<FuzzyEintrag> {
                 weight: 0.9
             },
             {
-                name: 'P-Code3',
+                name: 'Kode',
                 weight: 0.1
             }
         ]
