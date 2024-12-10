@@ -19,27 +19,24 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
     const catalogName = 'avv324';
     const property: SampleProperty = 'pathogen_avv';
     const options = getFuseOptions();
-
-    const catalogEnhancements = createCatalogEnhancements(
-        catalogService,
-        catalogName
-    ) as CatalogEnhancement[];
-
-    const fuse = catalogService
-        .getAVVCatalog<AVV324Data>(catalogName)
-        .getFuzzyIndex(options);
-
     const searchCache: Record<string, CorrectionSuggestions> = {};
 
     return (sampleData: SampleData): CorrectionSuggestions | null => {
+        const catalogEnhancements = createCatalogEnhancements(
+            catalogService,
+            catalogName
+        ) as CatalogEnhancement[];
+
         const samplingDateValue = sampleData.sampling_date.value;
         const catalog = catalogService.getAVVCatalog<AVV324Data>(
             catalogName,
             samplingDateValue
         );
+        const fuse = catalog.getFuzzyIndex(options);
 
         const originalValue = sampleData[property].value;
         const trimmedEntry = originalValue.trim();
+
         // Ignore empty entries
         if (!trimmedEntry) {
             return null;
@@ -106,6 +103,7 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
             fuse,
             resultOptions
         );
+
         return searchCache[trimmedEntry];
     };
 }
@@ -192,7 +190,7 @@ function getFuseOptions(): Fuse.IFuseOptions<FuzzyEintrag> {
                 weight: 0.9
             },
             {
-                name: 'P-Code3',
+                name: 'Kode',
                 weight: 0.1
             }
         ]
