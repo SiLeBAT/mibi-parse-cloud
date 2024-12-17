@@ -32,9 +32,9 @@ import {
     OrderNotificationMetaData,
     Payload,
     SampleSet,
-    SampleSheet,
-    Urgency
+    SampleSheet
 } from './../model/legacy.model';
+import { fromUrgencyStringToEnum } from './urgency.mapper';
 
 export class SubmissionAntiCorruptionLayer {
     private logger = getLogger();
@@ -130,10 +130,9 @@ export class SubmissionAntiCorruptionLayer {
                         },
                         {
                             nrl: NRLId.create(entry.data.nrl).value,
-                            urgency:
-                                Urgency[
-                                    entry.data.urgency as keyof typeof Urgency
-                                ],
+                            urgency: fromUrgencyStringToEnum(
+                                entry.data.urgency
+                            ),
                             analysis: entry.data.analysis
                         }
                     );
