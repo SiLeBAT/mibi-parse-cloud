@@ -11,6 +11,7 @@ import { FormValidatorService } from '../application/form-validation.service';
 import { NRLService } from '../application/nrl.service';
 import { Analysis, SampleData, Urgency } from '../model/legacy.model';
 import { Sample } from '../model/sample.entity';
+import { fromUrgencyStringToEnum } from './urgency.mapper';
 
 class SampleFactory {
     constructor(private nrlService: NRLService) {}
@@ -184,9 +185,7 @@ export class ValidationAntiCorruptionLayer {
                 });
 
                 sample.setAnalysis(this.nrlService, entry.data.analysis);
-                sample.setUrgency(
-                    this.fromUrgencyStringToEnum(entry.data.urgency)
-                );
+                sample.setUrgency(fromUrgencyStringToEnum(entry.data.urgency));
 
                 return sample;
             }
@@ -236,15 +235,5 @@ export class ValidationAntiCorruptionLayer {
         });
 
         return SampleSet.create({ data: results });
-    }
-
-    private fromUrgencyStringToEnum(urgency: string): Urgency {
-        switch (urgency.trim().toLowerCase()) {
-            case 'eilt':
-                return Urgency.URGENT;
-            case 'normal':
-            default:
-                return Urgency.NORMAL;
-        }
     }
 }

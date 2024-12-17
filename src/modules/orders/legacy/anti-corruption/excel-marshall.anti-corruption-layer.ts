@@ -6,7 +6,7 @@ import {
     SampleEntryTuple
 } from '../../domain';
 import { SampleService } from '../application/sample.service';
-import { Urgency } from '../model/legacy.model';
+import { fromUrgencyStringToEnum } from './urgency.mapper';
 import { Sample } from '../model/sample.entity';
 
 export class ExcelMarshallAntiCorruptionLayer {
@@ -156,9 +156,7 @@ export class ExcelMarshallAntiCorruptionLayer {
                     };
                     const meta = {
                         nrl: NRLId.create(entry.data.nrl).value,
-                        urgency: this.fromUrgencyStringToEnum(
-                            entry.data.urgency
-                        ),
+                        urgency: fromUrgencyStringToEnum(entry.data.urgency),
                         analysis: entry.data.analysis
                     };
                     return Sample.create(data, meta);
@@ -181,14 +179,5 @@ export class ExcelMarshallAntiCorruptionLayer {
             }
         });
         return FileInformation.create(props);
-    }
-    private fromUrgencyStringToEnum(urgency: string): Urgency {
-        switch (urgency.trim().toLowerCase()) {
-            case 'eilt':
-                return Urgency.URGENT;
-            case 'normal':
-            default:
-                return Urgency.NORMAL;
-        }
     }
 }
