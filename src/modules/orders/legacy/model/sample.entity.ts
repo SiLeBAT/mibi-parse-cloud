@@ -141,7 +141,11 @@ export class Sample {
     applySingleCorrectionSuggestions(): void {
         Object.keys(this._data).forEach(property => {
             const entry = this._data[property];
-            if (entry.correctionOffer.length === 1) {
+            if (
+                entry.correctionOffer.length === 1 &&
+                entry.errors.length === 1 &&
+                entry.errors[0].code === 88
+            ) {
                 entry.oldValue = entry.value;
                 entry.value = entry.correctionOffer[0];
                 entry.correctionOffer = [];
