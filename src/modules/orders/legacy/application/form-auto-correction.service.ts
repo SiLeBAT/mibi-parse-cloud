@@ -36,6 +36,7 @@ export class FormAutoCorrectionService {
                         );
                         newSample.addErrorTo(targetField, err);
                     }
+                    newSample.applySingleCorrectionSuggestions();
                 }
             });
             return newSample;
