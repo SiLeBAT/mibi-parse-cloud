@@ -1,12 +1,12 @@
 import { mp35CreateUserInfo } from './mp35-create-user-info';
-import { mp35CreateAVVCatalogue } from './mp37-create-avv-catalogue';
+import { mp35CreateAVVCatalog } from './mp37-create-avv-catalog';
 import { mp38CreateAdditionalPathogens } from './mp38-create-additional-pathogens';
 import { mp39CreateNRL } from './mp39-create-nrl';
 import { mp40CreateAnalysisProcedure } from './mp40-create-analysis-procedure';
 import { mp41CreateTemplateFile } from './mp41-create-template-file';
 import { mp66UpdateUserInfo } from './mp66-update-user-info';
 import { mp87CreateAllowedPLZ } from './mp87-create-allowed-plz';
-import { mp64UpdateAVVCatalogue } from './mp64-update-avv-catalogue';
+import { mp64UpdateAVVCatalog } from './mp64-update-avv-catalog';
 import { mp86reateSearchAlias } from './mp86-create-search-alias';
 export interface UpdateFunc {
     (): Promise<boolean>;
@@ -17,13 +17,13 @@ export interface UpdateFunc {
  */
 export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp35CreateUserInfo,
-    mp35CreateAVVCatalogue,
+    mp35CreateAVVCatalog,
     mp41CreateTemplateFile,
     mp40CreateAnalysisProcedure,
     mp38CreateAdditionalPathogens,
     mp39CreateNRL,
     mp66UpdateUserInfo,
     mp87CreateAllowedPLZ,
-    mp64UpdateAVVCatalogue,
+    mp64UpdateAVVCatalog,
     mp86reateSearchAlias
 ];
