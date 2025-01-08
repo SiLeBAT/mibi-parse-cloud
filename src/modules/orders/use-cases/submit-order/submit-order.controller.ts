@@ -11,7 +11,6 @@ import { SERVER_ERROR_CODE } from '../../domain/enums';
 import { OrderDTO, SampleDTO } from '../../dto';
 import { SampleEntryDTOMapper } from '../../mappers';
 import { OrderDTOMapper } from '../../mappers/order-dto.mapper';
-import { createCustomer } from '../create-customer';
 import { createSubmitterId } from '../create-submitter-id';
 import {
     AutoCorrectedInputError,
@@ -56,9 +55,6 @@ const submitOrderController = async (
         setLoggingContext(request.log);
 
         const submitterId: EntityId = await createSubmitterId.execute(request);
-        const customer = await createCustomer.execute({
-            userId: submitterId
-        });
         const order: Order<SampleEntryCollection> =
             await OrderDTOMapper.fromDTO(
                 requestDTO.order,
@@ -75,7 +71,6 @@ const submitOrderController = async (
                 }
             );
 
-        order.setCustomer(customer);
         const validatedSubmission = await submitOrderUseCase.execute({
             order,
             submitterId
