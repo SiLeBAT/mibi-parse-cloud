@@ -8,7 +8,7 @@ import {
     CatalogData,
     SearchAlias
 } from '../model/legacy.model';
-import { AVVCatalogueCache } from '../../../shared/infrastructure/cache';
+import { AVVCatalogCache } from '../../../shared/infrastructure/cache';
 import { CatalogRepository } from '../repositories/catalog.repository';
 import { SearchAliasCache } from '../../../shared/infrastructure/cache';
 
@@ -17,7 +17,7 @@ export class CatalogService {
         private plzCache: PLZCache,
         private catalogRepository: CatalogRepository,
         private searchAliasCache: SearchAliasCache,
-        private avvCatalogueCache: AVVCatalogueCache
+        private avvCatalogCache: AVVCatalogCache
     ) {}
 
     getCatalog<T extends CatalogData>(catalogName: string): Catalog<T> {
@@ -37,7 +37,7 @@ export class CatalogService {
         catalogName: string,
         samplingDate: string | null = null
     ): AVVCatalog<T> {
-        const catalogData = this.avvCatalogueCache.getAVVCatalogueData(
+        const catalogData = this.avvCatalogCache.getAVVCatalogData(
             catalogName,
             samplingDate
         );

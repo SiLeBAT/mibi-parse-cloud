@@ -1,12 +1,12 @@
 import { logger } from '../../../system/logging';
 import {
-    avvCatalogueCache,
+    avvCatalogCache,
     nrlCache,
     plzCache,
     searchAliasCache
 } from '../../shared/infrastructure';
 import { ObjectKeys } from '../../shared/infrastructure/parse-types';
-import { setAVVCatalogueCache, setSearchAliasCache } from '../use-cases';
+import { setAVVCatalogCache, setSearchAliasCache } from '../use-cases';
 import {
     ExcelMarshallAntiCorruptionLayer,
     ExcelUnmarshalAntiCorruptionLayer,
@@ -64,14 +64,14 @@ const antiCorruptionLayers = (async function init() {
 
     logger.info('Parse Cloud: Creating Search-Alias cache.');
     await setSearchAliasCache.execute();
-    logger.info('Parse Cloud: Creating AVVCatalogue cache.');
-    await setAVVCatalogueCache.execute();
+    logger.info('Parse Cloud: Creating AVVCatalog cache.');
+    await setAVVCatalogCache.execute();
 
     const catalogService = new CatalogService(
         plzCache,
         catalogRepository,
         searchAliasCache,
-        avvCatalogueCache
+        avvCatalogCache
     );
 
     const avvFormatProvider = new AVVFormatProvider(stateRepository);

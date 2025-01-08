@@ -5,21 +5,20 @@ export const ObjectKeys = {
     Institute: 'institutions',
     AllowedPLZ: 'Allowed_PLZ',
     AdditionalPathogens: 'Additional_Pathogens',
-    AVVCatalogue: 'AVV_Catalogue',
+    AVVCatalog: 'AVV_Catalogue',
     AnalysisProcedure: 'Analysis_Procedure',
     SearchAlias: 'Search_Alias'
 };
 
-export interface AVVCatalogueAttributes extends Parse.Attributes {
+export interface AVVCatalogAttributes extends Parse.Attributes {
     version: string;
     validFrom: Date;
-    catalogueFile: Parse.File;
-    catalogueCode: string;
-    catalogueData: string;
+    catalogFile: Parse.File;
+    catalogCode: string;
+    catalogData: string;
 }
 
-export interface AVVCatalogueObject
-    extends Parse.Object<AVVCatalogueAttributes> {}
+export interface AVVCatalogObject extends Parse.Object<AVVCatalogAttributes> {}
 
 export interface SearchAliasAttributes extends Parse.Attributes {
     catalog: string;
