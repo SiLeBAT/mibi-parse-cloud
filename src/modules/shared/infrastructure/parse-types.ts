@@ -5,7 +5,7 @@ export const ObjectKeys = {
     Institute: 'institutions',
     AllowedPLZ: 'Allowed_PLZ',
     AdditionalPathogens: 'Additional_Pathogens',
-    AVVCatalog: 'AVV_Catalogue',
+    AVVCatalog: 'AVV_Catalog',
     AnalysisProcedure: 'Analysis_Procedure',
     SearchAlias: 'Search_Alias'
 };

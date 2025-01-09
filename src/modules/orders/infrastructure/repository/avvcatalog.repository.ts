@@ -60,10 +60,10 @@ export class AVVCatalogRepository extends AbstractRepository<AVVCatalogObject> {
         const day = `${validFromDate.getDate()}`.padStart(2, '0');
 
         return await AVVCatalog.create({
-            name: avvCatalog.get('catalogueCode'),
+            name: avvCatalog.get('catalogCode'),
             validFrom: `${year}-${month}-${day}`,
             version: avvCatalog.get('version'),
-            data: avvCatalog.get('catalogueData')
+            data: avvCatalog.get('catalogData')
         });
     }
 }
