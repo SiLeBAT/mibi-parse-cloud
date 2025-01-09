@@ -25,7 +25,7 @@ export const beforeAVVCatalogSaveHook = async (
     request: BeforeAVVCatalogSaveHookRequest
 ) => {
     const avvCatalogObject: AVVCatalogObject = request.object;
-    const originalFile = avvCatalogObject.get('catalogueFile');
+    const originalFile = avvCatalogObject.get('catalogFile');
     const isUpdate = Boolean(avvCatalogObject.id);
     try {
         setLoggingContext(request.log);
@@ -72,7 +72,7 @@ function destroyFile(file: Parse.File) {
 async function getFileContent(
     avvCatalogObject: AVVCatalogObject
 ): Promise<FileContent> {
-    const file = avvCatalogObject.get('catalogueFile');
+    const file = avvCatalogObject.get('catalogFile');
 
     const fileContent = await FileContent.create({
         content: await getContentAsString(file),

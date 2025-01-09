@@ -14,7 +14,7 @@ export class AVVCatalogInformationMapper extends Mapper {
                     'Unable to create CatalogInformation: validFrom Date missing.'
                 );
             }
-            const catalogCode = avvCatalogObject.get('catalogueCode') || '';
+            const catalogCode = avvCatalogObject.get('catalogCode') || '';
             const version = avvCatalogObject.get('version') || '';
 
             return await CatalogInformation.create({

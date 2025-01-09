@@ -15,11 +15,11 @@ export const afterSaveAVVCatalogHook = async (
     request: AfterAVVCatalogSaveHookRequest
 ) => {
     request.log.info(
-        'Changes made to AVV_Catalogue Collection. Updating cache and deleting json file.'
+        'Changes made to AVV_Catalog Collection. Updating cache and deleting json file.'
     );
 
     const avvCatalogObject: AVVCatalogObject = request.object;
-    const jsonFile = avvCatalogObject.get('catalogueFile');
+    const jsonFile = avvCatalogObject.get('catalogFile');
     try {
         setLoggingContext(request.log);
         destroyFile(jsonFile);
@@ -36,7 +36,7 @@ export const afterSaveAVVCatalogHook = async (
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const afterDeleteAVVCatalogHook = (request: any) => {
     request.log.info(
-        'Entry deleted from AVV_Catalogue Collection. Updating cache.'
+        'Entry deleted from AVV_Catalog Collection. Updating cache.'
     );
 
     setAVVCatalogCache.execute();

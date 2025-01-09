@@ -27,11 +27,11 @@ export class AVVCatalogMapper extends Mapper {
             );
         }
 
-        aco.set('catalogueFile', jsonFile);
-        aco.set('catalogueCode', catalog.catalogInformation.catalogCode);
+        aco.set('catalogFile', jsonFile);
+        aco.set('catalogCode', catalog.catalogInformation.catalogCode);
         aco.set('version', catalog.catalogInformation.version);
         aco.set('validFrom', catalog.catalogInformation.validFrom);
-        aco.set('catalogueData', catalog.JSON);
+        aco.set('catalogData', catalog.JSON);
         return aco;
     }
 }

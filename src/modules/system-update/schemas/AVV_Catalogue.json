@@ -1,5 +1,5 @@
 {
-  "className": "AVV_Catalogue",
+  "className": "AVV_Catalog",
   "fields": {
     "objectId": {
       "type": "String"
@@ -13,11 +13,11 @@
     "ACL": {
       "type": "ACL"
     },
-    "catalogueFile": {
+    "catalogFile": {
       "type": "File",
       "required": true
     },
-    "catalogueCode": {
+    "catalogCode": {
       "type": "String",
       "required": false
     },

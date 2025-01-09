@@ -1,13 +1,13 @@
 import { createSchema } from './create-schema';
 
 export async function mp35CreateAVVCatalog() {
-    const schemaName = 'AVV_Catalogue';
+    const schemaName = 'AVV_Catalog';
     const avvCatalogSchema = new Parse.Schema(schemaName);
 
     const creationFunction = () => {
         avvCatalogSchema
-            .addFile('catalogueFile', { required: true })
-            .addString('catalogueCode')
+            .addFile('catalogFile', { required: true })
+            .addString('catalogCode')
             .addString('version')
             .addDate('validFrom');
 
