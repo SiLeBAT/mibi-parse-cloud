@@ -19,7 +19,6 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
     const catalogName = 'avv324';
     const property: SampleProperty = 'pathogen_avv';
     const options = getFuseOptions();
-    const searchCache: Record<string, CorrectionSuggestions> = {};
 
     return (sampleData: SampleData): CorrectionSuggestions | null => {
         const catalogEnhancements = createCatalogEnhancements(
@@ -41,10 +40,6 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
         if (!trimmedEntry) {
             return null;
         }
-        // Return cached result
-        if (searchCache[trimmedEntry]) {
-            return searchCache[trimmedEntry];
-        }
 
         if (catalog.containsTextEintrag(trimmedEntry)) {
             return null;
@@ -57,26 +52,24 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
         ) {
             const eintrag = catalog.getEintragWithAVVKode(trimmedEntry);
             if (eintrag) {
-                searchCache[trimmedEntry] = createCacheEntry(
+                return createCorrectionSuggestion(
                     property,
                     originalValue,
                     [eintrag.Text],
                     88
                 );
-                return searchCache[trimmedEntry];
             }
         }
 
         // Search for Genus
         const genusEntry = 'Genus ' + trimmedEntry;
         if (catalog.containsTextEintrag(genusEntry)) {
-            searchCache[trimmedEntry] = {
-                field: property,
-                original: originalValue,
-                correctionOffer: [genusEntry],
-                code: 88
-            };
-            return searchCache[trimmedEntry];
+            return createCorrectionSuggestion(
+                property,
+                originalValue,
+                [genusEntry],
+                88
+            );
         }
 
         // Search catalog enhancements
@@ -98,23 +91,21 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
             alias,
             original: originalValue
         };
-        searchCache[trimmedEntry] = doFuzzySearch(
-            alteredEntry,
-            fuse,
-            resultOptions
-        );
 
-        return searchCache[trimmedEntry];
+        const correctionSuggestions: CorrectionSuggestions | null =
+            doFuzzySearch(alteredEntry, fuse, resultOptions);
+
+        return correctionSuggestions;
     };
 }
 
 // Utility functions
-function createCacheEntry(
+function createCorrectionSuggestion(
     field: SampleProperty,
     original: string,
     correctionOffer: string[],
     code: number
-) {
+): CorrectionSuggestions {
     return {
         field,
         original,
