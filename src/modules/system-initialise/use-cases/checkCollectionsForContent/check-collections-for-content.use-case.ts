@@ -9,7 +9,6 @@ class CheckCollectionsForContentUseCase implements UseCase<null, null> {
     private blackList = [
         '_User',
         '_Role',
-        'institutions',
         'states',
         'users',
         'resettokens',

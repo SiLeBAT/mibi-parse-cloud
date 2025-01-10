@@ -1,3 +1,4 @@
+import './check-template-files';
 import './create-submission-file';
 import './parse-sample-data';
 import './set-avv-catalog-cache';
