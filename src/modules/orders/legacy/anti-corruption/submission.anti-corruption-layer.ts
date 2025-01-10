@@ -50,10 +50,11 @@ export class SubmissionAntiCorruptionLayer {
     ) {}
 
     async sendSamples(
-        order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>
+        order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>,
+        submitter: Customer
     ): Promise<void> {
         const applicantMetaData: ApplicantMetaData =
-            this.createLegacyApplicationMetaData(order.customer, order.comment);
+            this.createLegacyApplicationMetaData(submitter, order.comment);
 
         const sampleSet: SampleSet = this.createLegacySampleSet(order);
 
