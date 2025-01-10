@@ -7,6 +7,7 @@ import {
     SampleSet
 } from '../../domain';
 import { antiCorruptionLayers } from '../../legacy';
+import { createCustomer } from '../create-customer';
 import { validateOrder } from '../validate-order';
 import {
     AutoCorrectedInputError,
@@ -50,8 +51,8 @@ export class SubmitOrderUseCase
         }
         const { submissionAntiCorruptionLayer } = await antiCorruptionLayers;
         const submissionACLayer = await submissionAntiCorruptionLayer;
-
-        await submissionACLayer.sendSamples(order);
+        const submitter = await createCustomer.execute({ userId: submitterId });
+        await submissionACLayer.sendSamples(order, submitter);
 
         return validatedSubmission;
     }
