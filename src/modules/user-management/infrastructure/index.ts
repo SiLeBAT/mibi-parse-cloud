@@ -1,1 +1,1 @@
-export { userInformationRepository } from './repositories';
+export { instituteRepository, userInformationRepository } from './repositories';
