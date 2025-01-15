@@ -11,5 +11,6 @@ export {
 export { SampleSet, SampleSetProps } from './sample-set.entity';
 export { SubmissionFormInfo } from './submission-form-info.vo';
 export { SubmissionFormInput } from './submission-form-input.vo';
+export { Submitter, SubmitterProps } from './submitter.entity';
 export { Base64EncodedString } from './types';
 export { ValidationParameter } from './validation-parameter.vo';

@@ -6,9 +6,9 @@ import {
 import { getServerConfig } from '../../../shared/use-cases/get-server-config';
 import {
     AnnotatedSampleDataEntry,
-    Customer,
     Order,
-    SampleEntry
+    SampleEntry,
+    Submitter
 } from '../../domain';
 import { ReceiveAs } from '../../domain/enums';
 import { CatalogService } from '../application/catalog.service';
@@ -51,7 +51,7 @@ export class SubmissionAntiCorruptionLayer {
 
     async sendSamples(
         order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>,
-        submitter: Customer
+        submitter: Submitter
     ): Promise<void> {
         const applicantMetaData: ApplicantMetaData =
             this.createLegacyApplicationMetaData(submitter, order.comment);
@@ -163,7 +163,7 @@ export class SubmissionAntiCorruptionLayer {
     }
 
     private createLegacyApplicationMetaData(
-        customer: Customer,
+        customer: Submitter,
         comment: string
     ): ApplicantMetaData {
         try {
