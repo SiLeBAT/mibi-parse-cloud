@@ -1,11 +1,11 @@
 import { ObjectKeys } from '../../../shared/infrastructure/parse-types';
-import { CustomerRepository } from './customer.repository';
-import { UserRepository } from './user.repository';
 import { AVVCatalogRepository } from './avvcatalog.repository';
-import { SearchAliasRepository } from './search-alias.repository';
-import { PLZRepository } from './plz.repository';
 import { NRLRepository } from './nrl.repository';
-const customerRepository = new CustomerRepository(ObjectKeys.UserInformation);
+import { PLZRepository } from './plz.repository';
+import { SearchAliasRepository } from './search-alias.repository';
+import { SubmitterRepository } from './submitter.repository';
+import { UserRepository } from './user.repository';
+const submitterRepository = new SubmitterRepository(ObjectKeys.UserInformation);
 const userRepository = new UserRepository();
 const avvCatalogRepository = new AVVCatalogRepository(ObjectKeys.AVVCatalog);
 const searchAliasRepository = new SearchAliasRepository(ObjectKeys.SearchAlias);
@@ -13,16 +13,16 @@ const nrlRepository = new NRLRepository(ObjectKeys.NRL);
 const plzRepository = new PLZRepository(ObjectKeys.AllowedPLZ);
 
 export {
-    CustomerRepository,
-    customerRepository,
-    userRepository,
-    UserRepository,
+    avvCatalogRepository,
+    AVVCatalogRepository,
     nrlRepository,
     NRLRepository,
     PLZRepository,
     plzRepository,
-    avvCatalogRepository,
-    AVVCatalogRepository,
     searchAliasRepository,
-    SearchAliasRepository
+    SearchAliasRepository,
+    submitterRepository,
+    SubmitterRepository,
+    userRepository,
+    UserRepository
 };

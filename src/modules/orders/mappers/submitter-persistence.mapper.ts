@@ -1,20 +1,20 @@
 import { User } from 'parse';
-import { Email, Name } from '../../shared/domain/valueObjects';
+import { Email, EntityId, Name } from '../../shared/domain/valueObjects';
 import {
     InstituteObject,
     UserInformationObject
 } from '../../shared/infrastructure/parse-types';
 import { Mapper } from '../../shared/mappers';
-import { Contact, Customer, CustomerProps } from '../domain';
+import { Contact, Submitter, SubmitterProps } from '../domain';
 
-import { Bundesland } from './../domain/enums';
+import { Bundesland } from '../domain/enums';
 
-export class CustomerPersistenceMapper extends Mapper {
+export class SubmitterPersistenceMapper extends Mapper {
     public static async toDomain(
         userObject: User,
         userInformationObject: UserInformationObject,
         instituteObject: InstituteObject
-    ): Promise<Customer> {
+    ): Promise<Submitter> {
         try {
             const contact = Contact.create({
                 instituteName: instituteObject.get('name1'),
@@ -38,15 +38,15 @@ export class CustomerPersistenceMapper extends Mapper {
             const lastName = await Name.create({
                 value: userInformationObject.get('lastName')
             });
-            const props: CustomerProps = {
+            const props: SubmitterProps = {
                 contact,
                 firstName,
                 lastName,
-                customerRefNumber: ''
+                submitterId: EntityId.create({ value: userObject.id })
             };
-            return Customer.create(props);
+            return Submitter.create(props);
         } catch (e) {
-            console.error('Could not construct Customer from Object.');
+            console.error('Could not construct Submitter from Object.');
             throw e;
         }
     }

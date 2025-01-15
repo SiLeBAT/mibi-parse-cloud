@@ -1,21 +1,22 @@
 import { Entity } from '../../shared/domain/entities';
 import { EntityId, Name } from '../../shared/domain/valueObjects';
 import { Contact } from './contact.vo';
+import { Bundesland } from './enums';
 
-export interface CustomerProps {
+export interface SubmitterProps {
     contact: Contact;
     firstName?: Name;
     lastName?: Name;
-    customerRefNumber: string;
+    submitterId: EntityId;
 }
 
-export class Customer extends Entity<CustomerProps> {
-    static create(props: CustomerProps, id?: EntityId): Customer {
-        const userInformation = new Customer(props, id);
+export class Submitter extends Entity<SubmitterProps> {
+    static create(props: SubmitterProps, id?: EntityId): Submitter {
+        const userInformation = new Submitter(props, id);
         return userInformation;
     }
 
-    private constructor(props: CustomerProps, id?: EntityId) {
+    private constructor(props: SubmitterProps, id?: EntityId) {
         super(props, id);
     }
 
@@ -31,11 +32,15 @@ export class Customer extends Entity<CustomerProps> {
         return this.props.firstName;
     }
 
-    get customerRefNumber(): string {
-        return this.props.customerRefNumber;
+    get submitterId(): EntityId {
+        return this.props.submitterId;
     }
 
     get fullName(): string {
         return this.firstName + ' ' + this.lastName;
+    }
+
+    getStateAbbreviation(): Bundesland {
+        return this.contact.stateShort;
     }
 }

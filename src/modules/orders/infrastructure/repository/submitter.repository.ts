@@ -6,8 +6,8 @@ import {
     UserInformationObject
 } from '../../../shared/infrastructure/parse-types';
 import { AbstractRepository } from '../../../shared/infrastructure/repositories';
-import { Customer } from '../../domain';
-import { CustomerPersistenceMapper } from '../../mappers';
+import { Submitter } from '../../domain';
+import { SubmitterPersistenceMapper } from '../../mappers';
 
 class InnerInstituteRepo {
     async getObjectByEntityId(eId: EntityId): Promise<InstituteObject> {
@@ -35,10 +35,10 @@ class InnerUserRepo {
     }
 }
 
-export class CustomerRepository extends AbstractRepository<UserInformationObject> {
+export class SubmitterRepository extends AbstractRepository<UserInformationObject> {
     private instituteRepo: InnerInstituteRepo = new InnerInstituteRepo();
     private userRepo: InnerUserRepo = new InnerUserRepo();
-    async getCustomerByUserId(userId: EntityId): Promise<Customer> {
+    async getSubmitterByUserId(userId: EntityId): Promise<Submitter> {
         const tempUser = new Parse.User();
         tempUser.id = userId.value;
 
@@ -56,12 +56,12 @@ export class CustomerRepository extends AbstractRepository<UserInformationObject
             instituteId
         );
 
-        const customer = CustomerPersistenceMapper.toDomain(
+        const submitter = SubmitterPersistenceMapper.toDomain(
             userObject,
             userInformationObject,
             instituteObject
         );
 
-        return customer;
+        return submitter;
     }
 }

@@ -1,7 +1,7 @@
 import { EntityId } from '../../../shared/domain/valueObjects';
 import { UseCase } from '../../../shared/use-cases';
 import { ValidationOptions } from '../../domain/validation-parameter.vo';
-import { createCustomer } from '../create-customer';
+import { createSubmitter } from '../create-submitter';
 
 type CreateValidationOptionsParams = {
     submitterId: EntityId | null;
@@ -20,10 +20,10 @@ export class CreateValidationOptionsUseCase
         };
         if (submitterId !== null) {
             try {
-                const customer = await createCustomer.execute({
-                    userId: submitterId
+                const submitter = await createSubmitter.execute({
+                    submitterId
                 });
-                options.state = customer.getStateAbbreviation();
+                options.state = submitter.getStateAbbreviation();
             } catch (error) {
                 console.error(
                     `Unable to retrieve user information for user: ${submitterId.value}. Ignoring state information.`
