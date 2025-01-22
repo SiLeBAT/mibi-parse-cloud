@@ -1,3 +1,4 @@
+import './check-avv-catalog-collection-completeness';
 import './check-template-files';
 import './create-submission-file';
 import './parse-sample-data';
