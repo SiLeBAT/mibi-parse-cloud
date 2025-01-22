@@ -1,2 +1,2 @@
-export { checkSystemConfiguration } from './checkSystemConfiguration';
-export { checkCollectionsForContent } from './checkCollectionsForContent';
+import './checkCollectionsForContent';
+import './checkSystemConfiguration';

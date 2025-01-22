@@ -66,4 +66,4 @@ class TemporaryRepository extends AbstractRepository<any> {
 
 const checkCollectionsForContent = new CheckCollectionsForContentUseCase();
 
-export { checkCollectionsForContent, CheckCollectionsForContentUseCase };
+export { checkCollectionsForContent };
