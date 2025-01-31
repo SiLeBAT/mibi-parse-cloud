@@ -1,5 +1,6 @@
-import { object, string } from 'yup';
+import { object, string, ValidationError } from 'yup';
 import { ValueObject, ValueObjectProps } from './value-object';
+import { EmailValidationError } from './email-validation.error';
 
 interface EmailProps extends ValueObjectProps {
     value: string;
@@ -23,7 +24,18 @@ export class Email extends ValueObject<EmailProps> {
     }
 
     public static async create(props: EmailProps): Promise<Email> {
-        const validatedProps = await Email.emailSchema.validate(props);
-        return new Email(validatedProps);
+        try {
+            const validatedProps = await Email.emailSchema.validate(props);
+            return new Email(validatedProps);
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                throw new EmailValidationError(
+                    'Email Validation failed',
+                    new Error('Email Validation failed')
+                );
+            }
+
+            throw error;
+        }
     }
 }

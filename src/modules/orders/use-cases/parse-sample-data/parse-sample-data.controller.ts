@@ -1,5 +1,6 @@
 import { loggedController } from '../../../shared/core/controller';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
+import { EmailValidationError } from '../../../shared/domain/valueObjects/email-validation.error';
 import { Order, SampleEntryTuple, SubmissionFormInput } from '../../domain';
 import { OrderDTO } from '../../dto';
 import { SubmissionDTOMapper } from '../../mappers';
@@ -87,6 +88,10 @@ const parseSampleDataController = loggedController(
                 }
             }
         } catch (error) {
+            if (error instanceof EmailValidationError) {
+                throw error;
+            }
+
             throw new SubmissionCreationFailedError(
                 'Unable to create a submission',
                 error
