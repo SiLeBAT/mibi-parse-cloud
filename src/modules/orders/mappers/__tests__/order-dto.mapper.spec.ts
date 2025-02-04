@@ -17,6 +17,7 @@ describe('Order DTO Mapper ', () => {
                     meta: {
                         sender: {
                             instituteName: 'test',
+                            department: 'test',
                             street: 'test',
                             zip: 'test',
                             city: 'test',
@@ -256,6 +257,7 @@ describe('Order DTO Mapper ', () => {
         beforeEach(async () => {
             contact = Contact.create({
                 instituteName: 'test',
+                department: 'test',
                 street: 'test',
                 zip: 'test',
                 city: 'test',
@@ -287,6 +289,7 @@ describe('Order DTO Mapper ', () => {
                     meta: {
                         sender: {
                             instituteName: 'test',
+                            department: 'test',
                             street: 'test',
                             zip: 'test',
                             city: 'test',
