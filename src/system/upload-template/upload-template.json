@@ -1,0 +1,18 @@
+{
+    "requests":[
+    {
+      "method": "POST",
+      "path": "/admin/parse/classes/{$ClassName}",
+      "body": {
+        "key":"value"
+      }
+    },
+    {
+        "method": "POST",
+        "path": "/admin/parse/classes/{$ClassName}",
+        "body": {
+          "key":"value"
+        }
+      }
+  ]
+}

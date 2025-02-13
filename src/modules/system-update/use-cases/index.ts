@@ -1,0 +1,3 @@
+import './updateSchema';
+
+import './checkReferentialIntegrity';

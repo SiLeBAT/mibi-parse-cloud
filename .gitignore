@@ -5,6 +5,7 @@
 /lib
 /tmp
 /out-tsc
+/data
 
 # dependencies
 /node_modules
@@ -38,6 +39,7 @@ npm-debug.log
 yarn-error.log
 testem.log
 /local
+config/*
 
 # System Files
 .DS_Store
@@ -53,3 +55,4 @@ Thumbs.db
 server-patch.patch
 /tmp
 /logs
+/scripts

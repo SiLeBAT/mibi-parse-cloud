@@ -1,0 +1,2 @@
+import './checkCollectionsForContent';
+import './checkSystemConfiguration';

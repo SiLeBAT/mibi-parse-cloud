@@ -4,9 +4,10 @@
     "baseUrl": "./src",
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "types": ["node", "parse"],
+    "types": ["node", "parse", "jest"],
     "typeRoots": ["./node_modules/@types", "./typings"],
     "declaration": true,
+    "resolveJsonModule": true,
     // Emit
     "outDir": "lib",
     "sourceMap": true,
@@ -18,11 +19,12 @@
     "forceConsistentCasingInFileNames": true,
 
     // Language and Environment
-    "target": "ES2019",
+    "target": "ES2022",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
     // Type Checking: strict mode
+    "skipLibCheck": true,
     "alwaysStrict": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
