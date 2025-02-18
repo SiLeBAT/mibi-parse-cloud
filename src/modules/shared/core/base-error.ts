@@ -23,4 +23,8 @@ export abstract class BaseError extends Error {
     get error() {
         return this._error;
     }
+
+    toString() {
+        return `${this.name}::${this.message}::${this.error}`;
+    }
 }
