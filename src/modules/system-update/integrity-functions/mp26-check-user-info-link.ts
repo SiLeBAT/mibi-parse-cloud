@@ -16,7 +16,17 @@ export async function mp26CheckUserInfoLink() {
             return;
         }
         const queryUsers = new Parse.Query('users');
-        queryUsers.equalTo('email', user.getEmail());
+        const userEmail = user.getEmail();
+
+        if (userEmail === undefined) {
+            logger.warn(
+                'CreateUserInfoLink: No email found in users collection for user id:  ' +
+                    user.id
+            );
+            return;
+        }
+
+        queryUsers.matches('email', RegExp(userEmail), 'i');
         const old_user = await queryUsers.find({ useMasterKey: true });
         if (old_user.length !== 1) {
             logger.warn(
