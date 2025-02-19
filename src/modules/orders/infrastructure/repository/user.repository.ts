@@ -4,7 +4,8 @@ import { Email, EntityId } from '../../../shared/domain/valueObjects';
 export class UserRepository {
     async getIdForEmail(email: Email): Promise<EntityId> {
         const query = new Parse.Query<User>(User);
-        query.equalTo('email', email.value);
+
+        query.matches('email', RegExp(email.value), 'i');
         const userObject = await query.first({
             useMasterKey: true
         });
