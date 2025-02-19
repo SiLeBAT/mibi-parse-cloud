@@ -165,6 +165,7 @@ export class ExcelMarshallAntiCorruptionLayer {
             meta: {
                 sender: {
                     instituteName: order.customer.contact.instituteName,
+                    department: order.customer.contact.department || '',
                     street: order.customer.contact.street,
                     zip: order.customer.contact.zip,
                     city: order.customer.contact.city,

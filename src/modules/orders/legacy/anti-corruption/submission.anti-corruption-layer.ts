@@ -119,7 +119,7 @@ export class SubmissionAntiCorruptionLayer {
                             animal_matrix_text: entry.data.animal_matrix_text,
                             primary_production_avv:
                                 entry.data.primary_production_avv,
-                            control_program_avv: entry.data.program_avv,
+                            control_program_avv: entry.data.control_program_avv,
                             sampling_reason_avv: entry.data.sampling_reason_avv,
                             program_reason_text: entry.data.program_reason_text,
                             operations_mode_avv: entry.data.operations_mode_avv,
@@ -141,6 +141,7 @@ export class SubmissionAntiCorruptionLayer {
                 meta: {
                     sender: {
                         instituteName: order.customer.contact.instituteName,
+                        department: order.customer.contact.department || '',
                         street: order.customer.contact.street,
                         zip: order.customer.contact.zip,
                         city: order.customer.contact.city,
