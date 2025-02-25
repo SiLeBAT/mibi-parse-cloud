@@ -1,6 +1,6 @@
 import { createSchema } from './create-schema';
 
-export async function mp86reateSearchAlias() {
+export async function mp86CreateSearchAlias() {
     const schemaName = 'Search_Alias';
     const templateFileSchema = new Parse.Schema(schemaName);
 
