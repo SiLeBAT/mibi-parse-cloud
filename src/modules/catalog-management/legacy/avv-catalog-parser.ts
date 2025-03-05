@@ -741,7 +741,10 @@ export class AVVCatalogParser {
                 eintrag.facettenZuordnungTyp.facettenzuordnungen.forEach(
                     facettenZuordnung => {
                         facettenIds.push(facettenZuordnung.$facettenid);
-                        if (facettenZuordnung.$festgelegt === true) {
+                        if (
+                            facettenZuordnung.$festgelegt === true &&
+                            facettenZuordnung.$aktion !== 'DELETE'
+                        ) {
                             mibiEintrag.Festgelegt = true;
                             facettenzuordnungen.push({
                                 FacettenId: facettenZuordnung.$facettenid,
