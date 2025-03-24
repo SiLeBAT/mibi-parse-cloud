@@ -15,18 +15,6 @@ export class PathogenRepository extends AbstractRepository<AdditionalPathogensOb
         try {
             const query = this.getQuery();
             const allPathogens = await query.findAll({ useMasterKey: true });
-
-            // const pathogens = Promise.all(
-            //     allPathogens.map(pathogen =>
-            //         this.mapToSearchAlias(pathogen)
-            //     )
-            // );
-
-            // // const query = this.getQuery();
-            // query.equalTo(key, value);
-            // const results = await query.find({
-            //     useMasterKey: true
-            // });
             const pathogens = allPathogens.map(
                 async (pathogen: AdditionalPathogensObject) =>
                     await this.mapToPathogen(pathogen)

@@ -1,1 +1,2 @@
 import './uploadAVVCatalog';
+import './uploadZomoPlan';
