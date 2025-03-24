@@ -2,15 +2,15 @@ import { createSchema } from './create-schema';
 
 export async function mp86CreateSearchAlias() {
     const schemaName = 'Search_Alias';
-    const templateFileSchema = new Parse.Schema(schemaName);
+    const searchAliasFileSchema = new Parse.Schema(schemaName);
 
     const creationFunction = () => {
-        templateFileSchema
+        searchAliasFileSchema
             .addString('catalog')
             .addString('token', { required: true })
             .addArray('alias', { required: true });
-        templateFileSchema.addIndex('token_index', { token: 1 });
-        templateFileSchema.setCLP({
+        searchAliasFileSchema.addIndex('token_index', { token: 1 });
+        searchAliasFileSchema.setCLP({
             find: {},
             count: {},
             get: {},
@@ -23,5 +23,5 @@ export async function mp86CreateSearchAlias() {
             }
         });
     };
-    return createSchema(schemaName, templateFileSchema, creationFunction);
+    return createSchema(schemaName, searchAliasFileSchema, creationFunction);
 }
