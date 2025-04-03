@@ -17,190 +17,76 @@ export const zoMoConstraints: ValidationConstraints = {
     },
 
     pathogen_avv: {
-        // registeredZoMo: {
-        //     error: 49,
-        //     group: [
-        //         {
-        //             attr: 'operations_mode_avv',
-        //             code: 'ADV8-Kode'
-        //         },
-        //         {
-        //             attr: 'matrix_avv',
-        //             code: 'ADV3-Kode'
-        //         },
-        //         {
-        //             attr: 'animal_avv',
-        //             code: 'Kodiersystem'
-        //         },
-        //         {
-        //             attr: 'pathogen_avv',
-        //             code: 'ADV16-Kode'
-        //         }
-        //     ],
-        //     year: ['sampling_date', 'isolation_date'],
-        //     catalog: 'adv16'
-        // }
-    },
-
-    pathogen_text: {
-        // registeredZoMo: {
-        //     error: 49,
-        //     group: [
-        //         {
-        //             attr: 'operations_mode_avv',
-        //             code: 'ADV8-Kode'
-        //         },
-        //         {
-        //             attr: 'matrix_avv',
-        //             code: 'ADV3-Kode'
-        //         },
-        //         {
-        //             attr: 'animal_avv',
-        //             code: 'Kodiersystem'
-        //         },
-        //         {
-        //             attr: 'pathogen_avv',
-        //             code: 'ADV16-Kode'
-        //         }
-        //     ],
-        //     year: ['sampling_date', 'isolation_date'],
-        //     catalog: 'adv16'
-        // }
-    },
-
-    sampling_date: {
-        presence: {
-            error: 14,
-            allowEmpty: false
-        }
-
-        // new text
-        // registeredZoMo: {
-        //     error: 49,
-        //     group: [
-        //         {
-        //             attr: 'operations_mode_avv',
-        //             code: 'ADV8-Kode'
-        //         },
-        //         {
-        //             attr: 'matrix_avv',
-        //             code: 'ADV3-Kode'
-        //         },
-        //         {
-        //             attr: 'animal_avv',
-        //             code: 'Kodiersystem'
-        //         },
-        //         {
-        //             attr: 'pathogen_avv',
-        //             code: 'ADV16-Kode'
-        //         }
-        //     ],
-        //     year: ['sampling_date', 'isolation_date'],
-        //     catalog: 'adv16'
-        // }
-    },
-
-    isolation_date: {
-        presence: {
-            error: 18,
-            allowEmpty: false
+        matchesZoMo: {
+            error: 115,
+            date: ['sampling_date'],
+            zomoKey: '324',
+            codeType: 'pathogen',
+            programField: {
+                attr: 'program_avv',
+                zomoKey: '328'
+            }
         }
     },
+
+    pathogen_text: {},
+
+    sampling_date: {},
+
+    isolation_date: {},
 
     animal_avv: {
         atLeastOneOf: {
             error: 34,
             additionalMembers: ['matrix_avv']
-        }
+        },
 
-        // new text
-        // registeredZoMo: {
-        //     error: 49,
-        //     group: [
-        //         {
-        //             attr: 'operations_mode_avv',
-        //             code: 'ADV8-Kode'
-        //         },
-        //         {
-        //             attr: 'matrix_avv',
-        //             code: 'ADV3-Kode'
-        //         },
-        //         {
-        //             attr: 'animal_avv',
-        //             code: 'Kodiersystem'
-        //         },
-        //         {
-        //             attr: 'pathogen_avv',
-        //             code: 'ADV16-Kode'
-        //         }
-        //     ],
-        //     year: ['sampling_date', 'isolation_date'],
-        //     catalog: 'adv16'
-        // }
+        matchesZoMo: {
+            error: 113,
+            date: 'sampling_date',
+            zomoKey: '339',
+            codeType: 'facetten',
+            programField: {
+                attr: 'program_avv',
+                zomoKey: '328'
+            }
+        }
     },
 
     matrix_avv: {
         atLeastOneOf: {
             error: 34,
             additionalMembers: ['animal_avv']
-        }
+        },
 
-        // new text
-        // registeredZoMo: {
-        //     error: 49,
-        //     group: [
-        //         {
-        //             attr: 'operations_mode_avv',
-        //             code: 'ADV8-Kode'
-        //         },
-        //         {
-        //             attr: 'matrix_avv',
-        //             code: 'ADV3-Kode'
-        //         },
-        //         {
-        //             attr: 'animal_avv',
-        //             code: 'Kodiersystem'
-        //         },
-        //         {
-        //             attr: 'pathogen_avv',
-        //             code: 'ADV16-Kode'
-        //         }
-        //     ],
-        //     year: ['sampling_date', 'isolation_date'],
-        //     catalog: 'adv16'
-        // }
+        matchesZoMo: {
+            error: 114,
+            date: 'sampling_date',
+            zomoKey: '319',
+            codeType: 'facetten',
+            programField: {
+                attr: 'program_avv',
+                zomoKey: '328'
+            }
+        }
     },
 
     operations_mode_avv: {
         atLeastOneOf: {
             error: 48,
             additionalMembers: ['operations_mode_text']
-        }
+        },
 
-        // new text
-        // registeredZoMo: {
-        //     error: 49,
-        //     group: [
-        //         {
-        //             attr: 'operations_mode_avv',
-        //             code: 'ADV8-Kode'
-        //         },
-        //         {
-        //             attr: 'matrix_avv',
-        //             code: 'ADV3-Kode'
-        //         },
-        //         {
-        //             attr: 'animal_avv',
-        //             code: 'Kodiersystem'
-        //         },
-        //         {
-        //             attr: 'pathogen_avv',
-        //             code: 'ADV16-Kode'
-        //         }
-        //     ],
-        //     year: ['sampling_date', 'isolation_date'],
-        //     catalog: 'adv16'
-        // }
+        matchesZoMo: {
+            error: 116,
+            date: 'sampling_date',
+            zomoKey: '303',
+            codeType: 'facetten',
+            programField: {
+                attr: 'program_avv',
+                zomoKey: '328'
+            }
+        }
     },
 
     operations_mode_text: {
@@ -241,92 +127,23 @@ export const zoMoConstraints: ValidationConstraints = {
     },
 
     primary_production_avv: {
-        // new text
-        // registeredZoMo: {
-        //     error: 49,
-        //     group: [
-        //         {
-        //             attr: 'operations_mode_avv',
-        //             code: 'ADV8-Kode'
-        //         },
-        //         {
-        //             attr: 'matrix_avv',
-        //             code: 'ADV3-Kode'
-        //         },
-        //         {
-        //             attr: 'animal_avv',
-        //             code: 'Kodiersystem'
-        //         },
-        //         {
-        //             attr: 'pathogen_avv',
-        //             code: 'ADV16-Kode'
-        //         }
-        //     ],
-        //     year: ['sampling_date', 'isolation_date'],
-        //     catalog: 'adv16'
-        // }
-    },
-
-    control_program_avv: {
-        // new text
-        // registeredZoMo: {
-        //     error: 49,
-        //     group: [
-        //         {
-        //             attr: 'operations_mode_avv',
-        //             code: 'ADV8-Kode'
-        //         },
-        //         {
-        //             attr: 'matrix_avv',
-        //             code: 'ADV3-Kode'
-        //         },
-        //         {
-        //             attr: 'animal_avv',
-        //             code: 'Kodiersystem'
-        //         },
-        //         {
-        //             attr: 'pathogen_avv',
-        //             code: 'ADV16-Kode'
-        //         }
-        //     ],
-        //     year: ['sampling_date', 'isolation_date'],
-        //     catalog: 'adv16'
-        // }
-    },
-
-    program_reason_text: {
-        // new text
-        // registeredZoMo: {
-        //     error: 49,
-        //     group: [
-        //         {
-        //             attr: 'operations_mode_avv',
-        //             code: 'ADV8-Kode'
-        //         },
-        //         {
-        //             attr: 'matrix_avv',
-        //             code: 'ADV3-Kode'
-        //         },
-        //         {
-        //             attr: 'animal_avv',
-        //             code: 'Kodiersystem'
-        //         },
-        //         {
-        //             attr: 'pathogen_avv',
-        //             code: 'ADV16-Kode'
-        //         }
-        //     ],
-        //     year: ['sampling_date', 'isolation_date'],
-        //     catalog: 'adv16'
-        // }
-    },
-
-    program_avv: {
-        presence: {
-            error: 105,
-            allowEmpty: false
+        matchesZoMo: {
+            error: 118,
+            date: 'sampling_date',
+            zomoKey: '316',
+            codeType: 'basic',
+            programField: {
+                attr: 'program_avv',
+                zomoKey: '328'
+            }
         }
-    }
+    },
+
+    control_program_avv: {},
+
+    program_reason_text: {},
+
+    program_avv: {}
 };
 
 // only for not ZoMo samples
@@ -385,57 +202,9 @@ export const standardConstraints: ValidationConstraints = {
         }
     },
 
-    control_program_avv: {
-        shouldBeZoMo: {
-            error: 97,
-            group: [
-                {
-                    attr: 'operations_mode_avv',
-                    code: 'ADV8-Kode'
-                },
-                {
-                    attr: 'matrix_avv',
-                    code: 'ADV3-Kode'
-                },
-                {
-                    attr: 'animal_avv',
-                    code: 'Kodiersystem'
-                },
-                {
-                    attr: 'pathogen_avv',
-                    code: 'ADV16-Kode'
-                }
-            ],
-            year: ['sampling_date', 'isolation_date'],
-            catalog: 'adv16'
-        }
-    },
+    control_program_avv: {},
 
-    program_reason_text: {
-        shouldBeZoMo: {
-            error: 97,
-            group: [
-                {
-                    attr: 'operations_mode_avv',
-                    code: 'ADV8-Kode'
-                },
-                {
-                    attr: 'matrix_avv',
-                    code: 'ADV3-Kode'
-                },
-                {
-                    attr: 'animal_avv',
-                    code: 'Kodiersystem'
-                },
-                {
-                    attr: 'pathogen_avv',
-                    code: 'ADV16-Kode'
-                }
-            ],
-            year: ['sampling_date', 'isolation_date'],
-            catalog: 'adv16'
-        }
-    }
+    program_reason_text: {}
 };
 
 // for both samples: ZoMo and not ZoMo
@@ -480,9 +249,12 @@ export const baseConstraints: ValidationConstraints = {
     },
 
     sampling_date: {
-        presence: {
-            error: 11,
-            allowEmpty: false
+        presenceZoMo: {
+            error: 14
+        },
+
+        presenceNotZoMo: {
+            error: 11
         },
 
         dateAllowEmpty: {
@@ -519,9 +291,12 @@ export const baseConstraints: ValidationConstraints = {
     },
 
     isolation_date: {
-        presence: {
-            error: 15,
-            allowEmpty: false
+        presenceZoMo: {
+            error: 18
+        },
+
+        presenceNotZoMo: {
+            error: 15
         },
 
         dateAllowEmpty: {
@@ -746,6 +521,16 @@ export const baseConstraints: ValidationConstraints = {
         inAVVCatalog: {
             error: 104,
             catalog: 'avv328'
+        },
+
+        presenceZoMo: {
+            error: 105
+        },
+
+        matchesProgramZoMo: {
+            error: 119,
+            date: 'sampling_date',
+            zomoKey: '328'
         }
     },
 

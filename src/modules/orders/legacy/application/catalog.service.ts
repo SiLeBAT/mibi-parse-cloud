@@ -9,6 +9,7 @@ import {
     SearchAlias
 } from '../model/legacy.model';
 import { AVVCatalogCache } from '../../../shared/infrastructure/cache';
+import { ZomoPlanCache } from '../../../shared/infrastructure/cache';
 import { CatalogRepository } from '../repositories/catalog.repository';
 import { SearchAliasCache } from '../../../shared/infrastructure/cache';
 
@@ -17,7 +18,8 @@ export class CatalogService {
         private plzCache: PLZCache,
         private catalogRepository: CatalogRepository,
         private searchAliasCache: SearchAliasCache,
-        private avvCatalogCache: AVVCatalogCache
+        private avvCatalogCache: AVVCatalogCache,
+        private zomoPlanCache: ZomoPlanCache
     ) {}
 
     getCatalog<T extends CatalogData>(catalogName: string): Catalog<T> {
@@ -63,5 +65,9 @@ export class CatalogService {
             );
         }
         return searchAlias;
+    }
+
+    getZomoPlan(samplingDate: string | null = null) {
+        return this.zomoPlanCache.getZomoPlanData(samplingDate)?.data.zomoData;
     }
 }

@@ -10,5 +10,5 @@ import './submit-order';
 import './validate-order';
 
 export { setAVVCatalogCache } from './set-avv-catalog-cache';
-
+export { setZomoPlanCache } from './set-zomo-plan-cache';
 export { setSearchAliasCache } from './set-search-alias-cache';

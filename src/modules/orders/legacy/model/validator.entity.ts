@@ -26,9 +26,11 @@ import {
     noPlanprobeForNRL_AR,
     nrlExists,
     referenceDate,
-    registeredZoMo,
-    requiredIfOther,
-    shouldBeZoMo
+    matchesZoMo,
+    matchesProgramZoMo,
+    presenceZoMo,
+    presenceNotZoMo,
+    requiredIfOther
 } from './custom-validator-functions';
 import { Sample } from './sample.entity';
 
@@ -73,6 +75,7 @@ class SampleValidator implements Validator {
             return accumulator;
         }, dataValuesOnly);
         dataValuesOnly = { ...{ nrl: sample.getNRL() }, ...dataValuesOnly };
+
         return validate(dataValuesOnly, constraintSet);
     }
 
@@ -109,10 +112,12 @@ class SampleValidator implements Validator {
         validate.validators.matchAVVCodeOrString = matchAVVCodeOrString(
             this.catalogService
         );
-        validate.validators.registeredZoMo = registeredZoMo(
+        validate.validators.matchesZoMo = matchesZoMo(this.catalogService);
+        validate.validators.matchesProgramZoMo = matchesProgramZoMo(
             this.catalogService
         );
-        validate.validators.shouldBeZoMo = shouldBeZoMo(this.catalogService);
+        validate.validators.presenceZoMo = presenceZoMo;
+        validate.validators.presenceNotZoMo = presenceNotZoMo;
     }
 }
 

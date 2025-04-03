@@ -6,13 +6,16 @@ import { ParseHookRequest } from '../../../shared/infrastructure';
 import { ZomoPlanObject } from '../../../shared/infrastructure/parse-types';
 import {
     ZomoPlanDuplicationError,
-    ZomoPlanAmoutError
+    ZomoPlanAmoutError,
+    ZomoPlanAllowedError
 } from './create-zomo-plan.error';
 import { readFileContent } from '../readFileContent';
 import { createZomoPlan } from '../uploadZomoPlan/create-zomo-plan.use-case';
 import {
     checkForZomoPlanDuplication,
-    checkForTwoZomoPlans
+    checkForTwoZomoPlans,
+    checkForZomoPlanAllowed,
+    ZomoPlanAllowed
 } from '../checkForZomoPlanIntegrity';
 import { ZomoPlanMapper } from '../../mappers';
 
@@ -53,6 +56,17 @@ export const beforeZomoPlanSaveHook = async (
             if (twoExist) {
                 throw new ZomoPlanAmoutError(
                     'There exist already two zomo plans',
+                    new Error()
+                );
+            }
+
+            const zomoPlanAllowed: ZomoPlanAllowed =
+                await checkForZomoPlanAllowed.execute(
+                    zomoPlan.zomoPlanInformation
+                );
+            if (!zomoPlanAllowed.yearAllowed) {
+                throw new ZomoPlanAllowedError(
+                    `The zomo plan year must be one of ${zomoPlanAllowed.allowedYears}`,
                     new Error()
                 );
             }

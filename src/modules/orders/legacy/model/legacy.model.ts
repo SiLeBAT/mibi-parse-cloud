@@ -523,6 +523,22 @@ export interface SampleData {
     [key: string]: AnnotatedSampleDataEntry;
 }
 
+export type ZomoPlanData = {
+    data: {
+        year: string;
+        zomoData: ZomoData[];
+    };
+};
+
+export type ZomoData = {
+    '303': object[];
+    '316': object[];
+    '319': object[];
+    '324': string[];
+    '328': object[];
+    '339': object[];
+};
+
 export type AVVCatalogData =
     | MibiCatalogData
     | MibiCatalogFacettenData
@@ -667,19 +683,31 @@ export interface ReferenceDateOptions extends ValidatorFunctionOptions {
     };
 }
 
-interface Group {
-    code: keyof ZSPCatalogEntry;
-    attr: SampleProperty;
-}
-
-export interface RegisteredZoMoOptions extends ValidatorFunctionOptions {
-    year: string[];
-    group: Group[];
-    catalog: string;
-}
 export interface ValidatorFunctionOptions {
     message: ValidationError;
 }
+
+export enum CodeType {
+    BASIC = 'basic',
+    FACETTEN = 'facetten',
+    PATHOGEN = 'pathogen'
+}
+
+interface ZomoProgramField {
+    attr: SampleProperty;
+    zomoKey: keyof ZomoData;
+}
+
+export interface MatchesProgramZoMoOptions extends ValidatorFunctionOptions {
+    date: string;
+    zomoKey: keyof ZomoData;
+}
+
+export interface MatchesZoMoOptions extends MatchesProgramZoMoOptions {
+    codeType: CodeType;
+    programField: ZomoProgramField;
+}
+
 export interface MatchIdToYearOptions extends ValidatorFunctionOptions {
     regex: string[];
 }
