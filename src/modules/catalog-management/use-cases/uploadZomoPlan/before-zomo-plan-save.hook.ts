@@ -6,24 +6,16 @@ import { ParseHookRequest } from '../../../shared/infrastructure';
 import { ZomoPlanObject } from '../../../shared/infrastructure/parse-types';
 import {
     ZomoPlanDuplicationError,
-<<<<<<< HEAD
     ZomoPlanAmoutError,
     ZomoPlanAllowedError
-=======
-    ZomoPlanAmoutError
->>>>>>> e5d2b94 (Upload and parse zomo plan csv file.)
 } from './create-zomo-plan.error';
 import { readFileContent } from '../readFileContent';
 import { createZomoPlan } from '../uploadZomoPlan/create-zomo-plan.use-case';
 import {
     checkForZomoPlanDuplication,
-<<<<<<< HEAD
     checkForTwoZomoPlans,
     checkForZomoPlanAllowed,
     ZomoPlanAllowed
-=======
-    checkForTwoZomoPlans
->>>>>>> e5d2b94 (Upload and parse zomo plan csv file.)
 } from '../checkForZomoPlanIntegrity';
 import { ZomoPlanMapper } from '../../mappers';
 
