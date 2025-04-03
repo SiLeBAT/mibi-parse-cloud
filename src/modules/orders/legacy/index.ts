@@ -3,10 +3,15 @@ import {
     avvCatalogCache,
     nrlCache,
     plzCache,
-    searchAliasCache
+    searchAliasCache,
+    zomoPlanCache
 } from '../../shared/infrastructure';
 import { ObjectKeys } from '../../shared/infrastructure/parse-types';
-import { setAVVCatalogCache, setSearchAliasCache } from '../use-cases';
+import {
+    setAVVCatalogCache,
+    setSearchAliasCache,
+    setZomoPlanCache
+} from '../use-cases';
 import {
     ExcelMarshallAntiCorruptionLayer,
     ExcelUnmarshalAntiCorruptionLayer,
@@ -66,12 +71,15 @@ const antiCorruptionLayers = (async function init() {
     await setSearchAliasCache.execute();
     logger.info('Parse Cloud: Creating AVVCatalog cache.');
     await setAVVCatalogCache.execute();
+    logger.info('Parse Cloud: Creating Zomo Plan cache.');
+    await setZomoPlanCache.execute();
 
     const catalogService = new CatalogService(
         plzCache,
         catalogRepository,
         searchAliasCache,
-        avvCatalogCache
+        avvCatalogCache,
+        zomoPlanCache
     );
 
     const avvFormatProvider = new AVVFormatProvider(stateRepository);

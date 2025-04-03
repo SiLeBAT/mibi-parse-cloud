@@ -86,13 +86,12 @@ export class FormValidatorService {
         validationOptions: ValidationOptions
     ): Sample[] {
         return samples.map(sample => {
-            const constraintSet = sample.isZoMo()
+            const constraintSet = this.sampleIsZoMo(sample)
                 ? this.getConstraints(ConstraintSet.ZOMO, validationOptions)
                 : this.getConstraints(
                       ConstraintSet.STANDARD,
                       validationOptions
                   );
-
             const validationErrors = this.validator.validateSample(
                 sample,
                 constraintSet
@@ -100,7 +99,6 @@ export class FormValidatorService {
 
             // Ticket #mpc514
             this.supplementAVV313Data(sample);
-
             sample.addErrors(validationErrors);
 
             return sample;
@@ -239,5 +237,36 @@ export class FormValidatorService {
                 sample.supplementAVV313Data(catEntry.PLZ, catEntry.Text);
             }
         }
+    }
+
+    private sampleIsZoMo(sample: Sample): boolean {
+        const programKey = '328';
+
+        const year = sample.getEntryFor('sampling_date').value.trim();
+        const programValue = sample.getEntryFor('program_avv').value.trim();
+        const zomoPlan = this.catalogService.getZomoPlan(year);
+
+        if (!zomoPlan) {
+            return false;
+        }
+
+        const index = zomoPlan.findIndex(zomoPlanRow => {
+            const programEntry = zomoPlanRow[programKey] as object[];
+
+            if (
+                programEntry.length === 1 &&
+                Object.keys(programEntry).length === 0
+            ) {
+                return -1;
+            }
+
+            return _.has(programEntry[0], programValue);
+        });
+
+        if (index < 0) {
+            return false;
+        }
+
+        return true;
     }
 }
