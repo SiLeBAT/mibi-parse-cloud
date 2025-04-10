@@ -19,7 +19,8 @@ export class GetServerConfigUseCase implements UseCase<null, ServerConfig> {
         return ServerConfig.createFromStrings({
             appName: config.get('appName') || '',
             jobRecipient: config.get('jobRecipient') || '',
-            supportContact: config.get('supportContact') || ''
+            supportContact: config.get('supportContact') || '',
+            excelVersion: config.get('excelVersion') || ''
         });
     }
 }
