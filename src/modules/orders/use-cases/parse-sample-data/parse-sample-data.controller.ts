@@ -9,8 +9,11 @@ import { createSubmissionFileUseCase } from '../create-submission-file/create-su
 import { SampleEntry } from '../../domain/sample-entry.entity';
 import { ParseFromJSONUseCase } from './parse-from-json.use-case';
 import { ParseFromXLSXUseCase } from './parse-from-xlsx.use-case';
-
-import { SubmissionCreationFailedError } from './parse-sample-data.error';
+import { checkExcelVersionUseCase } from '../check-excel-version';
+import {
+    ExcelVersionError,
+    SubmissionCreationFailedError
+} from './parse-sample-data.error';
 import { ParseSampleDataUseCase } from './parse-sample-data.use-case';
 
 enum RESOURCE_VIEW_TYPE {
@@ -60,6 +63,18 @@ const parseSampleDataController = loggedController(
                 CreateOrderUseCaseFactory(type);
             const order: Order<SampleEntry<SampleEntryTuple>[]> =
                 await createOrder.execute(submissionFormInput);
+            const matchesExcelVersion = await checkExcelVersionUseCase.execute(
+                order
+            );
+
+            if (!matchesExcelVersion.valid) {
+                throw new ExcelVersionError(
+                    `Invalid Excel Version:${matchesExcelVersion.uploadedExcelVersion}`,
+                    new Error(
+                        `Invalid Excel Version:${matchesExcelVersion.uploadedExcelVersion}`
+                    )
+                );
+            }
 
             const returnType = getResourceViewType(request.headers['accept']);
 
@@ -89,6 +104,10 @@ const parseSampleDataController = loggedController(
             }
         } catch (error) {
             if (error instanceof EmailValidationError) {
+                throw error;
+            }
+
+            if (error instanceof ExcelVersionError) {
                 throw error;
             }
 
