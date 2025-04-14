@@ -40,6 +40,10 @@ class ZomoPlanCache {
             return null;
         }
 
+        if (!this.isYearValid(validYear)) {
+            return null;
+        }
+
         return this.cacheData[validYear];
     }
 
@@ -61,6 +65,13 @@ class ZomoPlanCache {
         const year = samplingDate.split('.').map(Number)[2];
 
         return year;
+    }
+
+    private isYearValid(year: number) {
+        const currentYear: number = new Date().getFullYear();
+        const allowedYears = [currentYear - 1, currentYear];
+
+        return allowedYears.includes(year);
     }
 }
 
