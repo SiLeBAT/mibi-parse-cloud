@@ -34,10 +34,10 @@ const validateOrderController = loggedController(
         try {
             submitterId = await createSubmitterId.execute(request);
         } catch (error) {
-            request.log.error(
-                'Unable to determine submitter. SubmitterId not set.'
+            request.log.warn(
+                'Unable to determine submitter from request. SubmitterId not set.'
             );
-            request.log.error(error.message);
+            request.log.warn(error.message);
         }
         try {
             const submittedOrder: ValidateOrderRequestParameters =

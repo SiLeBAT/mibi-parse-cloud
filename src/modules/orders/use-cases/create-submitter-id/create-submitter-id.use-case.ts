@@ -1,4 +1,4 @@
-import { getLogger } from 'nodemailer/lib/shared';
+import { getLogger } from '../../../shared/core/logging-context';
 import { Email, EntityId } from '../../../shared/domain/valueObjects';
 import { HTTPRequest } from '../../../shared/infrastructure';
 import { UseCase } from '../../../shared/use-cases';
@@ -15,29 +15,37 @@ type CreateSubmitterIdParams<T extends HasUserEmail> = HTTPRequest<T>;
 export class CreateSubmitterIdUseCase<T extends HasUserEmail>
     implements UseCase<CreateSubmitterIdParams<T>, EntityId>
 {
-    private logger = getLogger();
     constructor(private userRepository: UserRepository) {}
 
-    async execute<T extends HasUserEmail>(
-        request: CreateSubmitterIdParams<T>
-    ): Promise<EntityId> {
-        try {
-            if (request.user) {
-                return EntityId.create({ value: request.user.id });
-            } else {
-                const submitterEmail = await request.params.userEmail;
-                const submitterId: EntityId =
-                    await this.userRepository.getIdForEmail(
-                        await Email.create({ value: submitterEmail })
-                    );
-                return submitterId;
-            }
-        } catch (error) {
-            this.logger.error(
-                'Unable to determine Submitter Id: ' + error.message
+    async execute(request: CreateSubmitterIdParams<T>): Promise<EntityId> {
+        if (request.user) {
+            return EntityId.create({ value: request.user.id });
+        } else {
+            const submitterEmail = await this.getEmailFromRequest(request);
+            const submitterId: EntityId = await this.getIdForEmail(
+                submitterEmail
             );
-            throw error;
+            if (!submitterId) {
+                throw new Error(
+                    'Unable to determine Submitter Id. No user found with the provided email:' +
+                        submitterEmail.value
+                );
+            }
+            getLogger().info(
+                'Submitter Id determined from email: ' + submitterId.value
+            );
+            return submitterId;
         }
+    }
+
+    private getEmailFromRequest(
+        request: CreateSubmitterIdParams<T>
+    ): Promise<Email> {
+        return Email.create({ value: request.params.userEmail });
+    }
+
+    private getIdForEmail(email: Email): Promise<EntityId> {
+        return this.userRepository.getIdForEmail(email);
     }
 }
 
