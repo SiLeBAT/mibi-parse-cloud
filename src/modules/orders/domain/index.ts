@@ -1,4 +1,5 @@
 export { Contact } from './contact.vo';
+export { AffiliatedInstitute } from './affiliated-institute.vo';
 export { Customer, CustomerProps } from './customer.entity';
 export { FileInformation } from './file-information.vo';
 export { Order, OrderProps } from './order.entity';

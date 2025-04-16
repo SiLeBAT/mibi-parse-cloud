@@ -1,10 +1,10 @@
 import { Entity } from '../../shared/domain/entities';
 import { EntityId, Name } from '../../shared/domain/valueObjects';
-import { Contact } from './contact.vo';
+import { AffiliatedInstitute } from './affiliated-institute.vo';
 import { Bundesland } from './enums';
 
 export interface SubmitterProps {
-    contact: Contact;
+    institute: AffiliatedInstitute;
     firstName?: Name;
     lastName?: Name;
     submitterId: EntityId;
@@ -20,8 +20,8 @@ export class Submitter extends Entity<SubmitterProps> {
         super(props, id);
     }
 
-    get contact(): Contact {
-        return this.props.contact;
+    get institute(): AffiliatedInstitute {
+        return this.props.institute;
     }
 
     get lastName(): Name | undefined {
@@ -41,6 +41,6 @@ export class Submitter extends Entity<SubmitterProps> {
     }
 
     getStateAbbreviation(): Bundesland {
-        return this.contact.stateShort;
+        return this.institute.stateShort;
     }
 }
