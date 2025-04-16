@@ -1,9 +1,7 @@
 import { Contact, Customer } from '../domain';
 
-import { Email, Name } from '../../shared/domain/valueObjects';
+import { Email } from '../../shared/domain/valueObjects';
 import { Mapper, MappingError } from '../../shared/mappers';
-
-import { Bundesland } from '../domain/enums';
 import { SampleSetMetaDTO } from '../dto/submission.dto';
 
 export class CustomerDTOMapper extends Mapper {
@@ -12,16 +10,9 @@ export class CustomerDTOMapper extends Mapper {
             const props = {
                 contact: Contact.create({
                     ...meta.sender,
-                    stateShort: Bundesland.UNKNOWN,
                     email: await Email.create({
                         value: meta.sender.email
                     })
-                }),
-                firstName: await Name.create({
-                    value: meta.sender.contactPerson.split(' ')[0]
-                }),
-                lastName: await Name.create({
-                    value: meta.sender.contactPerson.split(' ')[1]
                 }),
                 customerRefNumber: meta.customerRefNumber || ''
             };

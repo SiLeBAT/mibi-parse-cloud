@@ -1,9 +1,8 @@
 import { Customer } from './../../domain/customer.entity';
 import { OrderDTOMapper } from './../order-dto.mapper';
 
-import { Email, Name } from '../../../shared/domain/valueObjects';
+import { Email } from '../../../shared/domain/valueObjects';
 import { Contact, Order, SampleEntry } from '../../domain';
-import { Bundesland } from '../../domain/enums';
 import { OrderDTO } from '../../dto';
 import { SampleEntryDTOMapper } from '../sample-entry-dto.mapper';
 
@@ -263,14 +262,11 @@ describe('Order DTO Mapper ', () => {
                 city: 'test',
                 contactPerson: 'test test',
                 telephone: 'test',
-                email: await Email.create({ value: 'test@test.com' }),
-                stateShort: Bundesland.UNKNOWN
+                email: await Email.create({ value: 'test@test.com' })
             });
 
             customer = Customer.create({
                 contact,
-                firstName: await Name.create({ value: 'test' }),
-                lastName: await Name.create({ value: 'test' }),
                 customerRefNumber: ''
             });
             submission = Order.create({

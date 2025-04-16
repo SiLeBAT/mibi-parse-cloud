@@ -20,7 +20,7 @@ import {
 } from './anti-corruption';
 import { AVVFormatProvider } from './application/avv-format-provider.service';
 import { CatalogService } from './application/catalog.service';
-import { configurationService } from './application/configuratioin.service';
+import { configurationService } from './application/configuration.service';
 import { excelUnmarshalService } from './application/excel-unmarshal.service';
 import { FormAutoCorrectionService } from './application/form-auto-correction.service';
 import { FormValidatorService } from './application/form-validation.service';

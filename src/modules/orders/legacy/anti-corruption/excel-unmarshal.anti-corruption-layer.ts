@@ -1,4 +1,4 @@
-import { Email, Name } from '../../../shared/domain/valueObjects';
+import { Email } from '../../../shared/domain/valueObjects';
 import {
     Contact,
     Customer,
@@ -7,7 +7,6 @@ import {
     SampleEntryTuple,
     SubmissionFormInfo
 } from '../../domain';
-import { Bundesland } from '../../domain/enums';
 import { ExcelUnmarshalService } from '../application/excel-unmarshal.service';
 import { SampleSheetService } from '../application/sample-sheet.service';
 import {
@@ -36,6 +35,7 @@ export class ExcelUnmarshalAntiCorruptionLayer {
 
         const order: Order<SampleEntry<SampleEntryTuple>[]> =
             await this.convertFromLegacy(legacySampleSet);
+
         return order;
     }
 
@@ -44,22 +44,11 @@ export class ExcelUnmarshalAntiCorruptionLayer {
     ): Promise<Order<SampleEntry<SampleEntryTuple>[]>> {
         const contact = Contact.create({
             ...sampleSet.meta.sender,
-            email: await Email.create({ value: sampleSet.meta.sender.email }),
-            stateShort: Bundesland.UNKNOWN
+            email: await Email.create({ value: sampleSet.meta.sender.email })
         });
 
         const customer = Customer.create({
             contact: contact,
-            firstName: sampleSet.meta.sender.contactPerson.split(' ')[0]
-                ? await Name.create({
-                      value: sampleSet.meta.sender.contactPerson.split(' ')[0]
-                  })
-                : undefined,
-            lastName: sampleSet.meta.sender.contactPerson.split(' ')[1]
-                ? await Name.create({
-                      value: sampleSet.meta.sender.contactPerson.split(' ')[1]
-                  })
-                : undefined,
             customerRefNumber: sampleSet.meta.customerRefNumber || ''
         });
 

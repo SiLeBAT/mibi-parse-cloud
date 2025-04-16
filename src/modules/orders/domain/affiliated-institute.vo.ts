@@ -3,29 +3,30 @@ import {
     ValueObject,
     ValueObjectProps
 } from '../../shared/domain/valueObjects';
+import { Bundesland } from './enums';
 
-interface ContactProps extends ValueObjectProps {
+interface AffiliatedInstituteProps extends ValueObjectProps {
     instituteName: string;
     department?: string;
     street: string;
     zip: string;
     city: string;
-    contactPerson: string;
     telephone: string;
     email: Email;
+    stateShort: Bundesland;
 }
 
-export class Contact extends ValueObject<ContactProps> {
+export class AffiliatedInstitute extends ValueObject<AffiliatedInstituteProps> {
     toString(): string {
         return `${this.props.contactPerson}`;
     }
 
-    private constructor(props: ContactProps) {
+    private constructor(props: AffiliatedInstituteProps) {
         super(props);
     }
 
-    static create(props: ContactProps) {
-        const contact = new Contact(props);
+    static create(props: AffiliatedInstituteProps) {
+        const contact = new AffiliatedInstitute(props);
         return contact;
     }
 
@@ -52,5 +53,8 @@ export class Contact extends ValueObject<ContactProps> {
     }
     get email(): Email {
         return this.props.email;
+    }
+    get stateShort(): Bundesland {
+        return this.props.stateShort;
     }
 }
