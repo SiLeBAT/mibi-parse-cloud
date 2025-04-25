@@ -21,7 +21,9 @@ export enum Bundesland {
 export enum SERVER_ERROR_CODE {
     UNKNOWN_ERROR = 1,
     INVALID_INPUT = 5,
-    AUTOCORRECTED_INPUT = 6
+    AUTOCORRECTED_INPUT = 6,
+    INVALID_VERSION = 7,
+    INVALID_EMAIL = 8
 }
 
 export enum ReceiveAs {
