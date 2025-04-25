@@ -24,12 +24,12 @@ export class Email extends ValueObject<EmailProps> {
     }
 
     public static async create(props: EmailProps): Promise<Email> {
-        const validatedProps = await Email.emailSchema.validate(props);
         try {
+            const validatedProps = await Email.emailSchema.validate(props);
             return new Email(validatedProps);
         } catch (error) {
             if (error instanceof ValidationError) {
-                const errorMessage = `Email Validation failed: ${validatedProps.value} is not a valid email address`;
+                const errorMessage = `Email Validation failed: ${props.value} is not a valid email address`;
                 throw new EmailValidationError(
                     errorMessage,
                     new Error(errorMessage)
