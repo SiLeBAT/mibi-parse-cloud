@@ -134,8 +134,7 @@ export class ZomoCsvParser {
 
         const codes = rowValue
             .split(this.ROW_VALUE_SEPARATOR)
-            .map(code => code.trim())
-            .filter(code => code);
+            .map(code => code.trim());
 
         for (const code of codes) {
             let basicCode = '';
