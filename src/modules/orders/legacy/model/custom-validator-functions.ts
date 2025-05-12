@@ -885,6 +885,10 @@ function checkFacettenCodeForZomo(
         return true;
     }
 
+    if (!value && zomoPlanHasEmptyProperty(zomoPlanEntry)) {
+        return true;
+    }
+
     const basicCodeRegex: RegExp = /^\d+\|\d+\|$/;
     const codeRegexGroup: RegExp =
         /^(?<basicCode>\d+\|\d+\|)(?<facettenPart>.+)$/;
@@ -1046,6 +1050,10 @@ function checkBasicCodeForZomo(zomoPlanEntry: object[], value: string) {
         return true;
     }
 
+    if (!value && zomoPlanHasEmptyProperty(zomoPlanEntry)) {
+        return true;
+    }
+
     const hasEntry = zomoPlanEntry.some(entry => {
         return value in entry;
     });
@@ -1059,6 +1067,12 @@ function isZomoPlanEntryEmpty(zomoPlanEntry: object[]) {
     }
 
     return false;
+}
+
+function zomoPlanHasEmptyProperty(zomoPlanEntry: object[]) {
+    return zomoPlanEntry.some(entry => {
+        return '' in entry;
+    });
 }
 
 function isEmptyObject(obj: object) {
