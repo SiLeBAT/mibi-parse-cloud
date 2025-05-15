@@ -1,1 +1,2 @@
 import './getSystemInformation';
+import './addInstitute';
