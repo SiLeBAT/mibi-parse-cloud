@@ -58,7 +58,7 @@ const validationErrorProvider = new ValidationErrorProvider(
 );
 
 const antiCorruptionLayers = (async function init() {
-    const catalogRepository = await catalogRepositoryInit(
+    await catalogRepositoryInit(
         configurationService.getDataStoreConfiguration().dataDir
     ).catch((error: Error) => {
         console.error(
@@ -76,7 +76,6 @@ const antiCorruptionLayers = (async function init() {
 
     const catalogService = new CatalogService(
         plzCache,
-        catalogRepository,
         searchAliasCache,
         avvCatalogCache,
         zomoPlanCache
