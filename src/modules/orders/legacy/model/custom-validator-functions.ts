@@ -9,7 +9,6 @@ import {
     MatchesProgramZoMoOptions,
     DependentFieldsOptions,
     InCatalogOptions,
-    MatchADVNumberOrStringOptions,
     MatchAVVCodeOrStringOptions,
     MatchIdToYearOptions,
     MatchRegexPatternOptions,
@@ -157,7 +156,7 @@ function matchesIdToSpecificYear(
     });
 }
 
-function inCatalog(
+function inPLZCatalog(
     catalogService: CatalogService
 ): ValidatorFunction<InCatalogOptions> {
     return (
@@ -168,23 +167,18 @@ function inCatalog(
     ) => {
         const trimmedValue = value.trim();
         if (attributes[key]) {
-            const catalogs = options.catalog.split(',');
+            const cat = catalogService.getPLZCatalog();
+            let plzOk: string | boolean = false;
 
-            const catalogWithKode = _.filter(catalogs, catalog => {
-                const cat = catalogService.getCatalog(catalog);
+            if (cat) {
+                const key: string = options.key
+                    ? options.key
+                    : cat.getUniqueId();
 
-                if (cat) {
-                    const key: string = options.key
-                        ? options.key
-                        : cat.getUniqueId();
+                plzOk = key && cat.containsEntryWithKeyValue(key, trimmedValue);
+            }
 
-                    return (
-                        key && cat.containsEntryWithKeyValue(key, trimmedValue)
-                    );
-                }
-            });
-
-            if (catalogWithKode.length === 0) {
+            if (!plzOk) {
                 return { ...options.message };
             }
         }
@@ -577,50 +571,6 @@ function checkEintragAttributes<
     }
 
     return true;
-}
-
-// Matching for ADV16 according to #mps53
-function matchADVNumberOrString(
-    catalogService: CatalogService
-): ValidatorFunction<InCatalogOptions> {
-    return (
-        value: string,
-        options: MatchADVNumberOrStringOptions,
-        key: SampleProperty,
-        attributes: SampleDataValues
-    ) => {
-        const trimmedValue = value.trim();
-        const altKeys = options.alternateKeys || [];
-        if (attributes[key]) {
-            const cat = catalogService.getCatalog(options.catalog);
-
-            if (cat) {
-                const key: string = options.key
-                    ? options.key
-                    : cat.getUniqueId();
-                if (!key) {
-                    return null;
-                }
-                if (numbersOnlyValue(value)) {
-                    if (!cat.containsEntryWithKeyValue(key, trimmedValue)) {
-                        return { ...options.message };
-                    }
-                } else {
-                    let found = false;
-                    altKeys.forEach(k => {
-                        found =
-                            cat.containsEntryWithKeyValue(k, trimmedValue) ||
-                            found;
-                    });
-                    if (found) {
-                        return null;
-                    }
-                    return { ...options.message };
-                }
-            }
-        }
-        return null;
-    };
 }
 
 function matchAVVCodeOrString(
@@ -1226,9 +1176,8 @@ export {
     hasObligatoryFacettenValues,
     inAVVCatalog,
     inAVVFacettenCatalog,
-    inCatalog,
+    inPLZCatalog,
     isHierarchyCode,
-    matchADVNumberOrString,
     matchAVVCodeOrString,
     matchesIdToSpecificYear,
     matchesRegexPattern,

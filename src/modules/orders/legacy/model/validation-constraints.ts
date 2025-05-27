@@ -376,9 +376,8 @@ export const baseConstraints: ValidationConstraints = {
             }
         },
 
-        inCatalog: {
-            error: 75,
-            catalog: 'plz'
+        inPLZCatalog: {
+            error: 75
         }
     },
 
