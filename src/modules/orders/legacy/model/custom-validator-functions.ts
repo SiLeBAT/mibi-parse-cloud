@@ -842,6 +842,8 @@ function checkFacettenCodeForZomo(
     const basicCodeRegex: RegExp = /^\d+\|\d+\|$/;
     const codeRegexGroup: RegExp =
         /^(?<basicCode>\d+\|\d+\|)(?<facettenPart>.+)$/;
+    const facettenPartRegex: RegExp =
+        /^((\d+-\d+(:\d+)*)?(,\d+-\d+(:\d+)*)*)?$/;
     let basicCode = '';
     let facettenPart = '';
 
@@ -861,6 +863,14 @@ function checkFacettenCodeForZomo(
         // value is a code with facetten
         basicCode = match.groups['basicCode'];
         facettenPart = match.groups['facettenPart'];
+
+        if (
+            !basicCodeRegex.test(basicCode) ||
+            !facettenPartRegex.test(facettenPart)
+        ) {
+            return false;
+        }
+
         const facettenResult = checkBasicCodeWithFacetten(
             zomoPlanEntry,
             basicCode,
