@@ -33,7 +33,12 @@ export const zoMoConstraints: ValidationConstraints = {
 
     sampling_date: {},
 
-    isolation_date: {},
+    isolation_date: {
+        presence: {
+            error: 18,
+            allowEmpty: false
+        }
+    },
 
     animal_avv: {
         atLeastOneOf: {
@@ -178,6 +183,10 @@ export const standardConstraints: ValidationConstraints = {
         atLeastOneOf: {
             error: 19,
             additionalMembers: ['sampling_date']
+        },
+
+        presenceNotZoMo: {
+            error: 15
         }
     },
 
@@ -293,10 +302,6 @@ export const baseConstraints: ValidationConstraints = {
     isolation_date: {
         presenceZoMo: {
             error: 18
-        },
-
-        presenceNotZoMo: {
-            error: 15
         },
 
         dateAllowEmpty: {
