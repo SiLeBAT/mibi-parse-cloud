@@ -9,28 +9,22 @@ import {
     SearchAlias
 } from '../model/legacy.model';
 import { AVVCatalogCache } from '../../../shared/infrastructure/cache';
-import { CatalogRepository } from '../repositories/catalog.repository';
+import { ZomoPlanCache } from '../../../shared/infrastructure/cache';
 import { SearchAliasCache } from '../../../shared/infrastructure/cache';
 
 export class CatalogService {
     constructor(
         private plzCache: PLZCache,
-        private catalogRepository: CatalogRepository,
         private searchAliasCache: SearchAliasCache,
-        private avvCatalogCache: AVVCatalogCache
+        private avvCatalogCache: AVVCatalogCache,
+        private zomoPlanCache: ZomoPlanCache
     ) {}
 
-    getCatalog<T extends CatalogData>(catalogName: string): Catalog<T> {
-        switch (catalogName) {
-            case 'plz': {
-                return createCatalog(
-                    this.plzCache.getJSONData(),
-                    'plz'
-                ) as unknown as Catalog<T>;
-            }
-            default:
-                return this.catalogRepository.getCatalog<T>(catalogName);
-        }
+    getPLZCatalog<T extends CatalogData>(): Catalog<T> {
+        return createCatalog(
+            this.plzCache.getJSONData(),
+            'plz'
+        ) as unknown as Catalog<T>;
     }
 
     getAVVCatalog<T extends AVVCatalogData>(
@@ -63,5 +57,9 @@ export class CatalogService {
             );
         }
         return searchAlias;
+    }
+
+    getZomoPlan(samplingDate: string | null = null) {
+        return this.zomoPlanCache.getZomoPlanData(samplingDate)?.data.zomoData;
     }
 }

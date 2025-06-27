@@ -1,17 +1,13 @@
-import path from 'path';
 import {
     getLogger,
     setLoggingContext
 } from '../../../shared/core/logging-context';
 import { ParseHookRequest } from '../../../shared/infrastructure';
 import { AVVCatalogObject } from '../../../shared/infrastructure/parse-types';
-import { FileContent, FileContentType } from '../../domain';
 import { AVVCatalogMapper } from '../../mappers';
 import { checkForCatalogDuplication } from '../checkForCatalogDuplication';
-import {
-    CatalogDuplicationError,
-    UnsupportedFileTypeError
-} from './create-avv-catalog.error';
+import { CatalogDuplicationError } from './create-avv-catalog.error';
+import { readFileContent } from '../readFileContent';
 import { createAVVCatalog } from './create-avv-catalog.use-case';
 
 type AVVCatalogSaveContext = Record<string, unknown>;
@@ -30,7 +26,7 @@ export const beforeAVVCatalogSaveHook = async (
     try {
         setLoggingContext(request.log);
 
-        const fileContent = await getFileContent(avvCatalogObject);
+        const fileContent = await readFileContent.execute(originalFile);
         const catalog = await createAVVCatalog.execute({
             fileContent
         });
@@ -66,42 +62,5 @@ function destroyFile(file: Parse.File) {
         file.destroy({ useMasterKey: true });
     } catch (error) {
         getLogger().error(error.message);
-    }
-}
-
-async function getFileContent(
-    avvCatalogObject: AVVCatalogObject
-): Promise<FileContent> {
-    const file = avvCatalogObject.get('catalogFile');
-
-    const fileContent = await FileContent.create({
-        content: await getContentAsString(file),
-        type: determineContentType(file)
-    });
-
-    return fileContent;
-}
-
-async function getContentAsString(file: Parse.File) {
-    const base64 = await file.getData();
-    return fromBase64ToUTF8(base64);
-}
-function fromBase64ToUTF8(base64: string): string {
-    const buff = Buffer.from(base64, 'base64');
-    return buff.toString('utf-8');
-}
-
-function determineContentType(file: Parse.File): FileContentType {
-    const ext = path.extname(file.url());
-    switch (ext) {
-        case '.json':
-            return FileContentType.JSON;
-        case '.xml':
-            return FileContentType.XML;
-        default:
-            throw new UnsupportedFileTypeError(
-                'Unsupported file type',
-                new Error()
-            );
     }
 }

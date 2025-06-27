@@ -3,10 +3,15 @@ import {
     avvCatalogCache,
     nrlCache,
     plzCache,
-    searchAliasCache
+    searchAliasCache,
+    zomoPlanCache
 } from '../../shared/infrastructure';
 import { ObjectKeys } from '../../shared/infrastructure/parse-types';
-import { setAVVCatalogCache, setSearchAliasCache } from '../use-cases';
+import {
+    setAVVCatalogCache,
+    setSearchAliasCache,
+    setZomoPlanCache
+} from '../use-cases';
 import {
     ExcelMarshallAntiCorruptionLayer,
     ExcelUnmarshalAntiCorruptionLayer,
@@ -15,7 +20,7 @@ import {
 } from './anti-corruption';
 import { AVVFormatProvider } from './application/avv-format-provider.service';
 import { CatalogService } from './application/catalog.service';
-import { configurationService } from './application/configuratioin.service';
+import { configurationService } from './application/configuration.service';
 import { excelUnmarshalService } from './application/excel-unmarshal.service';
 import { FormAutoCorrectionService } from './application/form-auto-correction.service';
 import { FormValidatorService } from './application/form-validation.service';
@@ -53,7 +58,7 @@ const validationErrorProvider = new ValidationErrorProvider(
 );
 
 const antiCorruptionLayers = (async function init() {
-    const catalogRepository = await catalogRepositoryInit(
+    await catalogRepositoryInit(
         configurationService.getDataStoreConfiguration().dataDir
     ).catch((error: Error) => {
         console.error(
@@ -66,12 +71,14 @@ const antiCorruptionLayers = (async function init() {
     await setSearchAliasCache.execute();
     logger.info('Parse Cloud: Creating AVVCatalog cache.');
     await setAVVCatalogCache.execute();
+    logger.info('Parse Cloud: Creating Zomo Plan cache.');
+    await setZomoPlanCache.execute();
 
     const catalogService = new CatalogService(
         plzCache,
-        catalogRepository,
         searchAliasCache,
-        avvCatalogCache
+        avvCatalogCache,
+        zomoPlanCache
     );
 
     const avvFormatProvider = new AVVFormatProvider(stateRepository);

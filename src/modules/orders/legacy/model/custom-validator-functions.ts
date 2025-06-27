@@ -5,23 +5,24 @@ import { CatalogService } from '../application/catalog.service';
 import {
     AVVCatalogData,
     AtLeastOneOfOptions,
+    MatchesZoMoOptions,
+    MatchesProgramZoMoOptions,
     DependentFieldsOptions,
     InCatalogOptions,
-    MatchADVNumberOrStringOptions,
     MatchAVVCodeOrStringOptions,
     MatchIdToYearOptions,
     MatchRegexPatternOptions,
     MibiCatalogData,
     MibiCatalogFacettenData,
     ReferenceDateOptions,
-    RegisteredZoMoOptions,
     RequiredIfOtherOptions,
     SampleDataValues,
     SampleProperty,
     ValidatorFunction,
     ValidatorFunctionOptions,
     ZOMO_ID,
-    ZSPCatalogEntry
+    CodeType,
+    ZomoData
 } from '../model/legacy.model';
 import { AVVCatalog } from './avvcatalog.entity';
 
@@ -155,7 +156,7 @@ function matchesIdToSpecificYear(
     });
 }
 
-function inCatalog(
+function inPLZCatalog(
     catalogService: CatalogService
 ): ValidatorFunction<InCatalogOptions> {
     return (
@@ -166,23 +167,18 @@ function inCatalog(
     ) => {
         const trimmedValue = value.trim();
         if (attributes[key]) {
-            const catalogs = options.catalog.split(',');
+            const cat = catalogService.getPLZCatalog();
+            let plzOk: string | boolean = false;
 
-            const catalogWithKode = _.filter(catalogs, catalog => {
-                const cat = catalogService.getCatalog(catalog);
+            if (cat) {
+                const key: string = options.key
+                    ? options.key
+                    : cat.getUniqueId();
 
-                if (cat) {
-                    const key: string = options.key
-                        ? options.key
-                        : cat.getUniqueId();
+                plzOk = key && cat.containsEntryWithKeyValue(key, trimmedValue);
+            }
 
-                    return (
-                        key && cat.containsEntryWithKeyValue(key, trimmedValue)
-                    );
-                }
-            });
-
-            if (catalogWithKode.length === 0) {
+            if (!plzOk) {
                 return { ...options.message };
             }
         }
@@ -532,8 +528,6 @@ function createFacettenMap(facettenValues: string): Map<number, number[]> {
     facetten.forEach(facette => {
         const ids = facette.split('-');
         const facettenNameBegriffsId = convertStringToNumber(ids[0]);
-        // const facettenNameBegriffsId =  num instanceof Error ?  ids[0];
-
         const wertNameBegriffsIds: number[] = [];
         if (ids.length > 1) {
             ids[1].split(':').forEach(wertNameBegriffsId => {
@@ -577,50 +571,6 @@ function checkEintragAttributes<
     }
 
     return true;
-}
-
-// Matching for ADV16 according to #mps53
-function matchADVNumberOrString(
-    catalogService: CatalogService
-): ValidatorFunction<InCatalogOptions> {
-    return (
-        value: string,
-        options: MatchADVNumberOrStringOptions,
-        key: SampleProperty,
-        attributes: SampleDataValues
-    ) => {
-        const trimmedValue = value.trim();
-        const altKeys = options.alternateKeys || [];
-        if (attributes[key]) {
-            const cat = catalogService.getCatalog(options.catalog);
-
-            if (cat) {
-                const key: string = options.key
-                    ? options.key
-                    : cat.getUniqueId();
-                if (!key) {
-                    return null;
-                }
-                if (numbersOnlyValue(value)) {
-                    if (!cat.containsEntryWithKeyValue(key, trimmedValue)) {
-                        return { ...options.message };
-                    }
-                } else {
-                    let found = false;
-                    altKeys.forEach(k => {
-                        found =
-                            cat.containsEntryWithKeyValue(k, trimmedValue) ||
-                            found;
-                    });
-                    if (found) {
-                        return null;
-                    }
-                    return { ...options.message };
-                }
-            }
-        }
-        return null;
-    };
 }
 
 function matchAVVCodeOrString(
@@ -673,186 +623,428 @@ function matchAVVCodeOrString(
     };
 }
 
-function shouldBeZoMo(
+function isZoMo(attributes: SampleDataValues): boolean {
+    return (
+        attributes['control_program_avv'] === ZOMO_ID.code ||
+        (attributes['program_reason_text']
+            .toLowerCase()
+            .includes(ZOMO_ID.string1) &&
+            attributes['program_reason_text']
+                .toLowerCase()
+                .includes(ZOMO_ID.string2))
+    );
+}
+
+function presenceZoMo(
+    value: string,
+    options: ValidatorFunctionOptions,
+    key: SampleProperty,
+    attributes: Record<string, string>
+) {
+    const sampleIsZoMo = isZoMo(attributes);
+
+    if (!sampleIsZoMo) {
+        return null;
+    }
+
+    if (!value.trim()) {
+        return { ...options.message };
+    }
+
+    return null;
+}
+
+function presenceNotZoMo(
+    value: string,
+    options: ValidatorFunctionOptions,
+    key: SampleProperty,
+    attributes: Record<string, string>
+) {
+    const sampleIsZoMo = isZoMo(attributes);
+
+    if (sampleIsZoMo) {
+        return null;
+    }
+
+    if (!value.trim()) {
+        return { ...options.message };
+    }
+
+    return null;
+}
+
+function matchesProgramZoMo(
     catalogService: CatalogService
-): ValidatorFunction<RegisteredZoMoOptions> {
+): ValidatorFunction<MatchesProgramZoMoOptions> {
     return (
         value: string,
-        options: RegisteredZoMoOptions,
+        options: MatchesZoMoOptions,
         key: SampleProperty,
         attributes: SampleDataValues
     ) => {
-        if (attributes.nrl === NRL_ID_VALUE.UNKNOWN) {
+        const sampleIsZoMo = isZoMo(attributes);
+
+        if (!sampleIsZoMo) {
             return null;
         }
 
-        const years = getYears(options.year, attributes);
-        const advCat = catalogService.getCatalog<ZSPCatalogEntry>(
-            options.catalog
+        const programValue = value.trim();
+
+        if (!programValue) {
+            return null;
+        }
+
+        const sampleDate = attributes[options.date];
+
+        if (!sampleDate) {
+            return null;
+        }
+
+        const zomoPlan = catalogService.getZomoPlan(sampleDate);
+
+        if (!zomoPlan) {
+            return null;
+        }
+
+        const programKey = options.zomoKey;
+        const zomoPlanIndex = getProgramIndexForZomo(
+            zomoPlan,
+            programValue,
+            programKey
         );
 
-        let result = null;
-        _.forEach(years, yearToCheck => {
-            const zspCat = catalogService.getCatalog<ZSPCatalogEntry>(
-                'zsp' + yearToCheck.toString()
-            );
-            if (zspCat && advCat) {
-                const groupValues = options.group.map(g => attributes[g.attr]);
-
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const adv16Entry: any[] = advCat.getEntriesWithKeyValue(
-                    'Text',
-                    groupValues[3]
-                );
-                if (adv16Entry.length < 1) {
-                    return null;
-                }
-                const adv16Kode: string = adv16Entry[0]['Kode'];
-
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const zspEntries: any[] = zspCat.dump() as any[];
-
-                const zspEntriesWithValues = _.filter(
-                    zspEntries,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (entry: any) => {
-                        const containsKodes =
-                            containsEntryWithValueFast(
-                                entry[options.group[0].code],
-                                groupValues[0]
-                            ) &&
-                            containsEntryWithValueFast(
-                                entry[options.group[1].code],
-                                groupValues[1]
-                            ) &&
-                            containsEntryWithValueFast(
-                                entry[options.group[2].code],
-                                groupValues[2]
-                            ) &&
-                            containsEntryWithValueFast(
-                                entry[options.group[3].code],
-                                adv16Kode
-                            );
-
-                        return containsKodes;
-                    }
-                );
-
-                if (zspEntriesWithValues.length >= 1) {
-                    result = { ...options.message };
-                }
-            }
-        });
-        return result;
-    };
-}
-
-function registeredZoMo(
-    catalogService: CatalogService
-): ValidatorFunction<RegisteredZoMoOptions> {
-    return (
-        value: string,
-        options: RegisteredZoMoOptions,
-        key: SampleProperty,
-        attributes: SampleDataValues
-    ) => {
-        if (attributes.nrl === NRL_ID_VALUE.UNKNOWN) {
+        if (zomoPlanIndex === -1) {
             return { ...options.message };
         }
 
-        const years = getYears(options.year, attributes);
-
-        if (years.length > 0) {
-            const yearToCheck = Math.min(...years);
-            const zspCat = catalogService.getCatalog<ZSPCatalogEntry>(
-                'zsp' + yearToCheck.toString()
-            );
-            const advCat = catalogService.getCatalog<ZSPCatalogEntry>(
-                options.catalog
-            );
-            if (zspCat && advCat) {
-                const groupValues = options.group.map(g => attributes[g.attr]);
-
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const adv16Entry: any[] = advCat.getEntriesWithKeyValue(
-                    'Text',
-                    groupValues[3]
-                );
-                if (adv16Entry.length < 1) {
-                    return { ...options.message };
-                }
-                const adv16Kode: string = adv16Entry[0]['Kode'];
-
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const zspEntries: any[] = zspCat.dump() as any[];
-
-                const zspEntriesWithValues = _.filter(
-                    zspEntries,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (entry: any) => {
-                        const containsKodes =
-                            containsEntryWithValueFast(
-                                entry[options.group[0].code],
-                                groupValues[0]
-                            ) &&
-                            containsEntryWithValueFast(
-                                entry[options.group[1].code],
-                                groupValues[1]
-                            ) &&
-                            containsEntryWithValueFast(
-                                entry[options.group[2].code],
-                                groupValues[2]
-                            ) &&
-                            containsEntryWithValueFast(
-                                entry[options.group[3].code],
-                                adv16Kode
-                            );
-
-                        return containsKodes;
-                    }
-                );
-
-                if (zspEntriesWithValues.length < 1) {
-                    return { ...options.message };
-                }
-            } else {
-                return { ...options.message };
-            }
-        } else {
-            return { ...options.message };
-        }
         return null;
     };
 }
 
-function containsEntryWithValueFast(arr: string[], value: string) {
-    let start = 0;
-    let end = arr.length - 1;
+function matchesZoMo(
+    catalogService: CatalogService
+): ValidatorFunction<MatchesZoMoOptions> {
+    return (
+        value: string,
+        options: MatchesZoMoOptions,
+        key: SampleProperty,
+        attributes: SampleDataValues
+    ) => {
+        const sampleDate = attributes[options.date];
 
-    while (start <= end) {
-        const middle = Math.floor((start + end) / 2);
-        if (arr[middle] === value) {
-            return true;
-            // tslint:disable-next-line
-        } else if (arr[middle] < value) {
-            start = middle + 1;
-        } else {
-            end = middle - 1;
+        if (!sampleDate) {
+            return null;
         }
+
+        const zomoPlan = catalogService.getZomoPlan(sampleDate);
+
+        if (!zomoPlan) {
+            return null;
+        }
+
+        const zomoKey = options.zomoKey;
+        const codeType = options.codeType;
+        const keyValue = value.trim();
+        const programField = options.programField;
+        const programValue = attributes[programField.attr];
+        const programKey = options.programField.zomoKey;
+        const zomoPlanIndex = getProgramIndexForZomo(
+            zomoPlan,
+            programValue,
+            programKey
+        );
+
+        if (zomoPlanIndex === -1) {
+            return { ...options.message };
+        }
+
+        const codeCheckResult = executeMatchingCodeType(
+            zomoPlan[zomoPlanIndex][zomoKey] as object[],
+            keyValue,
+            codeType
+        );
+
+        if (!codeCheckResult) {
+            return { ...options.message };
+        }
+
+        return null;
+    };
+}
+
+function executeMatchingCodeType(
+    zomoPlanEntry: object[],
+    value: string,
+    codeType: CodeType
+) {
+    let codeCheckResult = false;
+
+    switch (codeType) {
+        case CodeType.BASIC:
+            codeCheckResult = checkBasicCodeForZomo(
+                zomoPlanEntry as Record<string, object>[],
+                value
+            );
+            break;
+        case CodeType.FACETTEN:
+            codeCheckResult = checkFacettenCodeForZomo(
+                zomoPlanEntry as Record<string, object>[],
+                value
+            );
+            break;
+        case CodeType.PATHOGEN:
+            codeCheckResult = checkPathogenForZomo(
+                zomoPlanEntry as unknown as string[],
+                value
+            );
+            break;
+        default:
+            console.log('CodeType not known');
     }
+
+    return codeCheckResult;
+}
+
+function getProgramIndexForZomo(
+    zomoPlan: ZomoData[],
+    programValue: string,
+    programKey: keyof ZomoData
+) {
+    if (isZomoPlanEntryEmpty(zomoPlan)) {
+        return -1;
+    }
+
+    const index = zomoPlan.findIndex((zomoPlanRow: ZomoData) => {
+        const programEntry = zomoPlanRow[programKey] as object[];
+
+        if (isZomoPlanEntryEmpty(programEntry)) {
+            return -1;
+        }
+
+        return _.has(programEntry[0], programValue);
+    });
+
+    return index;
+}
+
+function checkFacettenCodeForZomo(
+    zomoPlanEntry: Array<Record<string, object>>,
+    value: string
+) {
+    if (isZomoPlanEntryEmpty(zomoPlanEntry)) {
+        return true;
+    }
+
+    if (!value && zomoPlanHasEmptyProperty(zomoPlanEntry)) {
+        return true;
+    }
+
+    const basicCodeRegex: RegExp = /^\d+\|\d+\|$/;
+    const codeRegexGroup: RegExp =
+        /^(?<basicCode>\d+\|\d+\|)(?<facettenPart>.+)$/;
+    const facettenPartRegex: RegExp =
+        /^((\d+-\d+(:\d+)*)?(,\d+-\d+(:\d+)*)*)?$/;
+    let basicCode = '';
+    let facettenPart = '';
+
+    if (basicCodeRegex.test(value)) {
+        // value is a basic code without facetten
+        basicCode = value;
+        const basicCodeResult = checkBasicCodeWithEmptyFacetten(
+            zomoPlanEntry,
+            basicCode
+        );
+
+        return basicCodeResult;
+    }
+
+    const match = value.match(codeRegexGroup);
+    if (match && match.groups) {
+        // value is a code with facetten
+        basicCode = match.groups['basicCode'];
+        facettenPart = match.groups['facettenPart'];
+
+        if (
+            !basicCodeRegex.test(basicCode) ||
+            !facettenPartRegex.test(facettenPart)
+        ) {
+            return false;
+        }
+
+        const facettenResult = checkBasicCodeWithFacetten(
+            zomoPlanEntry,
+            basicCode,
+            facettenPart
+        );
+
+        return facettenResult;
+    }
+
     return false;
 }
 
-function getYears(ary: string[], attributes: SampleDataValues): number[] {
-    const tmp = ary.map((y: SampleProperty) => {
-        const yearValue = attributes[y];
-        const formattedYear = moment
-            .utc(yearValue, 'DD-MM-YYYY')
-            .format('YYYY');
-        return parseInt(formattedYear, 10);
+function checkAllFacettenIdsInCode(
+    facettenField: (string | string[])[][],
+    zomoPlanFacettenIds: object
+) {
+    const facettenIdsCode = facettenField.map(([facettenId]) => facettenId);
+    const facettenIdsPlan = Object.keys(zomoPlanFacettenIds);
+
+    const allFacettenIn = facettenIdsPlan.every(facettenId => {
+        return facettenIdsCode.includes(facettenId);
     });
 
-    return Array.from(new Set(tmp));
+    if (!allFacettenIn) {
+        return false;
+    }
+
+    return true;
+}
+
+function checkBasicCodeWithFacetten(
+    zomoPlanEntry: Array<Record<string, object>>,
+    basicCode: string,
+    facettenPart: string
+) {
+    const facetten = facettenPart.split(',');
+    const facettenField: (string | string[])[][] = [];
+
+    facetten.forEach(facette => {
+        const [id, details] = facette.split('-');
+        const detailsField = details.split(':');
+        facettenField.push([id, detailsField]);
+    });
+
+    const zomoPlanEntryResult = zomoPlanEntry.some(
+        (entry: Record<string, object>) => {
+            const basicCodeEntry = entry[basicCode];
+
+            if (!basicCodeEntry) {
+                return false;
+            }
+
+            const allFacettenIn = checkAllFacettenIdsInCode(
+                facettenField,
+                basicCodeEntry
+            );
+            const planFacettenIds = Object.keys(basicCodeEntry);
+
+            const facettenFieldResult = planFacettenIds.every(facettenId => {
+                const facettenIdEntry: {
+                    and?: number[];
+                    or?: number[];
+                } = (basicCodeEntry as Record<string, object>)[facettenId];
+
+                const facettenFieldEntry = facettenField.find(
+                    ([facettenFieldId]: [string, string[]]) => {
+                        return facettenFieldId === facettenId;
+                    }
+                );
+
+                if (!(facettenIdEntry && facettenFieldEntry)) {
+                    return false;
+                }
+
+                if (facettenIdEntry['and']) {
+                    const numericDetails = (
+                        facettenFieldEntry[1] as string[]
+                    ).map(value => Number(value));
+                    const andValues = facettenIdEntry['and'] as number[];
+
+                    if (!andValues) {
+                        return false;
+                    }
+
+                    const andResult = andValues.every(planValue =>
+                        numericDetails.includes(planValue)
+                    );
+
+                    return andResult;
+                }
+
+                if (facettenIdEntry['or']) {
+                    const numericDetails = (
+                        facettenFieldEntry[1] as string[]
+                    ).map(value => Number(value));
+                    const orValues = facettenIdEntry['or'] as number[];
+
+                    if (!orValues) {
+                        return false;
+                    }
+
+                    const orResult = numericDetails.some(detailValue =>
+                        orValues.includes(detailValue)
+                    );
+
+                    return orResult;
+                }
+            });
+
+            return facettenFieldResult && allFacettenIn;
+        }
+    );
+
+    return zomoPlanEntryResult;
+}
+
+function checkBasicCodeWithEmptyFacetten(
+    zomoPlanEntry: Array<Record<string, object>>,
+    value: string
+) {
+    const hasEntry = zomoPlanEntry.some(entry => {
+        if (!(value in entry)) {
+            return false;
+        }
+
+        const propertyValue = entry[value];
+        const hasEmptyValue = isEmptyObject(propertyValue);
+
+        return hasEmptyValue;
+    });
+
+    return hasEntry;
+}
+
+function checkBasicCodeForZomo(zomoPlanEntry: object[], value: string) {
+    if (isZomoPlanEntryEmpty(zomoPlanEntry)) {
+        return true;
+    }
+
+    if (!value && zomoPlanHasEmptyProperty(zomoPlanEntry)) {
+        return true;
+    }
+
+    const hasEntry = zomoPlanEntry.some(entry => {
+        return value in entry;
+    });
+
+    return hasEntry;
+}
+
+function isZomoPlanEntryEmpty(zomoPlanEntry: object[]) {
+    if (zomoPlanEntry.length === 1 && isEmptyObject(zomoPlanEntry[0])) {
+        return true;
+    }
+
+    return false;
+}
+
+function zomoPlanHasEmptyProperty(zomoPlanEntry: object[]) {
+    return zomoPlanEntry.some(entry => {
+        return '' in entry;
+    });
+}
+
+function isEmptyObject(obj: object) {
+    return Object.keys(obj).length === 0;
+}
+
+function checkPathogenForZomo(regexPatterns: string[], value: string) {
+    const isMatch = regexPatterns.some(pattern => {
+        return new RegExp(pattern).test(value);
+    });
+
+    return isMatch;
 }
 
 function atLeastOneOf(
@@ -872,6 +1064,7 @@ function atLeastOneOf(
     }
     return null;
 }
+
 function dateAllowEmpty(value: string, options: AtLeastOneOfOptions) {
     if (isEmptyString(value)) {
         return null;
@@ -993,9 +1186,8 @@ export {
     hasObligatoryFacettenValues,
     inAVVCatalog,
     inAVVFacettenCatalog,
-    inCatalog,
+    inPLZCatalog,
     isHierarchyCode,
-    matchADVNumberOrString,
     matchAVVCodeOrString,
     matchesIdToSpecificYear,
     matchesRegexPattern,
@@ -1003,7 +1195,9 @@ export {
     noPlanprobeForNRL_AR,
     nrlExists,
     referenceDate,
-    registeredZoMo,
-    requiredIfOther,
-    shouldBeZoMo
+    matchesZoMo,
+    matchesProgramZoMo,
+    presenceZoMo,
+    presenceNotZoMo,
+    requiredIfOther
 };

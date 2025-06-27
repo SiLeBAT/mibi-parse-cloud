@@ -1,6 +1,6 @@
 {
   "name": "mibi-parse-cloud",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "license": "MIT",
   "private": false,
   "type": "commonjs",
@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "config": "~3.3.8",
+    "fast-csv": "^5.0.2",
     "fast-xml-parser": "^4.4.1",
     "fs-readfile-promise": "~3.0.1",
     "fuse.js": "6.6.2",

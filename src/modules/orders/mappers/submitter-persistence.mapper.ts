@@ -5,7 +5,7 @@ import {
     UserInformationObject
 } from '../../shared/infrastructure/parse-types';
 import { Mapper } from '../../shared/mappers';
-import { Contact, Submitter, SubmitterProps } from '../domain';
+import { AffiliatedInstitute, Submitter, SubmitterProps } from '../domain';
 
 import { Bundesland } from '../domain/enums';
 
@@ -16,7 +16,7 @@ export class SubmitterPersistenceMapper extends Mapper {
         instituteObject: InstituteObject
     ): Promise<Submitter> {
         try {
-            const contact = Contact.create({
+            const institute = AffiliatedInstitute.create({
                 instituteName: instituteObject.get('name1'),
                 street: instituteObject.get('address1').street,
                 zip: instituteObject.get('zip'),
@@ -39,7 +39,7 @@ export class SubmitterPersistenceMapper extends Mapper {
                 value: userInformationObject.get('lastName')
             });
             const props: SubmitterProps = {
-                contact,
+                institute,
                 firstName,
                 lastName,
                 submitterId: EntityId.create({ value: userObject.id })

@@ -9,9 +9,13 @@ import { createSubmissionFileUseCase } from '../create-submission-file/create-su
 import { SampleEntry } from '../../domain/sample-entry.entity';
 import { ParseFromJSONUseCase } from './parse-from-json.use-case';
 import { ParseFromXLSXUseCase } from './parse-from-xlsx.use-case';
-
-import { SubmissionCreationFailedError } from './parse-sample-data.error';
+import { checkExcelVersionUseCase } from '../check-excel-version';
+import {
+    ExcelVersionError,
+    SubmissionCreationFailedError
+} from './parse-sample-data.error';
 import { ParseSampleDataUseCase } from './parse-sample-data.use-case';
+import { SERVER_ERROR_CODE } from '../../domain/enums';
 
 enum RESOURCE_VIEW_TYPE {
     JSON,
@@ -27,12 +31,24 @@ type ParseSampleDataResponse =
           fileName: string;
           type: string;
       };
+
 type ParseSampleDataRequestParameters = {
     readonly data: string;
     readonly filename: string;
     readonly type: 'xml' | 'json';
 };
+
 type ParseSampleDataRequest = HTTPRequest<ParseSampleDataRequestParameters>;
+
+type ErrorDTO = {
+    code: number;
+    message: string;
+};
+
+export interface EmailValidationErrorDTO extends ErrorDTO {}
+export interface ExcelVersionErrorDTO extends ErrorDTO {
+    version: string;
+}
 
 /*
  * The job of the Controller is simply to:
@@ -46,7 +62,7 @@ type ParseSampleDataRequest = HTTPRequest<ParseSampleDataRequestParameters>;
 const parseSampleDataController = loggedController(
     async (
         request: ParseSampleDataRequest
-    ): Promise<ParseSampleDataResponse> => {
+    ): Promise<ParseSampleDataResponse | ErrorDTO> => {
         const type = getResourceViewType(request.params.type);
         const submissionFormInput: SubmissionFormInput =
             SubmissionFormInput.create({
@@ -60,6 +76,18 @@ const parseSampleDataController = loggedController(
                 CreateOrderUseCaseFactory(type);
             const order: Order<SampleEntry<SampleEntryTuple>[]> =
                 await createOrder.execute(submissionFormInput);
+            const matchesExcelVersion = await checkExcelVersionUseCase.execute(
+                order
+            );
+
+            if (!matchesExcelVersion.valid) {
+                throw new ExcelVersionError(
+                    `Invalid Excel Version:${matchesExcelVersion.uploadedExcelVersion}`,
+                    new Error(
+                        `Invalid Excel Version:${matchesExcelVersion.uploadedExcelVersion}`
+                    )
+                );
+            }
 
             const returnType = getResourceViewType(request.headers['accept']);
 
@@ -89,7 +117,26 @@ const parseSampleDataController = loggedController(
             }
         } catch (error) {
             if (error instanceof EmailValidationError) {
-                throw error;
+                const dto: EmailValidationErrorDTO = {
+                    code: SERVER_ERROR_CODE.INVALID_EMAIL,
+                    message: error.message
+                };
+
+                return dto;
+            }
+
+            if (error instanceof ExcelVersionError) {
+                const version = error.message.includes(':')
+                    ? error.message.split(':')[1]
+                    : '16';
+
+                const dto: ExcelVersionErrorDTO = {
+                    code: SERVER_ERROR_CODE.INVALID_VERSION,
+                    message: error.message,
+                    version: version
+                };
+
+                return dto;
             }
 
             throw new SubmissionCreationFailedError(

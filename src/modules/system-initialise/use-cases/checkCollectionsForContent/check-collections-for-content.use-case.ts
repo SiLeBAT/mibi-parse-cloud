@@ -14,9 +14,17 @@ class CheckCollectionsForContentUseCase implements UseCase<null, null> {
         'resettokens',
         'validationerrors',
         'analysisprocedures',
-        'nrls',
         'dbversioninfos',
-        '_Session'
+        '_Session',
+        'AVV_Catalog',
+        'Additional_Pathogens',
+        'Allowed_PLZ',
+        'Analysis_Procedure',
+        'Client_Dashboard',
+        'NRL',
+        'Search_Alias',
+        'Template_File',
+        'Zomo_Plan'
     ];
 
     async execute(): Promise<null> {

@@ -145,7 +145,7 @@ export class SubmissionAntiCorruptionLayer {
                         street: order.customer.contact.street,
                         zip: order.customer.contact.zip,
                         city: order.customer.contact.city,
-                        contactPerson: order.customer.fullName,
+                        contactPerson: order.customer.contact.contactPerson,
                         telephone: order.customer.contact.telephone,
                         email: order.customer.contact.email.value
                     },
@@ -164,22 +164,24 @@ export class SubmissionAntiCorruptionLayer {
     }
 
     private createLegacyApplicationMetaData(
-        customer: Submitter,
+        submitter: Submitter,
         comment: string
     ): ApplicantMetaData {
         try {
             return {
                 user: {
-                    firstName: customer.firstName
-                        ? customer.firstName.value
+                    firstName: submitter.firstName
+                        ? submitter.firstName.value
                         : '',
-                    lastName: customer.lastName ? customer.lastName.value : '',
-                    email: customer.contact.props.email.value,
+                    lastName: submitter.lastName
+                        ? submitter.lastName.value
+                        : '',
+                    email: submitter.institute.props.email.value,
                     institution: {
-                        stateShort: customer.contact.stateShort.toString(),
-                        name: customer.contact.instituteName,
-                        city: customer.contact.city,
-                        zip: customer.contact.zip
+                        stateShort: submitter.institute.stateShort.toString(),
+                        name: submitter.institute.instituteName,
+                        city: submitter.institute.city,
+                        zip: submitter.institute.zip
                     },
                     getFullName: function (): string {
                         return this.firstName + ' ' + this.lastName;

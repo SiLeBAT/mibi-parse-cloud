@@ -3,7 +3,6 @@ import {
     ValueObject,
     ValueObjectProps
 } from '../../shared/domain/valueObjects';
-import { Bundesland } from './enums';
 
 interface ContactProps extends ValueObjectProps {
     instituteName: string;
@@ -11,9 +10,9 @@ interface ContactProps extends ValueObjectProps {
     street: string;
     zip: string;
     city: string;
+    contactPerson: string;
     telephone: string;
     email: Email;
-    stateShort: Bundesland;
 }
 
 export class Contact extends ValueObject<ContactProps> {
@@ -45,14 +44,13 @@ export class Contact extends ValueObject<ContactProps> {
     get city(): string {
         return this.props.city;
     }
+    get contactPerson(): string {
+        return this.props.contactPerson;
+    }
     get telephone(): string {
         return this.props.telephone;
     }
     get email(): Email {
         return this.props.email;
-    }
-
-    get stateShort(): Bundesland {
-        return this.props.stateShort;
     }
 }

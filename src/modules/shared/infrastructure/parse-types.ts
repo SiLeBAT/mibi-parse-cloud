@@ -7,7 +7,8 @@ export const ObjectKeys = {
     AdditionalPathogens: 'Additional_Pathogens',
     AVVCatalog: 'AVV_Catalog',
     AnalysisProcedure: 'Analysis_Procedure',
-    SearchAlias: 'Search_Alias'
+    SearchAlias: 'Search_Alias',
+    ZomoPlan: 'Zomo_Plan'
 };
 
 export interface AVVCatalogAttributes extends Parse.Attributes {
@@ -19,6 +20,13 @@ export interface AVVCatalogAttributes extends Parse.Attributes {
 }
 
 export interface AVVCatalogObject extends Parse.Object<AVVCatalogAttributes> {}
+
+export interface ZomoPlanAttributes extends Parse.Attributes {
+    year: string;
+    zomoFile: Parse.File;
+}
+
+export interface ZomoPlanObject extends Parse.Object<ZomoPlanAttributes> {}
 
 export interface SearchAliasAttributes extends Parse.Attributes {
     catalog: string;

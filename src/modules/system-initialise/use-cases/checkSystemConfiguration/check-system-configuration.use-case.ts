@@ -10,10 +10,12 @@ class CheckSystemConfigurationUseCase implements UseCase<null, null> {
             const appName = config.get('appName');
             const jobRecipient = config.get('jobRecipient');
             const supportContact = config.get('supportContact');
+            const excelVersion = config.get('excelVersion');
 
             this.checkValue('appName', appName, 'MiBi-Portal');
             this.checkValue('jobRecipient', jobRecipient);
             this.checkValue('supportContact', supportContact);
+            this.checkValue('excelVersion', excelVersion);
         } catch (error) {
             logger.error(
                 'Serious error: Unable to retrieve Parse Configuration'

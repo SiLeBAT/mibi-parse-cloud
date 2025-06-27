@@ -6,12 +6,7 @@ export class CatalogRepository {
     private catalogs: {
         [key: string]: Catalog<CatalogData>;
     };
-    private catalogNames: string[] = [
-        'adv16',
-        `zsp${new Date().getFullYear().toString()}`,
-        `zsp${(new Date().getFullYear() + 1).toString()}`,
-        `zsp${(new Date().getFullYear() - 1).toString()}`
-    ];
+    private catalogNames: string[] = [];
 
     constructor(private dataDir: string) {
         this.catalogs = {};
@@ -34,13 +29,13 @@ export class CatalogRepository {
                     })
                     .catch(error => {
                         console.log(
-                            `Error loading catalog from json file: ${error}`
+                            `mibi-cloud: Error loading catalog from json file: ${error}`
                         );
                     });
             })
         ).then(() => {
             console.log(
-                `${this.constructor.name}.${this.initialise.name}, finished initialising Catalog Repository from Filesystem.`
+                `mibi-cloud: ${this.constructor.name}.${this.initialise.name}, finished initialising Catalog Repository from Filesystem.`
             );
         });
     }
@@ -50,12 +45,8 @@ export class CatalogRepository {
     }
 }
 
-let repo: CatalogRepository;
-
 export async function initialiseRepository(
     dataDir: string
 ): Promise<CatalogRepository> {
-    const repository = repo ? repo : new CatalogRepository(dataDir);
-    repo = repository;
-    return repository.initialise().then(() => repository);
+    return new CatalogRepository(dataDir);
 }

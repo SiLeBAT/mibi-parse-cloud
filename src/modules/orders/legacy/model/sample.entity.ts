@@ -11,8 +11,7 @@ import {
     SampleProperty,
     Urgency,
     ValidationError,
-    ValidationErrorCollection,
-    ZOMO_ID
+    ValidationErrorCollection
 } from '../model/legacy.model';
 
 export class Sample {
@@ -102,18 +101,6 @@ export class Sample {
             ).length;
             return accumulator;
         }, 0);
-    }
-
-    isZoMo(): boolean {
-        return (
-            this._data.control_program_avv.value === ZOMO_ID.code ||
-            (this._data.program_reason_text.value
-                .toLowerCase()
-                .includes(ZOMO_ID.string1) &&
-                this._data.program_reason_text.value
-                    .toLowerCase()
-                    .includes(ZOMO_ID.string2))
-        );
     }
 
     addErrorTo(property: SampleProperty, error: ValidationError): void {

@@ -5,6 +5,7 @@ import { ValueObject, ValueObjectProps } from './value-object';
 
 interface ServerConfigBaseProps extends ValueObjectProps {
     appName?: string;
+    excelVersion?: string;
 }
 
 interface ServerConfigProps extends ServerConfigBaseProps {
@@ -19,7 +20,8 @@ interface ServerConfigStringProps extends ServerConfigBaseProps {
 
 export class ServerConfig extends ValueObject<ServerConfigProps> {
     private static serverConfigSchema = object({
-        appName: string().trim().max(30, 'Must be 30 characters or less')
+        appName: string().trim().max(30, 'Must be 30 characters or less'),
+        excelVersion: string().trim().required()
     });
 
     public toString(): string {
@@ -34,6 +36,10 @@ export class ServerConfig extends ValueObject<ServerConfigProps> {
     }
     get supportContact(): Email | null {
         return this.props.supportContact || null;
+    }
+
+    get excelVersion(): string | null {
+        return this.props.excelVersion || null;
     }
 
     private constructor(props: ServerConfigProps) {
@@ -57,7 +63,8 @@ export class ServerConfig extends ValueObject<ServerConfigProps> {
         );
 
         const serverConfigProps: ServerConfigProps = {
-            appName: validatedProps.appName
+            appName: validatedProps.appName,
+            excelVersion: validatedProps.excelVersion
         };
         if (!isEmpty(props.jobRecipient) && !isUndefined(props.jobRecipient)) {
             serverConfigProps.jobRecipient = await Email.create({

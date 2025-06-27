@@ -1,11 +1,9 @@
 import { Entity } from '../../shared/domain/entities';
-import { EntityId, Name } from '../../shared/domain/valueObjects';
+import { EntityId } from '../../shared/domain/valueObjects';
 import { Contact } from './contact.vo';
 
 export interface CustomerProps {
     contact: Contact;
-    firstName?: Name;
-    lastName?: Name;
     customerRefNumber: string;
 }
 
@@ -23,19 +21,7 @@ export class Customer extends Entity<CustomerProps> {
         return this.props.contact;
     }
 
-    get lastName(): Name | undefined {
-        return this.props.lastName;
-    }
-
-    get firstName(): Name | undefined {
-        return this.props.firstName;
-    }
-
     get customerRefNumber(): string {
         return this.props.customerRefNumber;
-    }
-
-    get fullName(): string {
-        return this.firstName + ' ' + this.lastName;
     }
 }
