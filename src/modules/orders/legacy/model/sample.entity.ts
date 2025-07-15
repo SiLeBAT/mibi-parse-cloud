@@ -64,20 +64,75 @@ export class Sample {
     }
 
     get pathogenId(): string | undefined {
-        if (!this._data.sample_id.value || !this._data.pathogen_avv.value) {
+        if (
+            !this._data.sample_id.value ||
+            this._data.sample_id_avv.value ||
+            this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
             return undefined;
         }
         return this._data.sample_id.value + this._data.pathogen_avv.value;
     }
 
     get pathogenIdAVV(): string | undefined {
-        if (!this._data.sample_id_avv.value || !this._data.pathogen_avv.value) {
+        if (
+            this._data.sample_id.value ||
+            !this._data.sample_id_avv.value ||
+            this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
+            return undefined;
+        }
+        return this._data.sample_id_avv.value + this._data.pathogen_avv.value;
+    }
+
+    get pathogenIdIdPartial(): string | undefined {
+        if (
+            !this._data.sample_id.value ||
+            this._data.sample_id_avv.value ||
+            !this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
+            return undefined;
+        }
+        return (
+            this._data.sample_id.value +
+            this._data.partial_sample_id.value +
+            this._data.pathogen_avv.value
+        );
+    }
+
+    get pathogenIdAVVPartial(): string | undefined {
+        if (
+            this._data.sample_id.value ||
+            !this._data.sample_id_avv.value ||
+            !this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
             return undefined;
         }
         return (
             this._data.sample_id_avv.value +
-            this._data.pathogen_avv.value +
-            (this._data.sample_id.value ? this._data.sample_id.value : '')
+            this._data.partial_sample_id.value +
+            this._data.pathogen_avv.value
+        );
+    }
+
+    get pathogenIdIdAVVPartial(): string | undefined {
+        if (
+            !this._data.sample_id.value ||
+            !this._data.sample_id_avv.value ||
+            !this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
+            return undefined;
+        }
+        return (
+            this._data.sample_id.value +
+            this._data.sample_id_avv.value +
+            this._data.partial_sample_id.value +
+            this._data.pathogen_avv.value
         );
     }
 
