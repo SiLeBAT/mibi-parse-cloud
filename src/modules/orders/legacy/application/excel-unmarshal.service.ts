@@ -41,9 +41,7 @@ import {
     UnmarshalSample,
     UnmarshalSampleSheet,
     Urgency,
-    VALID_SHEET_NAME,
-    FORM_PROPERTIES_AVV_CODES,
-    FORM_PROPERTIES_PATHOGEN_CODE
+    VALID_SHEET_NAME
 } from '../model/legacy.model';
 import { NRLService } from './nrl.service';
 
@@ -396,30 +394,12 @@ export class ExcelUnmarshalService {
     private fromDataToCleanedSamples(
         data: Record<string, string>[]
     ): Record<string, string>[] {
-        const avvCodeKeys = FORM_PROPERTIES_AVV_CODES;
-        const basicCodeWithWhitespace = /^\s*(?:\d\s*)+\|\s*(?:\d\s*)+\|\s*$/;
-
-        const avvCodesWithoutWhiteSpace: Record<string, string>[] = data.map(
-            sampleObj => {
-                return Object.keys(sampleObj).reduce((acc, key) => {
-                    acc[key] =
-                        avvCodeKeys.includes(key) ||
-                        (key === FORM_PROPERTIES_PATHOGEN_CODE &&
-                            basicCodeWithWhitespace.test(sampleObj[key]))
-                            ? sampleObj[key].replace(/\s+/g, '')
-                            : sampleObj[key];
-                    return acc;
-                }, {} as Record<string, string>);
-            }
+        const cleanedData: Record<string, string>[] = data.filter(
+            sampleObj =>
+                Object.keys(sampleObj)
+                    .map(key => sampleObj[key])
+                    .filter(item => item !== '').length > 0
         );
-
-        const cleanedData: Record<string, string>[] =
-            avvCodesWithoutWhiteSpace.filter(
-                sampleObj =>
-                    Object.keys(sampleObj)
-                        .map(key => sampleObj[key])
-                        .filter(item => item !== '').length > 0
-            );
 
         return cleanedData;
     }

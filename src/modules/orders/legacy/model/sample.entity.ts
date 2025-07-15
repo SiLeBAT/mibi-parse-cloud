@@ -11,7 +11,9 @@ import {
     SampleProperty,
     Urgency,
     ValidationError,
-    ValidationErrorCollection
+    ValidationErrorCollection,
+    FORM_PROPERTIES_AVV_CODES,
+    FORM_PROPERTIES_PATHOGEN_CODE
 } from '../model/legacy.model';
 
 export class Sample {
@@ -225,6 +227,20 @@ export class Sample {
 
     setUrgency(urgency: Urgency): void {
         this._meta.urgency = urgency;
+    }
+
+    removeWhiteSpacesInAVVCodeValues() {
+        const avvCodeKeys = FORM_PROPERTIES_AVV_CODES;
+        const basicCodeWithWhitespace = /^\s*(?:\d\s*)+\|\s*(?:\d\s*)+\|\s*$/;
+
+        Object.keys(this._data).forEach(property => {
+            this._data[property].value =
+                avvCodeKeys.includes(property) ||
+                (property === FORM_PROPERTIES_PATHOGEN_CODE &&
+                    basicCodeWithWhitespace.test(this._data[property].value))
+                    ? this._data[property].value.replace(/\s+/g, '')
+                    : this._data[property].value;
+        });
     }
 
     clone(): Sample {
