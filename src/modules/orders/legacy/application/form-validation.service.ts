@@ -25,21 +25,39 @@ enum ConstraintSet {
 }
 
 interface DuplicateIdConfig {
-    sampleId: SampleProperty;
+    sampleIds: SampleProperty[];
     error: number;
     uniqueIdSelector: (sample: Sample) => string | undefined;
 }
 
 const duplicatePathogenIdConfig: DuplicateIdConfig = {
-    sampleId: 'sample_id',
+    sampleIds: ['sample_id'],
     error: 3,
     uniqueIdSelector: (sample: Sample) => sample.pathogenId
 };
 
 const duplicatePathogenIdAVVConfig: DuplicateIdConfig = {
-    sampleId: 'sample_id_avv',
+    sampleIds: ['sample_id_avv'],
     error: 6,
     uniqueIdSelector: (sample: Sample) => sample.pathogenIdAVV
+};
+
+const duplicatePathogenIdIdPartialConfig: DuplicateIdConfig = {
+    sampleIds: ['sample_id', 'partial_sample_id'],
+    error: 120,
+    uniqueIdSelector: (sample: Sample) => sample.pathogenIdIdPartial
+};
+
+const duplicatePathogenIdAVVPartialConfig: DuplicateIdConfig = {
+    sampleIds: ['sample_id_avv', 'partial_sample_id'],
+    error: 121,
+    uniqueIdSelector: (sample: Sample) => sample.pathogenIdAVVPartial
+};
+
+const duplicatePathogenIdIdAVVPartialConfig: DuplicateIdConfig = {
+    sampleIds: ['sample_id', 'sample_id_avv', 'partial_sample_id'],
+    error: 122,
+    uniqueIdSelector: (sample: Sample) => sample.pathogenIdIdAVVPartial
 };
 
 export class FormValidatorService {
@@ -110,9 +128,22 @@ export class FormValidatorService {
             samples,
             duplicatePathogenIdConfig
         );
-        return this.checkForDuplicateIdEntries(
+        const checkedForDuplicateIdAVV = this.checkForDuplicateIdEntries(
             checkedForDuplicateIds,
             duplicatePathogenIdAVVConfig
+        );
+        const checkedForDuplicateIdPartial = this.checkForDuplicateIdEntries(
+            checkedForDuplicateIdAVV,
+            duplicatePathogenIdIdPartialConfig
+        );
+        const checkedForDuplicateIdAVVPartial = this.checkForDuplicateIdEntries(
+            checkedForDuplicateIdPartial,
+            duplicatePathogenIdAVVPartialConfig
+        );
+
+        return this.checkForDuplicateIdEntries(
+            checkedForDuplicateIdAVVPartial,
+            duplicatePathogenIdIdAVVPartialConfig
         );
     }
 
@@ -132,7 +163,9 @@ export class FormValidatorService {
             )
         ).forEach(filteredSample => {
             const err = this.validationErrorProvider.getError(config.error);
-            filteredSample.addErrorTo(config.sampleId, err);
+            config.sampleIds.forEach(sampleId =>
+                filteredSample.addErrorTo(sampleId, err)
+            );
         });
 
         return [...samples];

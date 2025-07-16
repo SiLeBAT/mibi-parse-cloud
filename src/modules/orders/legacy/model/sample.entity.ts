@@ -11,7 +11,9 @@ import {
     SampleProperty,
     Urgency,
     ValidationError,
-    ValidationErrorCollection
+    ValidationErrorCollection,
+    FORM_PROPERTIES_AVV_CODES,
+    FORM_PROPERTIES_PATHOGEN_CODE
 } from '../model/legacy.model';
 
 export class Sample {
@@ -64,20 +66,75 @@ export class Sample {
     }
 
     get pathogenId(): string | undefined {
-        if (!this._data.sample_id.value || !this._data.pathogen_avv.value) {
+        if (
+            !this._data.sample_id.value ||
+            this._data.sample_id_avv.value ||
+            this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
             return undefined;
         }
         return this._data.sample_id.value + this._data.pathogen_avv.value;
     }
 
     get pathogenIdAVV(): string | undefined {
-        if (!this._data.sample_id_avv.value || !this._data.pathogen_avv.value) {
+        if (
+            this._data.sample_id.value ||
+            !this._data.sample_id_avv.value ||
+            this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
+            return undefined;
+        }
+        return this._data.sample_id_avv.value + this._data.pathogen_avv.value;
+    }
+
+    get pathogenIdIdPartial(): string | undefined {
+        if (
+            !this._data.sample_id.value ||
+            this._data.sample_id_avv.value ||
+            !this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
+            return undefined;
+        }
+        return (
+            this._data.sample_id.value +
+            this._data.partial_sample_id.value +
+            this._data.pathogen_avv.value
+        );
+    }
+
+    get pathogenIdAVVPartial(): string | undefined {
+        if (
+            this._data.sample_id.value ||
+            !this._data.sample_id_avv.value ||
+            !this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
             return undefined;
         }
         return (
             this._data.sample_id_avv.value +
-            this._data.pathogen_avv.value +
-            (this._data.sample_id.value ? this._data.sample_id.value : '')
+            this._data.partial_sample_id.value +
+            this._data.pathogen_avv.value
+        );
+    }
+
+    get pathogenIdIdAVVPartial(): string | undefined {
+        if (
+            !this._data.sample_id.value ||
+            !this._data.sample_id_avv.value ||
+            !this._data.partial_sample_id.value ||
+            !this._data.pathogen_avv.value
+        ) {
+            return undefined;
+        }
+        return (
+            this._data.sample_id.value +
+            this._data.sample_id_avv.value +
+            this._data.partial_sample_id.value +
+            this._data.pathogen_avv.value
         );
     }
 
@@ -170,6 +227,20 @@ export class Sample {
 
     setUrgency(urgency: Urgency): void {
         this._meta.urgency = urgency;
+    }
+
+    removeWhiteSpacesInAVVCodeValues() {
+        const avvCodeKeys = FORM_PROPERTIES_AVV_CODES;
+        const basicCodeWithWhitespace = /^\s*(?:\d\s*)+\|\s*(?:\d\s*)+\|\s*$/;
+
+        Object.keys(this._data).forEach(property => {
+            this._data[property].value =
+                avvCodeKeys.includes(property) ||
+                (property === FORM_PROPERTIES_PATHOGEN_CODE &&
+                    basicCodeWithWhitespace.test(this._data[property].value))
+                    ? this._data[property].value.replace(/\s+/g, '')
+                    : this._data[property].value;
+        });
     }
 
     clone(): Sample {
