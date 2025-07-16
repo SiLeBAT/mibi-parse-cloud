@@ -977,6 +977,20 @@ export const FORM_PROPERTIES_NRL: string[] = [
     'program_text_avv',
     'comment'
 ];
+
+export const FORM_PROPERTIES_AVV_CODES: string[] = [
+    'sampling_location_avv',
+    'animal_avv',
+    'matrix_avv',
+    'primary_production_avv',
+    'control_program_avv',
+    'sampling_reason_avv',
+    'operations_mode_avv',
+    'program_avv'
+];
+
+export const FORM_PROPERTIES_PATHOGEN_CODE: string = 'pathogen_avv';
+
 export interface FileBuffer {
     buffer: Buffer;
     mimeType: string;

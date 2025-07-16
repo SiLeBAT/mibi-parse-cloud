@@ -186,6 +186,7 @@ export class ValidationAntiCorruptionLayer {
 
                 sample.setAnalysis(this.nrlService, entry.data.analysis);
                 sample.setUrgency(fromUrgencyStringToEnum(entry.data.urgency));
+                sample.removeWhiteSpacesInAVVCodeValues();
 
                 return sample;
             }
