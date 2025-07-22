@@ -79,7 +79,10 @@
     },
     "semver": "7.5.2",
     "crypto-js": "4.2.0",
-    "follow-redirects": "1.15.4"
+    "follow-redirects": "1.15.4",
+    "request": {
+      "form-data": "2.5.5"
+    }
   },
   "mibiConfig": {
     "lastChange": "2019-04-16 11:25:17 +0200"
