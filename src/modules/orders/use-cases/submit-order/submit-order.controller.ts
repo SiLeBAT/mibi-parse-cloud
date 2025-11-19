@@ -54,6 +54,8 @@ const submitOrderController = async (
         // Setting the logging context manually because the catch block requires request information.
         setLoggingContext(request.log);
 
+        // console.log('submitOrderController, requestDTO: ', JSON.stringify(requestDTO, null, 2));
+
         const submitterId: EntityId = await createSubmitterId.execute(request);
         const order: Order<SampleEntryCollection> =
             await OrderDTOMapper.fromDTO(
@@ -76,6 +78,9 @@ const submitOrderController = async (
             submitterId
         });
 
+        // console.log('submitOrderController, order: ', order);
+        // console.log('submitOrderController, validatedSubmission: ', JSON.stringify(validatedSubmission, null, 2));
+
         const result = {
             order: {
                 sampleSet: {
@@ -91,6 +96,11 @@ const submitOrderController = async (
                 }
             }
         };
+
+        console.log(
+            'submitOrderController, result: ',
+            JSON.stringify(result, null, 2)
+        );
 
         return result;
     } catch (error) {

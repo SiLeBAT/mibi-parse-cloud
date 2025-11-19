@@ -10,6 +10,7 @@ import { mp64UpdateAVVCatalog } from './mp64-update-avv-catalog';
 import { mp86CreateSearchAlias } from './mp86-create-search-alias';
 import { mp151CreateClientDashboard } from './mp151-create-client-dashboard';
 import { mp156CreateZomoPlan } from './mp156-create-zomo-plan';
+import { mp180CreateOrder } from './mp180-create-order';
 export interface UpdateFunc {
     (): Promise<boolean>;
 }
@@ -29,5 +30,6 @@ export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp64UpdateAVVCatalog,
     mp86CreateSearchAlias,
     mp151CreateClientDashboard,
-    mp156CreateZomoPlan
+    mp156CreateZomoPlan,
+    mp180CreateOrder
 ];

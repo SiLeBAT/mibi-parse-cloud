@@ -15,7 +15,7 @@ import {
 
 export class MailService {
     private host = 'localhost';
-    private port = 25;
+    private port = 2525;
 
     private logger = getLogger();
 
