@@ -34,9 +34,12 @@ import {
     SampleSheetConstants,
     SampleSheetMetaData,
     Urgency,
-    VALID_SHEET_NAME
+    VALID_SHEET_NAME,
+    FORM_PROPERTIES_PATHOGEN_CODE,
+    FORM_PROPERTIES_PATHOGEN_TEXT
 } from '../model/legacy.model';
 import { Sample } from '../model/sample.entity';
+import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 
 type ChangedValueCollection = Record<string, string>;
 
@@ -112,13 +115,60 @@ export class JSONMarshalService {
 
         _.forEach(sampleCollection, (sample: Sample) => {
             const row: string[] = [];
+
+            // ticket: https://github.com/SiLeBAT/mibi-parse-cloud/issues/181
+            const adjustedPathogen = this.adjustPathogenForVTEC(
+                sample,
+                nrlSampleSheet
+            );
+
             _.forEach(formProperties, header => {
-                row.push(sample.getValueFor(header));
+                if (header === FORM_PROPERTIES_PATHOGEN_CODE) {
+                    row.push(adjustedPathogen.pathogenCode);
+                } else if (header === FORM_PROPERTIES_PATHOGEN_TEXT) {
+                    row.push(adjustedPathogen.pathogenText);
+                } else {
+                    row.push(sample.getValueFor(header));
+                }
             });
             dataToSave.push(row);
         });
 
         return dataToSave;
+    }
+
+    private adjustPathogenForVTEC(
+        sample: Sample,
+        nrlSampleSheet: boolean
+    ): { pathogenCode: string; pathogenText: string } {
+        const vtecPathogenCode =
+            'Escherichia coli Shigatoxin/Verocytotoxin bildend';
+        const text = 'Text: ';
+        const code = 'Code: ';
+        const currentPathogenCode =
+            sample.getValueFor(FORM_PROPERTIES_PATHOGEN_CODE) ?? '';
+        const currentPathogenText =
+            sample.getValueFor(FORM_PROPERTIES_PATHOGEN_TEXT) ?? '';
+        const adjustedPathogen = {
+            pathogenCode: currentPathogenCode,
+            pathogenText: currentPathogenText
+        };
+
+        if (
+            sample.getNRL() === NRL_ID_VALUE.NRL_VTEC &&
+            nrlSampleSheet === true
+        ) {
+            adjustedPathogen.pathogenCode =
+                currentPathogenCode.trim() !== vtecPathogenCode
+                    ? vtecPathogenCode
+                    : currentPathogenCode;
+            adjustedPathogen.pathogenText =
+                currentPathogenText.trim() === ''
+                    ? `${code}${currentPathogenCode}`
+                    : `${code}${currentPathogenCode}; ${text}${currentPathogenText}`;
+        }
+
+        return adjustedPathogen;
     }
 
     private addMetaDataToWorkbook(

@@ -990,6 +990,7 @@ export const FORM_PROPERTIES_AVV_CODES: string[] = [
 ];
 
 export const FORM_PROPERTIES_PATHOGEN_CODE: string = 'pathogen_avv';
+export const FORM_PROPERTIES_PATHOGEN_TEXT: string = 'pathogen_text';
 
 export interface FileBuffer {
     buffer: Buffer;
