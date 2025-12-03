@@ -158,6 +158,9 @@ export class JSONMarshalService {
             sample.getNRL() === NRL_ID_VALUE.NRL_VTEC &&
             nrlSampleSheet === true
         ) {
+            if (currentPathogenCode.trim() === vtecPathogenCode) {
+                return adjustedPathogen;
+            }
             adjustedPathogen.pathogenCode =
                 currentPathogenCode.trim() !== vtecPathogenCode
                     ? vtecPathogenCode
