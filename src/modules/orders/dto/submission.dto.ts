@@ -64,6 +64,8 @@ type AVVAttributes =
     | 'program_avv'
     | 'comment';
 
+type AVVAttributesV18 = AVVAttributes | 'sequence_id' | 'sequence_status';
+
 export interface SampleDataEntryDTO {
     value: string;
     errors?: SampleValidationErrorDTO[];
@@ -71,6 +73,8 @@ export interface SampleDataEntryDTO {
     oldValue?: string;
 }
 interface SampleDataDTO extends Record<AVVAttributes, SampleDataEntryDTO> {}
+interface SampleDataV18DTO
+    extends Record<AVVAttributesV18, SampleDataEntryDTO> {}
 interface SampleMetaDTO {
     nrl: string;
     analysis: AnalysisDTO;
@@ -78,7 +82,7 @@ interface SampleMetaDTO {
 }
 
 export interface SampleDTO {
-    sampleData: SampleDataDTO;
+    sampleData: SampleDataDTO | SampleDataV18DTO;
     sampleMeta: SampleMetaDTO;
 }
 

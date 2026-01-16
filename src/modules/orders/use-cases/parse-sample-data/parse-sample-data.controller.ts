@@ -1,12 +1,17 @@
 import { loggedController } from '../../../shared/core/controller';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
 import { EmailValidationError } from '../../../shared/domain/valueObjects/email-validation.error';
-import { Order, SampleEntryTuple, SubmissionFormInput } from '../../domain';
+import {
+    AnySampleEntry,
+    Order,
+    SampleEntry,
+    SampleEntryTuple,
+    SubmissionFormInput
+} from '../../domain';
 import { OrderDTO } from '../../dto';
 import { SubmissionDTOMapper } from '../../mappers';
 import { SampleEntryDTOMapper } from '../../mappers/sample-entry-dto.mapper';
 import { createSubmissionFileUseCase } from '../create-submission-file/create-submission-file.use-case';
-import { SampleEntry } from '../../domain/sample-entry.entity';
 import { ParseFromJSONUseCase } from './parse-from-json.use-case';
 import { ParseFromXLSXUseCase } from './parse-from-xlsx.use-case';
 import { checkExcelVersionUseCase } from '../check-excel-version';
@@ -74,8 +79,9 @@ const parseSampleDataController = loggedController(
             // Get the right factory depending on submission type
             const createOrder: ParseSampleDataUseCase =
                 CreateOrderUseCaseFactory(type);
-            const order: Order<SampleEntry<SampleEntryTuple>[]> =
-                await createOrder.execute(submissionFormInput);
+            const order: Order<AnySampleEntry[]> = await createOrder.execute(
+                submissionFormInput
+            );
             const matchesExcelVersion = await checkExcelVersionUseCase.execute(
                 order
             );
@@ -100,18 +106,23 @@ const parseSampleDataController = loggedController(
                         type: fileInformation.type,
                         data: fileInformation.data
                     };
-                    break;
                 }
                 case RESOURCE_VIEW_TYPE.JSON:
                 default: {
+                    const mapper = SampleEntryDTOMapper.toDTO(
+                        order.submissionFormInfo?.version || '18'
+                    );
                     return {
                         order: SubmissionDTOMapper.toDTO<
                             SampleEntry<SampleEntryTuple>[]
-                        >(order, samples => {
-                            return samples.map(s =>
-                                SampleEntryDTOMapper.toDTO(s, t => t)
-                            );
-                        })
+                        >(
+                            order as Order<SampleEntry<SampleEntryTuple>[]>,
+                            samples => {
+                                return (
+                                    samples as SampleEntry<SampleEntryTuple>[]
+                                ).map(s => mapper(s, t => t));
+                            }
+                        )
                     };
                 }
             }

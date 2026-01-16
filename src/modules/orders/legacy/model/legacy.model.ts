@@ -7,6 +7,7 @@ import { sampleSheetPDFConfig } from './sample-sheet-pdf.config';
 import { sampleSheetPDFStyles } from './sample-sheet-pdf.styles';
 import { Sample } from './sample.entity';
 import { NRLService } from '../application/nrl.service';
+import { WorkSheet } from 'xlsx';
 export enum SampleSheetAnalysisOption {
     OMIT,
     ACTIVE,
@@ -204,6 +205,20 @@ export const sampleSheetSamplesStrings = {
     }
 };
 
+export const sampleSheetV18SamplesStrings = {
+    ...sampleSheetSamplesStrings,
+    titles: {
+        ...sampleSheetSamplesStrings.titles,
+        sequence_id: 'Ihre Sequenz-ID',
+        sequence_status: 'Sequenz-Status'
+    },
+    subtitles: {
+        ...sampleSheetSamplesStrings.subtitles,
+        sequence_id: '',
+        sequence_status: ''
+    }
+};
+
 export const sampleSheetNRLStrings: Record<NRL_ID_VALUE, string> = {
     'NRL-AR': 'NRL für Antibiotikaresistenz',
     'NRL-AR-Kleb': 'NRL für Antibiotikaresistenz',
@@ -332,7 +347,7 @@ export const sampleSheetStyles = {
 };
 
 export interface FileRepository {
-    getFileBuffer(fileName: string): Promise<Buffer>;
+    getFileBuffer(fileName: string, version: string): Promise<Buffer>;
 }
 export type SampleSheetConfig = typeof sampleSheetConfig;
 export type SampleSheetMetaStrings = typeof sampleSheetMetaStrings;
@@ -687,6 +702,10 @@ export interface ValidatorFunctionOptions {
     message: ValidationError;
 }
 
+export interface NotEmptyIfOtherExistsOptions extends ValidatorFunctionOptions {
+    other: string;
+}
+
 export enum CodeType {
     BASIC = 'basic',
     FACETTEN = 'facetten',
@@ -883,6 +902,14 @@ export interface ExcelFileInfo {
     fileName: string;
     type: string;
 }
+
+export interface ExcelUnmarshalStrategy {
+    readonly version: string;
+    convertExcelWorksheetToJSJson(
+        workSheet: WorkSheet
+    ): UnmarshalSampleSheet | null;
+}
+
 export enum Urgency {
     NORMAL = 'NORMAL',
     URGENT = 'EILT'
@@ -945,12 +972,74 @@ export const FORM_PROPERTIES: string[] = [
     'comment'
 ];
 
+export const FORM_PROPERTIES_V18: string[] = [
+    'sample_id',
+    'sample_id_avv',
+    'partial_sample_id',
+    'pathogen_avv',
+    'pathogen_text',
+    'sequence_id',
+    'sequence_status',
+    'sampling_date',
+    'isolation_date',
+    'sampling_location_avv',
+    'sampling_location_zip',
+    'sampling_location_text',
+    'animal_avv',
+    'matrix_avv',
+    'animal_matrix_text',
+    'primary_production_avv',
+    'control_program_avv',
+    'sampling_reason_avv',
+    'program_reason_text',
+    'operations_mode_avv',
+    'operations_mode_text',
+    'vvvo',
+    'program_avv',
+    'comment'
+];
+
 export const FORM_PROPERTIES_NRL: string[] = [
     'sample_id',
     'sample_id_avv',
     'partial_sample_id',
     'pathogen_avv',
     'pathogen_text',
+    'sampling_date',
+    'isolation_date',
+    'sampling_location_avv',
+    'sampling_location_text_avv',
+    'sampling_location_zip',
+    'sampling_location_text',
+    'animal_avv',
+    'animal_text_avv',
+    'matrix_avv',
+    'matrix_text_avv',
+    'animal_matrix_text',
+    'primary_production_avv',
+    'primary_production_text_avv',
+    'control_program_avv',
+    'control_program_text_avv',
+    'sampling_reason_avv',
+    'sampling_reason_text_avv',
+    'program_reason_text',
+    'operations_mode_avv',
+    'operations_mode_text_avv',
+    'operations_mode_text',
+    'vvvo',
+    'program_avv',
+    'program_text_avv',
+    'comment'
+];
+
+export const FORM_PROPERTIES_NRL_V18: string[] = [
+    'sample_id',
+    'sample_id_avv',
+    'partial_sample_id',
+    'pathogen_avv',
+    'pathogen_text',
+    'sequence_id',
+    'sequence_status',
     'sampling_date',
     'isolation_date',
     'sampling_location_avv',
@@ -991,6 +1080,11 @@ export const FORM_PROPERTIES_AVV_CODES: string[] = [
 
 export const FORM_PROPERTIES_PATHOGEN_CODE: string = 'pathogen_avv';
 export const FORM_PROPERTIES_PATHOGEN_TEXT: string = 'pathogen_text';
+
+export enum ExcelVersion {
+    V17 = '17',
+    V18 = '18'
+}
 
 export interface FileBuffer {
     buffer: Buffer;

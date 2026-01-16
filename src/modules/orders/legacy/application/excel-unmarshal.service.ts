@@ -9,7 +9,9 @@ import {
     Analysis,
     AnnotatedSampleDataEntry,
     DEFAULT_SAMPLE_DATA_HEADER_ROW,
+    ExcelVersion,
     FORM_PROPERTIES,
+    FORM_PROPERTIES_V18,
     META_ANALYSIS_COMPAREHUMAN_BOOL_CELL,
     META_ANALYSIS_COMPAREHUMAN_TEXT_CELL,
     META_ANALYSIS_ESBLAMPCCARBAPENEMASEN_CELL,
@@ -46,6 +48,8 @@ import {
 import { NRLService } from './nrl.service';
 
 export class ExcelUnmarshalService {
+    private formProperties: string[] = FORM_PROPERTIES_V18;
+
     constructor(private factory: SampleFactory) {}
 
     async convertExcelToJSJson(
@@ -53,6 +57,20 @@ export class ExcelUnmarshalService {
         fileName: string
     ): Promise<UnmarshalSampleSheet> {
         const workSheet: WorkSheet = await this.fromFileToWorkSheet(buffer);
+        const excelVersion = this.fromWorkSheetToExcelVersion(workSheet);
+
+        switch (excelVersion) {
+            case ExcelVersion.V17:
+                this.formProperties = FORM_PROPERTIES;
+                break;
+            case ExcelVersion.V18:
+                this.formProperties = FORM_PROPERTIES_V18;
+                break;
+            default:
+                this.formProperties = FORM_PROPERTIES_V18;
+                break;
+        }
+
         const samples = this.fromWorksheetToData(workSheet);
 
         const meta = this.getMetaDataFromFileData(workSheet, fileName);
@@ -60,6 +78,19 @@ export class ExcelUnmarshalService {
             samples,
             meta
         };
+    }
+
+    private fromWorkSheetToExcelVersion(workSheet: WorkSheet): ExcelVersion {
+        const normalizedVersion = String(
+            workSheet[META_EXCEL_VERSION]['v'] ?? ''
+        )
+            .trim()
+            .toUpperCase();
+        const enumValue =
+            ExcelVersion[normalizedVersion as keyof typeof ExcelVersion] ??
+            ExcelVersion.V18;
+
+        return enumValue;
     }
 
     private async fromFileToWorkSheet(buffer: Buffer): Promise<WorkSheet> {
@@ -299,13 +330,12 @@ export class ExcelUnmarshalService {
         const lineNumber = this.getSampleDataHeaderRow(workSheet);
 
         const data = utils.sheet_to_json<Record<string, string>>(workSheet, {
-            header: FORM_PROPERTIES,
+            header: this.formProperties,
             range: lineNumber,
             defval: ''
         });
 
         const cleanedData = this.fromDataToCleanedSamples(data);
-
         const formattedData: UnmarshalSample[] = this.formatData(cleanedData);
 
         return formattedData;

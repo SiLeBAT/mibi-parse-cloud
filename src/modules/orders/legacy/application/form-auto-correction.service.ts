@@ -5,7 +5,10 @@ import {
 } from '../model/legacy.model';
 import { Sample } from '../model/sample.entity';
 import { CatalogService } from './catalog.service';
-import { autoCorrectAVV324 } from './custom-auto-correction-functions';
+import {
+    autoCorrectAVV324,
+    autoCorrectSequenceStatus
+} from './custom-auto-correction-functions';
 import { ValidationErrorProvider } from './validation-error-provider.service';
 
 export class FormAutoCorrectionService {
@@ -30,6 +33,12 @@ export class FormAutoCorrectionService {
                         targetField,
                         correction.correctionOffer
                     );
+                    if (correction.code === -1) {
+                        newSample.applySilentSingleCorrectionSuggestion(
+                            correction
+                        );
+                        correction.code = 0;
+                    }
                     if (correction.code) {
                         const err = this.validationErrorProvider.getError(
                             correction.code
@@ -39,12 +48,15 @@ export class FormAutoCorrectionService {
                     newSample.applySingleCorrectionSuggestions();
                 }
             });
+
             return newSample;
         });
+
         return results;
     }
 
     private registerCorrectionFunctions() {
         this.correctionFunctions.push(autoCorrectAVV324(this.catalogService));
+        this.correctionFunctions.push(autoCorrectSequenceStatus());
     }
 }

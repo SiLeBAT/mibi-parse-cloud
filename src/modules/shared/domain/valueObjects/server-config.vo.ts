@@ -1,11 +1,11 @@
 import { isEmpty, isUndefined } from 'lodash';
-import { object, string } from 'yup';
+import { object, string, array } from 'yup';
 import { Email } from './email.vo';
 import { ValueObject, ValueObjectProps } from './value-object';
 
 interface ServerConfigBaseProps extends ValueObjectProps {
     appName?: string;
-    excelVersion?: string;
+    excelVersion?: string[];
 }
 
 interface ServerConfigProps extends ServerConfigBaseProps {
@@ -21,7 +21,18 @@ interface ServerConfigStringProps extends ServerConfigBaseProps {
 export class ServerConfig extends ValueObject<ServerConfigProps> {
     private static serverConfigSchema = object({
         appName: string().trim().max(30, 'Must be 30 characters or less'),
-        excelVersion: string().trim().required()
+        excelVersion: array()
+            // cast array elements into strings, accept single non-array values by wrapping them
+            .transform((_val, orig) => {
+                if (Array.isArray(orig)) {
+                    return orig.map(item =>
+                        item === null || item === undefined ? '' : String(item)
+                    );
+                }
+                if (orig == null || orig === '') return [];
+                return [orig];
+            })
+            .of(string().required())
     });
 
     public toString(): string {
@@ -38,7 +49,7 @@ export class ServerConfig extends ValueObject<ServerConfigProps> {
         return this.props.supportContact || null;
     }
 
-    get excelVersion(): string | null {
+    get excelVersion(): string[] | null {
         return this.props.excelVersion || null;
     }
 

@@ -257,6 +257,19 @@ export const baseConstraints: ValidationConstraints = {
         }
     },
 
+    sequence_id: {
+        notEmptyIfOtherExists: {
+            error: 124,
+            other: 'sequence_status'
+        }
+    },
+
+    sequence_status: {
+        hasCorrectSequenceStatusValues: {
+            error: 123
+        }
+    },
+
     sampling_date: {
         presenceZoMo: {
             error: 14

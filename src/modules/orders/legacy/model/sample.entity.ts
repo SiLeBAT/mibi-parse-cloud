@@ -13,7 +13,8 @@ import {
     ValidationError,
     ValidationErrorCollection,
     FORM_PROPERTIES_AVV_CODES,
-    FORM_PROPERTIES_PATHOGEN_CODE
+    FORM_PROPERTIES_PATHOGEN_CODE,
+    CorrectionSuggestions
 } from '../model/legacy.model';
 
 export class Sample {
@@ -180,6 +181,17 @@ export class Sample {
     supplementAVV313Data(plz: string, city: string) {
         this._data['sampling_location_zip'].nrlData = plz;
         this._data['sampling_location_text'].nrlData = city;
+    }
+
+    applySilentSingleCorrectionSuggestion(
+        correction: CorrectionSuggestions
+    ): void {
+        const entry = this._data[correction.field];
+        if (entry.correctionOffer.length === 1) {
+            entry.oldValue = entry.value;
+            entry.value = entry.correctionOffer[0];
+            entry.correctionOffer = [];
+        }
     }
 
     applySingleCorrectionSuggestions(): void {
