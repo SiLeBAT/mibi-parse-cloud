@@ -23,6 +23,14 @@ export class GetServerConfigUseCase implements UseCase<null, ServerConfig> {
             excelVersion: config.get('excelVersion') || ''
         });
     }
+
+    isStringArray(arr: unknown[]): arr is string[] {
+        return arr.every(v => typeof v === 'string');
+    }
+
+    isIntegerArray(arr: unknown[]): arr is number[] {
+        return arr.every(v => typeof v === 'number' && Number.isInteger(v));
+    }
 }
 
 const getServerConfig = new GetServerConfigUseCase();

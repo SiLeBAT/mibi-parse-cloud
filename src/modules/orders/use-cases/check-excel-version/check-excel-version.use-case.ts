@@ -3,7 +3,7 @@ import { Order, SampleEntryTuple } from '../../domain';
 import { SampleEntry } from '../../domain/sample-entry.entity';
 import { UseCase } from '../../../shared/use-cases';
 
-type ExcelVersionCheck = {
+export type ExcelVersionCheck = {
     uploadedExcelVersion: string;
     valid: boolean;
 };
@@ -20,9 +20,13 @@ class CheckExcelVersionUseCase
         const validExcelVersion = config.excelVersion;
         const uploadedExcelVersion = order.submissionFormInfo?.version || '';
 
+        const isValid =
+            Array.isArray(validExcelVersion) &&
+            validExcelVersion.includes(uploadedExcelVersion);
+
         return {
             uploadedExcelVersion,
-            valid: validExcelVersion === uploadedExcelVersion
+            valid: isValid
         };
     }
 }

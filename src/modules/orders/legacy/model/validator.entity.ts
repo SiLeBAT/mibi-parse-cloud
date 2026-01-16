@@ -29,7 +29,9 @@ import {
     matchesProgramZoMo,
     presenceZoMo,
     presenceNotZoMo,
-    requiredIfOther
+    requiredIfOther,
+    notEmptyIfOtherExists,
+    hasCorrectSequenceStatusValues
 } from './custom-validator-functions';
 import { Sample } from './sample.entity';
 
@@ -92,6 +94,9 @@ class SampleValidator implements Validator {
         validate.validators.requiredIfOther = requiredIfOther;
         validate.validators.matchesRegexPattern = matchesRegexPattern;
         validate.validators.matchesIdToSpecificYear = matchesIdToSpecificYear;
+        validate.validators.notEmptyIfOtherExists = notEmptyIfOtherExists;
+        validate.validators.hasCorrectSequenceStatusValues =
+            hasCorrectSequenceStatusValues;
         validate.validators.inPLZCatalog = inPLZCatalog(this.catalogService);
         validate.validators.inAVVCatalog = inAVVCatalog(this.catalogService);
         validate.validators.inAVVFacettenCatalog = inAVVFacettenCatalog(

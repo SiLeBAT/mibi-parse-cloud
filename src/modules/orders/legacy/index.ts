@@ -40,9 +40,10 @@ import { stateRepository } from './repositories/state.repository';
 import { validationErrorRepository } from './repositories/validation-error.repository';
 
 const fileRepository = {
-    getFileBuffer: async (key: string) => {
+    getFileBuffer: async (key: string, version: string) => {
         const query = new Parse.Query(ObjectKeys.TEMPLATE_FILE);
         query.equalTo('key', key.toUpperCase());
+        query.equalTo('version', version);
         const templateFileObject = await query.first({ useMasterKey: true });
         if (!templateFileObject) {
             throw Error("Can't find template file with key: " + key);
@@ -146,6 +147,7 @@ const antiCorruptionLayers = (async function init() {
             excelUnmarshalService,
             sampleSheetService
         );
+
     return {
         excelUnmarshalAntiCorruptionLayer,
         validationAntiCorruptionLayer,

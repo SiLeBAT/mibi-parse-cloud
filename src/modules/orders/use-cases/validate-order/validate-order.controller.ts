@@ -1,10 +1,12 @@
 import { loggedController } from '../../../shared/core/controller';
 import { HTTPRequest } from '../../../shared/infrastructure/request';
 import {
-    AnnotatedSampleDataEntry,
     SampleEntry,
+    SampleEntryV18,
     SampleEntryTuple,
-    SampleSet
+    SampleEntryV18Tuple,
+    SampleSet,
+    SampleSetV18
 } from '../../domain';
 import { OrderContainerDTO, SampleDTO } from '../../dto';
 import { SampleEntryDTOMapper } from '../../mappers';
@@ -42,34 +44,36 @@ const validateOrderController = loggedController(
         try {
             const submittedOrder: ValidateOrderRequestParameters =
                 request.params;
+            const version = submittedOrder.order.sampleSet.meta.version || '18';
+            const sampleData:
+                | SampleEntry<SampleEntryTuple>[]
+                | SampleEntryV18<SampleEntryV18Tuple>[] = submittedOrder.order.sampleSet.samples.map(
+                (sample: SampleDTO) => {
+                    return SampleEntryDTOMapper.fromDTO(version)(
+                        sample,
+                        t => t
+                    );
+                }
+            );
+            const sampleSet = sampleSetCreator(version)({ data: sampleData });
 
-            const sampleData: SampleEntry<SampleEntryTuple>[] =
-                submittedOrder.order.sampleSet.samples.map(
-                    (sample: SampleDTO) => {
-                        return SampleEntryDTOMapper.fromDTO(sample, t => t);
-                    }
-                );
-
-            const sampleSet = SampleSet.create({ data: sampleData });
-
-            const validatedSubmission: SampleSet = await validateOrder.execute({
-                submitterId,
-                sampleSet
-            });
+            const validatedSubmission: SampleSet | SampleSetV18 =
+                await validateOrder.execute({
+                    submitterId,
+                    sampleSet
+                });
 
             const result: OrderContainerDTO = {
                 order: {
                     sampleSet: {
-                        samples: validatedSubmission.data.map(
-                            (
-                                sampleEntry: SampleEntry<AnnotatedSampleDataEntry>
-                            ) => {
-                                return SampleEntryDTOMapper.toDTO(
-                                    sampleEntry,
-                                    t => t
-                                );
-                            }
-                        ),
+                        samples: validatedSubmission.data.map(sampleEntry => {
+                            return SampleEntryDTOMapper.toDTO(version)(
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                sampleEntry as any,
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                (t: any) => t as any
+                            );
+                        }),
                         meta: submittedOrder.order.sampleSet.meta
                     }
                 }
@@ -84,6 +88,16 @@ const validateOrderController = loggedController(
         }
     }
 );
+function sampleSetCreator(version: string) {
+    switch (version) {
+        case '17':
+            return SampleSet.create;
+        case '18':
+        default: {
+            return SampleSetV18.create;
+        }
+    }
+}
 
 const ValidateOrderRequestValidation = {
     fields: {

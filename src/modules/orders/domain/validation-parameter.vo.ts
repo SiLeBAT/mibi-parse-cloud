@@ -4,13 +4,19 @@ import {
     ValueObjectProps
 } from '../../shared/domain/valueObjects';
 import { SampleEntry, SampleEntryTuple } from './sample-entry.entity';
+import {
+    SampleEntryV18,
+    SampleEntryTuple as SampleEntryV18Tuple
+} from './sample-entry-v18.entity';
 
 export interface ValidationOptions {
     state?: string;
     year?: string;
 }
 interface ValidationParameterProps extends ValueObjectProps {
-    data: SampleEntry<SampleEntryTuple>[];
+    data:
+        | SampleEntry<SampleEntryTuple>[]
+        | SampleEntryV18<SampleEntryV18Tuple>[];
     options: ValidationOptions;
 }
 

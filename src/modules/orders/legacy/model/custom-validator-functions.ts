@@ -22,7 +22,8 @@ import {
     ValidatorFunctionOptions,
     ZOMO_ID,
     CodeType,
-    ZomoData
+    ZomoData,
+    NotEmptyIfOtherExistsOptions
 } from '../model/legacy.model';
 import { AVVCatalog } from './avvcatalog.entity';
 
@@ -154,6 +155,49 @@ function matchesIdToSpecificYear(
         ...options,
         ...{ ignoreNumbers: false }
     });
+}
+
+function notEmptyIfOtherExists(
+    value: string,
+    options: NotEmptyIfOtherExistsOptions,
+    key: SampleProperty,
+    attributes: SampleDataValues
+) {
+    if (key in attributes && options.other in attributes) {
+        const regex = /^qc[- ](?:pass|fail)$/i;
+        const trimmedValue = value.trim();
+        const otherValue = attributes[options.other].trim();
+        const otherValueOK = regex.test(otherValue);
+
+        if (!trimmedValue && otherValueOK) {
+            return { ...options.message };
+        }
+    }
+
+    return null;
+}
+
+function hasCorrectSequenceStatusValues(
+    value: string,
+    options: ValidatorFunctionOptions,
+    key: SampleProperty,
+    attributes: SampleDataValues
+) {
+    if (key in attributes) {
+        const trimmedValue = value.trim();
+
+        if (!trimmedValue) {
+            return null;
+        }
+        const regex = /^(?:qc[- ](?:pass|fail)|in bearbeitung|in planung)$/i;
+        const valueOK = regex.test(trimmedValue);
+
+        if (!valueOK) {
+            return { ...options.message };
+        }
+    }
+
+    return null;
 }
 
 function inPLZCatalog(
@@ -1199,5 +1243,7 @@ export {
     matchesProgramZoMo,
     presenceZoMo,
     presenceNotZoMo,
-    requiredIfOther
+    requiredIfOther,
+    notEmptyIfOtherExists,
+    hasCorrectSequenceStatusValues
 };

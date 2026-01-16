@@ -5,6 +5,8 @@ import XlsxPopulate from 'xlsx-populate';
 import {
     FORM_PROPERTIES,
     FORM_PROPERTIES_NRL,
+    FORM_PROPERTIES_V18,
+    FORM_PROPERTIES_NRL_V18,
     FileBuffer,
     FileRepository,
     META_ANALYSIS_COMPAREHUMAN_BOOL_CELL,
@@ -55,6 +57,7 @@ export class JSONMarshalService {
 
     async createExcel(
         sampleSheet: SampleSheet,
+        version: string,
         nrlSampleSheet: boolean = false
     ): Promise<FileBuffer> {
         const templateFileName = nrlSampleSheet
@@ -62,7 +65,8 @@ export class JSONMarshalService {
             : this.TEMPLATE_FILE_KEY;
 
         const buffer = await this.fileRepository.getFileBuffer(
-            templateFileName
+            templateFileName,
+            version
         );
 
         if (!buffer) {
@@ -76,6 +80,7 @@ export class JSONMarshalService {
 
         const dataToSave = this.fromDataObjToAOO(
             sampleSheet.samples,
+            version,
             nrlSampleSheet
         );
 
@@ -106,12 +111,27 @@ export class JSONMarshalService {
 
     private fromDataObjToAOO(
         sampleCollection: Sample[],
+        version: string,
         nrlSampleSheet: boolean = false
     ): string[][] {
         const dataToSave: string[][] = [];
-        const formProperties: string[] = nrlSampleSheet
-            ? [...FORM_PROPERTIES_NRL]
-            : [...FORM_PROPERTIES];
+
+        let formProperties: string[];
+        switch (version) {
+            case '17': {
+                formProperties = nrlSampleSheet
+                    ? [...FORM_PROPERTIES_NRL]
+                    : [...FORM_PROPERTIES];
+                break;
+            }
+            case '18':
+            default: {
+                formProperties = nrlSampleSheet
+                    ? [...FORM_PROPERTIES_NRL_V18]
+                    : [...FORM_PROPERTIES_V18];
+                break;
+            }
+        }
 
         _.forEach(sampleCollection, (sample: Sample) => {
             const row: string[] = [];
