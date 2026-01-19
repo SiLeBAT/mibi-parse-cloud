@@ -17,6 +17,7 @@ import { JSONMarshalService } from '../application/json-marshal.service';
 import { NotificationService } from '../application/notification.service';
 import { NRLService } from '../application/nrl.service';
 import { PDFCreatorService } from '../application/pdf-creator.service';
+import { PDFCreatorV18Service } from '../application/pdf-creator-v18.service';
 import { SampleSheetService } from '../application/sample-sheet.service';
 import { Sample } from '../model/sample.entity';
 import {
@@ -45,6 +46,7 @@ export class SubmissionAntiCorruptionLayer {
         private notificationService: NotificationService,
         private jsonMarshalService: JSONMarshalService,
         private pdfCreatorService: PDFCreatorService,
+        private pdfCreatorV18Service: PDFCreatorV18Service,
         private nrlService: NRLService,
         private sampleSheetService: SampleSheetService,
         private catalogService: CatalogService
@@ -77,7 +79,10 @@ export class SubmissionAntiCorruptionLayer {
             case ReceiveAs.PDF:
                 userPayloads = await this.createPayloads(
                     splitSampleSets,
-                    sampleSheet => this.pdfCreatorService.createPDF(sampleSheet)
+                    sampleSheet =>
+                        this.getPdfCreatorService(version).createPDF(
+                            sampleSheet
+                        )
                 );
                 break;
             case ReceiveAs.EXCEL:
@@ -96,6 +101,20 @@ export class SubmissionAntiCorruptionLayer {
         this.sendToNRLs(nrlPayloads, applicantMetaData);
 
         this.sendToUser(userPayloads, applicantMetaData);
+    }
+
+    private getPdfCreatorService(
+        version: string
+    ): PDFCreatorService | PDFCreatorV18Service {
+        switch (version) {
+            case '17': {
+                return this.pdfCreatorService;
+            }
+            case '18':
+            default: {
+                return this.pdfCreatorV18Service;
+            }
+        }
     }
 
     private createLegacySampleSet(
