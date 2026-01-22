@@ -190,6 +190,7 @@ export class AVVCatalogParser {
         '324': this.avv324.bind(this),
         '326': this.avv326.bind(this),
         '328': this.avv328.bind(this),
+        '337': this.avv337.bind(this),
         '339': this.avv339.bind(this)
     };
 
@@ -515,6 +516,35 @@ export class AVVCatalogParser {
             xmlData
         ) as KatalogInstance;
         const standardData = this.getStandardData(catalog328);
+
+        const mibiEintraege: MibiEintraege = {};
+
+        this.collectEintraege(standardData.eintraege, [])
+            .map(eintrag => this.getTempEintragFromEintrag(eintrag))
+            .forEach((tempEintrag: TempEintrag) => {
+                mibiEintraege[tempEintrag.Kode] = {
+                    Text: tempEintrag.Text.normalize('NFC'),
+                    Basiseintrag: tempEintrag.Basiseintrag
+                };
+            });
+
+        return Promise.resolve({
+            data: {
+                ...standardData,
+                eintraege: mibiEintraege
+            },
+            uId: 'Kode'
+        });
+    }
+
+    private async avv337(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+        // Katalogtyp: Monohierarchische Klassifikation
+        // Zusatzangaben in der Kennzeichnung
+
+        const catalog337: KatalogInstance = this.parser.parse(
+            xmlData
+        ) as KatalogInstance;
+        const standardData = this.getStandardData(catalog337);
 
         const mibiEintraege: MibiEintraege = {};
 

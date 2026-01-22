@@ -11,6 +11,7 @@ import { sampleSheetPDFStyles } from './sample-sheet-pdf.styles';
 import { Sample } from './sample.entity';
 import { NRLService } from '../application/nrl.service';
 import { WorkSheet } from 'xlsx';
+import { ValidationErrorProvider } from '../application/validation-error-provider.service';
 export enum SampleSheetAnalysisOption {
     OMIT,
     ACTIVE,
@@ -511,6 +512,7 @@ export interface ValidatorConfig {
     dateFormat: string;
     dateTimeFormat: string;
     catalogService: CatalogService;
+    validationErrorProvider: ValidationErrorProvider;
 }
 
 export interface Validator {
@@ -828,6 +830,13 @@ export interface RequiredIfOtherOptions extends ValidatorFunctionOptions {
 
 export interface InCatalogOptions extends ValidatorFunctionOptions {
     catalog: string;
+    key: string;
+}
+
+export interface InCatalogsOptions extends ValidatorFunctionOptions {
+    error17: number;
+    error18: number;
+    catalogs: string[];
     key: string;
 }
 

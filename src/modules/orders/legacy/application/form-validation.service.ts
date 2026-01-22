@@ -71,7 +71,8 @@ export class FormValidatorService {
         this.validator = createValidator({
             dateFormat: 'DD-MM-YYYY',
             dateTimeFormat: 'DD-MM-YYYY hh:mm:ss',
-            catalogService: this.catalogService
+            catalogService: this.catalogService,
+            validationErrorProvider: this.validationErrorProvider
         });
     }
 
