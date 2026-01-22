@@ -714,11 +714,6 @@ export class PDFCreatorV18Service {
                 false,
                 false
             ),
-            // this.createAdditionalDataCell(
-            //     'avv316',
-            //     sampleData.primary_production_avv.value,
-            //     sampleData.sampling_date.value.trim()
-            // ),
             this.createTwoCodesToTextDataCell(
                 'avv322',
                 'avv326',

@@ -526,6 +526,8 @@ export class SubmissionAntiCorruptionLayer {
     }
 
     private createNRLSampleSet(sampleSet: SampleSet): SampleSet {
+        const version = sampleSet.meta.version;
+
         try {
             const nrlDataFeatures: NrlDataFeatures = {
                 sampling_location_text_avv: {
@@ -541,7 +543,7 @@ export class SubmissionAntiCorruptionLayer {
                     avvProperty: 'matrix_avv'
                 },
                 primary_production_text_avv: {
-                    catalog: 'avv316',
+                    catalog: version === '17' ? 'avv316' : 'avv337',
                     avvProperty: 'primary_production_avv'
                 },
                 control_program_text_avv: {

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { CatalogService } from '../application/catalog.service';
+import { ValidationErrorProvider } from '../application/validation-error-provider.service';
 import {
     AVVCatalogData,
     AtLeastOneOfOptions,
@@ -23,7 +24,8 @@ import {
     ZOMO_ID,
     CodeType,
     ZomoData,
-    NotEmptyIfOtherExistsOptions
+    NotEmptyIfOtherExistsOptions,
+    InCatalogsOptions
 } from '../model/legacy.model';
 import { AVVCatalog } from './avvcatalog.entity';
 
@@ -264,6 +266,61 @@ function inAVVCatalog(
                 return { ...options.message };
             }
         }
+        return null;
+    };
+}
+
+function inAVVCatalogs(
+    catalogService: CatalogService,
+    validationErrorProvider: ValidationErrorProvider
+): ValidatorFunction<InCatalogsOptions> {
+    return (
+        value: string,
+        options: InCatalogsOptions,
+        key: SampleProperty,
+        attributes: SampleDataValues
+    ) => {
+        const trimmedValue = value.trim();
+        if (attributes[key]) {
+            const catalogNames = options.catalogs;
+            if (catalogNames.length > 0) {
+                const error17 = validationErrorProvider.getError(
+                    options.error17
+                );
+                const error18 = validationErrorProvider.getError(
+                    options.error18
+                );
+                const samplingDate = attributes[SAMPLING_DATE];
+
+                const catalogWithKode = _.filter(
+                    catalogNames,
+                    (catalogName: string) => {
+                        const cat =
+                            catalogService.getAVVCatalog<AVVCatalogData>(
+                                catalogName,
+                                samplingDate
+                            );
+
+                        if (cat) {
+                            return (
+                                cat.containsEintragWithAVVKode(trimmedValue) ||
+                                cat.containsTextEintrag(trimmedValue)
+                            );
+                        }
+                    }
+                );
+
+                if (catalogWithKode.length === 0) {
+                    const validationError =
+                        'sequence_id' in attributes &&
+                        'sequence_status' in attributes
+                            ? error18
+                            : error17;
+                    return { ...validationError };
+                }
+            }
+        }
+
         return null;
     };
 }
@@ -1229,6 +1286,7 @@ export {
     dependentFields,
     hasObligatoryFacettenValues,
     inAVVCatalog,
+    inAVVCatalogs,
     inAVVFacettenCatalog,
     inPLZCatalog,
     isHierarchyCode,

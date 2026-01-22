@@ -3,6 +3,7 @@ import validate from 'validate.js';
 
 import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { CatalogService } from '../application/catalog.service';
+import { ValidationErrorProvider } from '../application/validation-error-provider.service';
 import {
     ValidationConstraints,
     ValidationErrorCollection,
@@ -15,6 +16,7 @@ import {
     dependentFields,
     hasObligatoryFacettenValues,
     inAVVCatalog,
+    inAVVCatalogs,
     inAVVFacettenCatalog,
     inPLZCatalog,
     isHierarchyCode,
@@ -39,6 +41,7 @@ moment.locale('de');
 
 class SampleValidator implements Validator {
     private catalogService: CatalogService;
+    private validationErrorProvider: ValidationErrorProvider;
 
     constructor(config: ValidatorConfig) {
         // Before using it we must add the parse and format functions
@@ -62,6 +65,7 @@ class SampleValidator implements Validator {
             }
         });
         this.catalogService = config.catalogService;
+        this.validationErrorProvider = config.validationErrorProvider;
         this.registerCustomValidators();
     }
 
@@ -99,6 +103,10 @@ class SampleValidator implements Validator {
             hasCorrectSequenceStatusValues;
         validate.validators.inPLZCatalog = inPLZCatalog(this.catalogService);
         validate.validators.inAVVCatalog = inAVVCatalog(this.catalogService);
+        validate.validators.inAVVCatalogs = inAVVCatalogs(
+            this.catalogService,
+            this.validationErrorProvider
+        );
         validate.validators.inAVVFacettenCatalog = inAVVFacettenCatalog(
             this.catalogService
         );

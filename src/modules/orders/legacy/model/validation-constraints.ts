@@ -131,19 +131,6 @@ export const zoMoConstraints: ValidationConstraints = {
         }
     },
 
-    primary_production_avv: {
-        matchesZoMo: {
-            error: 118,
-            date: 'sampling_date',
-            zomoKey: '316',
-            codeType: 'basic',
-            programField: {
-                attr: 'program_avv',
-                zomoKey: '328'
-            }
-        }
-    },
-
     control_program_avv: {},
 
     program_reason_text: {},
@@ -462,9 +449,11 @@ export const baseConstraints: ValidationConstraints = {
     animal_matrix_text: {},
 
     primary_production_avv: {
-        inAVVCatalog: {
+        inAVVCatalogs: {
             error: 100,
-            catalog: 'avv316'
+            error17: 100,
+            error18: 125,
+            catalogs: ['avv316', 'avv337']
         }
     },
 
