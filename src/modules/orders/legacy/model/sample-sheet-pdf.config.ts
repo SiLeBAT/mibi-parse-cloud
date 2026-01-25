@@ -99,15 +99,15 @@ export const sampleSheetV18PDFConfig = {
             left: 0.5,
             right: 0.5
         },
-        colWidthFactors: [0.8, 1, 1.2, 1.25, 1.3, 1.4, 1.5, 1.9, 3.1, 3.3, 5],
+        colWidthFactors: [0.8, 1, 1.2, 1.25, 1.3, 1.4, 1.55, 1.9, 3.0, 3.3, 5],
         colWidthIndicesMap: new Map<string, number>([
             ['sample_id', 2],
             ['sample_id_avv', 4],
             ['partial_sample_id', 0],
             ['pathogen_avv', 7],
             ['pathogen_text', 4],
-            ['sequence_id', 4],
-            ['sequence_status', 4],
+            ['sequence_id', 5],
+            ['sequence_status', 5],
             ['sampling_date', 4],
             ['isolation_date', 4],
             ['sampling_location_zip', 1],
