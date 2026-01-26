@@ -162,9 +162,15 @@ export const sampleSheetMetaStrings = {
         cellProtectionInstruction2:
             'sind nicht zielführend und werden beim Einlesen der Daten durch das BfR nicht berücksichtigt.'
     },
-    footer: {
+    footer17: {
         validated:
             'OE-Mibi-SOP-059_FB_A01_Elektronischer Einsendebogen_V17 gültig ab 01.01.2024',
+        page: 'Seite',
+        pageOf: 'von'
+    },
+    footer18: {
+        validated:
+            'OE-Mibi-SOP-059_FB_A01_Untersuchungsauftrag_V18 gültig ab 01.02.2026',
         page: 'Seite',
         pageOf: 'von'
     }

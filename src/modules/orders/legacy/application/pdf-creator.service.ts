@@ -1076,7 +1076,7 @@ export class PDFCreatorService {
     // Footer
 
     private createFooter(currentPage: number, pageCount: number) {
-        const strings = this.strings.meta.footer;
+        const strings = this.strings.meta.footer17;
         const margins = this.config.footer.margins;
         return {
             columns: [
