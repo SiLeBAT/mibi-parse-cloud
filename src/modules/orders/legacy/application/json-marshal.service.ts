@@ -163,6 +163,7 @@ export class JSONMarshalService {
     ): { pathogenCode: string; pathogenText: string } {
         const vtecPathogenCode =
             'Escherichia coli Shigatoxin/Verocytotoxin bildend';
+        const vtecEscherichiaAlbertii = 'Escherichia albertii';
         const text = 'Text: ';
         const code = 'Code: ';
         const currentPathogenCode =
@@ -178,6 +179,9 @@ export class JSONMarshalService {
             sample.getNRL() === NRL_ID_VALUE.NRL_VTEC &&
             nrlSampleSheet === true
         ) {
+            if (currentPathogenCode.trim() === vtecEscherichiaAlbertii) {
+                return adjustedPathogen;
+            }
             if (currentPathogenCode.trim() === vtecPathogenCode) {
                 return adjustedPathogen;
             }
