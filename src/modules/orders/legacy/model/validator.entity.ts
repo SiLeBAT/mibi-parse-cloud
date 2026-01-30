@@ -3,6 +3,7 @@ import validate from 'validate.js';
 
 import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { CatalogService } from '../application/catalog.service';
+import { ValidationErrorProvider } from '../application/validation-error-provider.service';
 import {
     ValidationConstraints,
     ValidationErrorCollection,
@@ -15,6 +16,7 @@ import {
     dependentFields,
     hasObligatoryFacettenValues,
     inAVVCatalog,
+    inAVVCatalogs,
     inAVVFacettenCatalog,
     inPLZCatalog,
     isHierarchyCode,
@@ -29,7 +31,9 @@ import {
     matchesProgramZoMo,
     presenceZoMo,
     presenceNotZoMo,
-    requiredIfOther
+    requiredIfOther,
+    notEmptyIfOtherExists,
+    hasCorrectSequenceStatusValues
 } from './custom-validator-functions';
 import { Sample } from './sample.entity';
 
@@ -37,6 +41,7 @@ moment.locale('de');
 
 class SampleValidator implements Validator {
     private catalogService: CatalogService;
+    private validationErrorProvider: ValidationErrorProvider;
 
     constructor(config: ValidatorConfig) {
         // Before using it we must add the parse and format functions
@@ -60,6 +65,7 @@ class SampleValidator implements Validator {
             }
         });
         this.catalogService = config.catalogService;
+        this.validationErrorProvider = config.validationErrorProvider;
         this.registerCustomValidators();
     }
 
@@ -92,8 +98,15 @@ class SampleValidator implements Validator {
         validate.validators.requiredIfOther = requiredIfOther;
         validate.validators.matchesRegexPattern = matchesRegexPattern;
         validate.validators.matchesIdToSpecificYear = matchesIdToSpecificYear;
+        validate.validators.notEmptyIfOtherExists = notEmptyIfOtherExists;
+        validate.validators.hasCorrectSequenceStatusValues =
+            hasCorrectSequenceStatusValues;
         validate.validators.inPLZCatalog = inPLZCatalog(this.catalogService);
         validate.validators.inAVVCatalog = inAVVCatalog(this.catalogService);
+        validate.validators.inAVVCatalogs = inAVVCatalogs(
+            this.catalogService,
+            this.validationErrorProvider
+        );
         validate.validators.inAVVFacettenCatalog = inAVVFacettenCatalog(
             this.catalogService
         );

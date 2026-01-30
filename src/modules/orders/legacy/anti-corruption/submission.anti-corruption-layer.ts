@@ -8,6 +8,7 @@ import {
     AnnotatedSampleDataEntry,
     Order,
     SampleEntry,
+    SampleEntryV18,
     Submitter
 } from '../../domain';
 import { ReceiveAs } from '../../domain/enums';
@@ -16,6 +17,7 @@ import { JSONMarshalService } from '../application/json-marshal.service';
 import { NotificationService } from '../application/notification.service';
 import { NRLService } from '../application/nrl.service';
 import { PDFCreatorService } from '../application/pdf-creator.service';
+import { PDFCreatorV18Service } from '../application/pdf-creator-v18.service';
 import { SampleSheetService } from '../application/sample-sheet.service';
 import { Sample } from '../model/sample.entity';
 import {
@@ -44,6 +46,7 @@ export class SubmissionAntiCorruptionLayer {
         private notificationService: NotificationService,
         private jsonMarshalService: JSONMarshalService,
         private pdfCreatorService: PDFCreatorService,
+        private pdfCreatorV18Service: PDFCreatorV18Service,
         private nrlService: NRLService,
         private sampleSheetService: SampleSheetService,
         private catalogService: CatalogService
@@ -57,6 +60,7 @@ export class SubmissionAntiCorruptionLayer {
             this.createLegacyApplicationMetaData(submitter, order.comment);
 
         const sampleSet: SampleSet = this.createLegacySampleSet(order);
+        const version = sampleSet.meta.version;
 
         const splitSampleSets = this.splitSampleSet(sampleSet);
 
@@ -67,7 +71,7 @@ export class SubmissionAntiCorruptionLayer {
         const nrlPayloads = await this.createPayloads(
             nrlSampleSets,
             sampleSheet =>
-                this.jsonMarshalService.createExcel(sampleSheet, true)
+                this.jsonMarshalService.createExcel(sampleSheet, version, true)
         );
 
         let userPayloads: Payload[];
@@ -75,7 +79,10 @@ export class SubmissionAntiCorruptionLayer {
             case ReceiveAs.PDF:
                 userPayloads = await this.createPayloads(
                     splitSampleSets,
-                    sampleSheet => this.pdfCreatorService.createPDF(sampleSheet)
+                    sampleSheet =>
+                        this.getPdfCreatorService(version).createPDF(
+                            sampleSheet
+                        )
                 );
                 break;
             case ReceiveAs.EXCEL:
@@ -83,7 +90,10 @@ export class SubmissionAntiCorruptionLayer {
                 userPayloads = await this.createPayloads(
                     splitSampleSets,
                     sampleSheet =>
-                        this.jsonMarshalService.createExcel(sampleSheet)
+                        this.jsonMarshalService.createExcel(
+                            sampleSheet,
+                            version
+                        )
                 );
                 break;
         }
@@ -93,51 +103,144 @@ export class SubmissionAntiCorruptionLayer {
         this.sendToUser(userPayloads, applicantMetaData);
     }
 
+    private getPdfCreatorService(
+        version: string
+    ): PDFCreatorService | PDFCreatorV18Service {
+        switch (version) {
+            case '17': {
+                return this.pdfCreatorService;
+            }
+            case '18':
+            default: {
+                return this.pdfCreatorV18Service;
+            }
+        }
+    }
+
     private createLegacySampleSet(
-        order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>
+        order:
+            | Order<SampleEntry<AnnotatedSampleDataEntry>[]>
+            | Order<SampleEntryV18<AnnotatedSampleDataEntry>[]>
     ): SampleSet {
         try {
+            const version = order.submissionFormInfo?.version || '18';
             return {
-                samples: order.sampleEntryCollection.map(entry => {
-                    return Sample.create(
-                        {
-                            sample_id: entry.data.sample_id,
-                            sample_id_avv: entry.data.sample_id_avv,
-                            partial_sample_id: entry.data.partial_sample_id,
-                            pathogen_avv: entry.data.pathogen_avv,
-                            pathogen_text: entry.data.pathogen_text,
-                            sampling_date: entry.data.sampling_date,
-                            isolation_date: entry.data.isolation_date,
-                            sampling_location_avv:
-                                entry.data.sampling_location_avv,
-                            sampling_location_zip:
-                                entry.data.sampling_location_zip,
-                            sampling_location_text:
-                                entry.data.sampling_location_text,
-                            animal_avv: entry.data.animal_avv,
-                            matrix_avv: entry.data.matrix_avv,
-                            animal_matrix_text: entry.data.animal_matrix_text,
-                            primary_production_avv:
-                                entry.data.primary_production_avv,
-                            control_program_avv: entry.data.control_program_avv,
-                            sampling_reason_avv: entry.data.sampling_reason_avv,
-                            program_reason_text: entry.data.program_reason_text,
-                            operations_mode_avv: entry.data.operations_mode_avv,
-                            operations_mode_text:
-                                entry.data.operations_mode_text,
-                            vvvo: entry.data.vvvo,
-                            program_avv: entry.data.program_avv,
-                            comment: entry.data.comment
-                        },
-                        {
-                            nrl: NRLId.create(entry.data.nrl).value,
-                            urgency: fromUrgencyStringToEnum(
-                                entry.data.urgency
-                            ),
-                            analysis: entry.data.analysis
+                samples: order.sampleEntryCollection.map(
+                    (
+                        entry:
+                            | SampleEntry<AnnotatedSampleDataEntry>
+                            | SampleEntryV18<AnnotatedSampleDataEntry>
+                    ) => {
+                        let sample: Sample;
+                        switch (version) {
+                            case '17': {
+                                sample = Sample.create(
+                                    {
+                                        sample_id: entry.data.sample_id,
+                                        sample_id_avv: entry.data.sample_id_avv,
+                                        partial_sample_id:
+                                            entry.data.partial_sample_id,
+                                        pathogen_avv: entry.data.pathogen_avv,
+                                        pathogen_text: entry.data.pathogen_text,
+                                        sampling_date: entry.data.sampling_date,
+                                        isolation_date:
+                                            entry.data.isolation_date,
+                                        sampling_location_avv:
+                                            entry.data.sampling_location_avv,
+                                        sampling_location_zip:
+                                            entry.data.sampling_location_zip,
+                                        sampling_location_text:
+                                            entry.data.sampling_location_text,
+                                        animal_avv: entry.data.animal_avv,
+                                        matrix_avv: entry.data.matrix_avv,
+                                        animal_matrix_text:
+                                            entry.data.animal_matrix_text,
+                                        primary_production_avv:
+                                            entry.data.primary_production_avv,
+                                        control_program_avv:
+                                            entry.data.control_program_avv,
+                                        sampling_reason_avv:
+                                            entry.data.sampling_reason_avv,
+                                        program_reason_text:
+                                            entry.data.program_reason_text,
+                                        operations_mode_avv:
+                                            entry.data.operations_mode_avv,
+                                        operations_mode_text:
+                                            entry.data.operations_mode_text,
+                                        vvvo: entry.data.vvvo,
+                                        program_avv: entry.data.program_avv,
+                                        comment: entry.data.comment
+                                    },
+                                    {
+                                        nrl: NRLId.create(entry.data.nrl).value,
+                                        urgency: fromUrgencyStringToEnum(
+                                            entry.data.urgency
+                                        ),
+                                        analysis: entry.data.analysis
+                                    }
+                                );
+                                break;
+                            }
+                            case '18':
+                            default: {
+                                sample = Sample.create(
+                                    {
+                                        sample_id: entry.data.sample_id,
+                                        sample_id_avv: entry.data.sample_id_avv,
+                                        partial_sample_id:
+                                            entry.data.partial_sample_id,
+                                        pathogen_avv: entry.data.pathogen_avv,
+                                        pathogen_text: entry.data.pathogen_text,
+                                        sequence_id: (
+                                            entry as SampleEntryV18<AnnotatedSampleDataEntry>
+                                        ).data.sequence_id,
+                                        sequence_status: (
+                                            entry as SampleEntryV18<AnnotatedSampleDataEntry>
+                                        ).data.sequence_status,
+                                        sampling_date: entry.data.sampling_date,
+                                        isolation_date:
+                                            entry.data.isolation_date,
+                                        sampling_location_avv:
+                                            entry.data.sampling_location_avv,
+                                        sampling_location_zip:
+                                            entry.data.sampling_location_zip,
+                                        sampling_location_text:
+                                            entry.data.sampling_location_text,
+                                        animal_avv: entry.data.animal_avv,
+                                        matrix_avv: entry.data.matrix_avv,
+                                        animal_matrix_text:
+                                            entry.data.animal_matrix_text,
+                                        primary_production_avv:
+                                            entry.data.primary_production_avv,
+                                        control_program_avv:
+                                            entry.data.control_program_avv,
+                                        sampling_reason_avv:
+                                            entry.data.sampling_reason_avv,
+                                        program_reason_text:
+                                            entry.data.program_reason_text,
+                                        operations_mode_avv:
+                                            entry.data.operations_mode_avv,
+                                        operations_mode_text:
+                                            entry.data.operations_mode_text,
+                                        vvvo: entry.data.vvvo,
+                                        program_avv: entry.data.program_avv,
+                                        comment: entry.data.comment
+                                    },
+                                    {
+                                        nrl: NRLId.create(entry.data.nrl).value,
+                                        urgency: fromUrgencyStringToEnum(
+                                            entry.data.urgency
+                                        ),
+                                        analysis: entry.data.analysis
+                                    }
+                                );
+                                break;
+                            }
                         }
-                    );
-                }),
+
+                        return sample;
+                    }
+                ),
                 meta: {
                     sender: {
                         instituteName: order.customer.contact.instituteName,
@@ -423,6 +526,8 @@ export class SubmissionAntiCorruptionLayer {
     }
 
     private createNRLSampleSet(sampleSet: SampleSet): SampleSet {
+        const version = sampleSet.meta.version;
+
         try {
             const nrlDataFeatures: NrlDataFeatures = {
                 sampling_location_text_avv: {
@@ -438,7 +543,7 @@ export class SubmissionAntiCorruptionLayer {
                     avvProperty: 'matrix_avv'
                 },
                 primary_production_text_avv: {
-                    catalog: 'avv316',
+                    catalog: version === '17' ? 'avv316' : 'avv337',
                     avvProperty: 'primary_production_avv'
                 },
                 control_program_text_avv: {

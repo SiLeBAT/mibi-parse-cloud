@@ -99,6 +99,88 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
     };
 }
 
+function autoCorrectSequenceStatus(): CorrectionFunction {
+    const property: SampleProperty = 'sequence_status';
+    const QC_FAIL = 'QC-FAIL';
+    const QC_PASS = 'QC-PASS';
+    const IN_PROGRESS = 'in Bearbeitung';
+    const IN_PLANNING = 'in Planung';
+
+    return (sampleData: SampleData): CorrectionSuggestions | null => {
+        if (!sampleData[property]) {
+            return null;
+        }
+
+        const originalValue = sampleData[property].value;
+        const trimmedEntry = originalValue.trim();
+
+        // Ignore empty entries or exact terms
+        if (
+            !trimmedEntry ||
+            trimmedEntry === QC_FAIL ||
+            trimmedEntry === QC_PASS ||
+            trimmedEntry === IN_PROGRESS ||
+            trimmedEntry === IN_PLANNING
+        ) {
+            return null;
+        }
+
+        const passRegex = /^qc[- ]pass$/i;
+        if (passRegex.test(trimmedEntry)) {
+            return createCorrectionSuggestion(
+                property,
+                originalValue,
+                [QC_PASS],
+                -1
+            );
+        }
+
+        const failRegex = /^qc[- ]fail$/i;
+        if (failRegex.test(trimmedEntry)) {
+            return createCorrectionSuggestion(
+                property,
+                originalValue,
+                [QC_FAIL],
+                -1
+            );
+        }
+
+        const progressRegex = /^in bearbeitung$/i;
+        if (progressRegex.test(trimmedEntry)) {
+            return createCorrectionSuggestion(
+                property,
+                originalValue,
+                [IN_PROGRESS],
+                -1
+            );
+        }
+
+        const planningRegex = /^in planung$/i;
+        if (planningRegex.test(trimmedEntry)) {
+            return createCorrectionSuggestion(
+                property,
+                originalValue,
+                [IN_PLANNING],
+                -1
+            );
+        }
+
+        const correctionSuggestions: CorrectionSuggestions = {
+            field: property,
+            original: trimmedEntry,
+            correctionOffer: [
+                'QC-PASS',
+                'QC-FAIL',
+                'in Bearbeitung',
+                'in Planung'
+            ],
+            code: 0
+        };
+
+        return correctionSuggestions;
+    };
+}
+
 // Utility functions
 function createCorrectionSuggestion(
     field: SampleProperty,
@@ -203,4 +285,4 @@ function createCatalogEnhancements(
         .value();
 }
 
-export { autoCorrectAVV324 };
+export { autoCorrectAVV324, autoCorrectSequenceStatus };

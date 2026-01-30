@@ -12,13 +12,13 @@ import {
 } from '../model/legacy.model';
 import { Sample } from '../model/sample.entity';
 import { CatalogService } from './catalog.service';
-import { PDFConfigProviderService } from './pdf-config-provider.service';
+import { PDFConfigProviderV18Service } from './pdf-config-provider-v18.service';
 import { PDFService } from './pdf.service';
 
 type PdfPrefixText = { text: string; bold: boolean };
 type PdfText = (string | PdfPrefixText)[];
 
-export class PDFCreatorService {
+export class PDFCreatorV18Service {
     private readonly FILE_EXTENSION = '.pdf';
     private readonly MIME_TYPE = 'application/pdf';
     private readonly SEPARATOR = '. ';
@@ -44,7 +44,7 @@ export class PDFCreatorService {
 
     constructor(
         private pdfService: PDFService,
-        private configProvider: PDFConfigProviderService,
+        private configProvider: PDFConfigProviderV18Service,
         private catalogService: CatalogService
     ) {
         this.config = this.configProvider.config;
@@ -628,6 +628,14 @@ export class PDFCreatorService {
                 subTitles.pathogen_text
             ),
             this.createSamplesHeaderCell(
+                titles.sequence_id,
+                subTitles.sequence_id
+            ),
+            this.createSamplesHeaderCell(
+                titles.sequence_status,
+                subTitles.sequence_status
+            ),
+            this.createSamplesHeaderCell(
                 titles.sampling_date,
                 subTitles.sampling_date
             ),
@@ -648,10 +656,6 @@ export class PDFCreatorService {
                 subTitles.animal_matrix_text
             ),
             this.createSamplesHeaderCell(
-                titles.primary_production_text_avv,
-                subTitles.primary_production_text_avv
-            ),
-            this.createSamplesHeaderCell(
                 titles.program_reason_text,
                 subTitles.program_reason_text
             ),
@@ -659,7 +663,6 @@ export class PDFCreatorService {
                 titles.operations_mode_text,
                 subTitles.operations_mode_text
             ),
-            this.createSamplesHeaderCell(titles.vvvo, subTitles.vvvo),
             this.createSamplesHeaderCell(
                 titles.program_text_avv,
                 subTitles.program_text_avv
@@ -685,6 +688,8 @@ export class PDFCreatorService {
 
             this.createSamplesDataCell([sampleData.pathogen_avv.value]),
             this.createSamplesDataCell([sampleData.pathogen_text.value]),
+            this.createSamplesDataCell([sampleData['sequence_id'].value]),
+            this.createSamplesDataCell([sampleData['sequence_status'].value]),
             this.createSamplesDataCell([sampleData.sampling_date.value]),
             this.createSamplesDataCell([sampleData.isolation_date.value]),
             this.createSamplesDataCell([
@@ -709,11 +714,6 @@ export class PDFCreatorService {
                 false,
                 false
             ),
-            this.createAdditionalDataCell(
-                'avv316',
-                sampleData.primary_production_avv.value,
-                sampleData.sampling_date.value.trim()
-            ),
             this.createTwoCodesToTextDataCell(
                 'avv322',
                 'avv326',
@@ -732,7 +732,7 @@ export class PDFCreatorService {
                 'Betrieb',
                 false
             ),
-            this.createSamplesDataCell([sampleData.vvvo.value]),
+            // this.createSamplesDataCell([sampleData.vvvo.value]),
             this.createAdditionalDataCell(
                 'avv328',
                 sampleData.program_avv.value,
@@ -1076,7 +1076,7 @@ export class PDFCreatorService {
     // Footer
 
     private createFooter(currentPage: number, pageCount: number) {
-        const strings = this.strings.meta.footer17;
+        const strings = this.strings.meta.footer18;
         const margins = this.config.footer.margins;
         return {
             columns: [

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { CatalogService } from '../application/catalog.service';
+import { ValidationErrorProvider } from '../application/validation-error-provider.service';
 import {
     AVVCatalogData,
     AtLeastOneOfOptions,
@@ -22,7 +23,9 @@ import {
     ValidatorFunctionOptions,
     ZOMO_ID,
     CodeType,
-    ZomoData
+    ZomoData,
+    NotEmptyIfOtherExistsOptions,
+    InCatalogsOptions
 } from '../model/legacy.model';
 import { AVVCatalog } from './avvcatalog.entity';
 
@@ -156,6 +159,49 @@ function matchesIdToSpecificYear(
     });
 }
 
+function notEmptyIfOtherExists(
+    value: string,
+    options: NotEmptyIfOtherExistsOptions,
+    key: SampleProperty,
+    attributes: SampleDataValues
+) {
+    if (key in attributes && options.other in attributes) {
+        const regex = /^qc[- ](?:pass|fail)$/i;
+        const trimmedValue = value.trim();
+        const otherValue = attributes[options.other].trim();
+        const otherValueOK = regex.test(otherValue);
+
+        if (!trimmedValue && otherValueOK) {
+            return { ...options.message };
+        }
+    }
+
+    return null;
+}
+
+function hasCorrectSequenceStatusValues(
+    value: string,
+    options: ValidatorFunctionOptions,
+    key: SampleProperty,
+    attributes: SampleDataValues
+) {
+    if (key in attributes) {
+        const trimmedValue = value.trim();
+
+        if (!trimmedValue) {
+            return null;
+        }
+        const regex = /^(?:qc[- ](?:pass|fail)|in bearbeitung|in planung)$/i;
+        const valueOK = regex.test(trimmedValue);
+
+        if (!valueOK) {
+            return { ...options.message };
+        }
+    }
+
+    return null;
+}
+
 function inPLZCatalog(
     catalogService: CatalogService
 ): ValidatorFunction<InCatalogOptions> {
@@ -220,6 +266,61 @@ function inAVVCatalog(
                 return { ...options.message };
             }
         }
+        return null;
+    };
+}
+
+function inAVVCatalogs(
+    catalogService: CatalogService,
+    validationErrorProvider: ValidationErrorProvider
+): ValidatorFunction<InCatalogsOptions> {
+    return (
+        value: string,
+        options: InCatalogsOptions,
+        key: SampleProperty,
+        attributes: SampleDataValues
+    ) => {
+        const trimmedValue = value.trim();
+        if (attributes[key]) {
+            const catalogNames = options.catalogs;
+            if (catalogNames.length > 0) {
+                const error17 = validationErrorProvider.getError(
+                    options.error17
+                );
+                const error18 = validationErrorProvider.getError(
+                    options.error18
+                );
+                const samplingDate = attributes[SAMPLING_DATE];
+
+                const catalogWithKode = _.filter(
+                    catalogNames,
+                    (catalogName: string) => {
+                        const cat =
+                            catalogService.getAVVCatalog<AVVCatalogData>(
+                                catalogName,
+                                samplingDate
+                            );
+
+                        if (cat) {
+                            return (
+                                cat.containsEintragWithAVVKode(trimmedValue) ||
+                                cat.containsTextEintrag(trimmedValue)
+                            );
+                        }
+                    }
+                );
+
+                if (catalogWithKode.length === 0) {
+                    const validationError =
+                        'sequence_id' in attributes &&
+                        'sequence_status' in attributes
+                            ? error18
+                            : error17;
+                    return { ...validationError };
+                }
+            }
+        }
+
         return null;
     };
 }
@@ -1185,6 +1286,7 @@ export {
     dependentFields,
     hasObligatoryFacettenValues,
     inAVVCatalog,
+    inAVVCatalogs,
     inAVVFacettenCatalog,
     inPLZCatalog,
     isHierarchyCode,
@@ -1199,5 +1301,7 @@ export {
     matchesProgramZoMo,
     presenceZoMo,
     presenceNotZoMo,
-    requiredIfOther
+    requiredIfOther,
+    notEmptyIfOtherExists,
+    hasCorrectSequenceStatusValues
 };

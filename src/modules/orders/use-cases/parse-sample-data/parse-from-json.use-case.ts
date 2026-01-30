@@ -17,12 +17,13 @@ export class ParseFromJSONUseCase extends ParseSampleDataUseCase {
         const buff = Buffer.from(await file.getData(), 'base64');
         const jsonString = buff.toString('utf8');
         const dto: OrderContainerDTO = JSON.parse(jsonString);
+        const version = dto.order.sampleSet.meta.version || '18';
         const submission = await OrderDTOMapper.fromDTO(
             dto.order,
             '',
             samples => {
                 return samples.map(s =>
-                    SampleEntryDTOMapper.fromDTO(s, t => t)
+                    SampleEntryDTOMapper.fromDTO(version)(s, t => t)
                 );
             }
         );

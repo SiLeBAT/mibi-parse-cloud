@@ -105,6 +105,7 @@ export interface AnalysisProcedureObject
 export interface TemplateFileAttributes extends Parse.Attributes {
     templateFile: Parse.File;
     key?: string;
+    version: string;
 }
 
 export interface TemplateFileObject

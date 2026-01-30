@@ -4,7 +4,9 @@ import {
     AnnotatedSampleDataEntry,
     Order,
     SampleEntry,
-    SampleSet
+    SampleEntryV18,
+    SampleSet,
+    SampleSetV18
 } from '../../domain';
 import { antiCorruptionLayers } from '../../legacy';
 import { createSubmitter } from '../create-submitter';
@@ -15,21 +17,37 @@ import {
 } from './submit-order.error';
 
 type SubmitOrderInput = {
-    order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>;
+    order:
+        | Order<SampleEntry<AnnotatedSampleDataEntry>[]>
+        | Order<SampleEntryV18<AnnotatedSampleDataEntry>[]>;
     submitterId: EntityId;
 };
 export class SubmitOrderUseCase
-    implements UseCase<SubmitOrderInput, Promise<SampleSet>>
+    implements UseCase<SubmitOrderInput, Promise<SampleSet | SampleSetV18>>
 {
     constructor() {}
 
     async execute({
         order,
         submitterId
-    }: SubmitOrderInput): Promise<SampleSet> {
-        const sampleSet = SampleSet.create({
-            data: order.sampleEntryCollection
-        });
+    }: SubmitOrderInput): Promise<SampleSet | SampleSetV18> {
+        let sampleSet: SampleSet | SampleSetV18;
+        const version = order.submissionFormInfo?.version || '18';
+        switch (version) {
+            case '17': {
+                sampleSet = SampleSet.create({
+                    data: order.sampleEntryCollection as unknown as SampleEntry<AnnotatedSampleDataEntry>[]
+                });
+                break;
+            }
+            case '18':
+            default: {
+                sampleSet = SampleSetV18.create({
+                    data: order.sampleEntryCollection as unknown as SampleEntryV18<AnnotatedSampleDataEntry>[]
+                });
+                break;
+            }
+        }
 
         const validatedSubmission = await validateOrder.execute({
             submitterId,

@@ -3,7 +3,10 @@ import { UseCase } from '../../../shared/use-cases';
 import {
     SampleEntry,
     SampleEntryTuple,
+    SampleEntryV18,
+    SampleEntryV18Tuple,
     SampleSet,
+    SampleSetV18,
     ValidationParameter
 } from '../../domain';
 import { antiCorruptionLayers } from '../../legacy';
@@ -12,8 +15,11 @@ import { createValidationOptions } from '../create-validation-options';
 export class ValidateOrderUseCase
     implements
         UseCase<
-            { submitterId: EntityId | null; sampleSet: SampleSet },
-            SampleSet
+            {
+                submitterId: EntityId | null;
+                sampleSet: SampleSet | SampleSetV18;
+            },
+            SampleSet | SampleSetV18
         >
 {
     async execute({
@@ -21,14 +27,16 @@ export class ValidateOrderUseCase
         sampleSet
     }: {
         submitterId: EntityId | null;
-        sampleSet: SampleSet;
-    }): Promise<SampleSet> {
+        sampleSet: SampleSet | SampleSetV18;
+    }): Promise<SampleSet | SampleSetV18> {
         const validationOptions = await createValidationOptions.execute({
             submitterId
         });
 
         const validationParameter = await ValidationParameter.create({
-            data: sampleSet.data as SampleEntry<SampleEntryTuple>[],
+            data: sampleSet.data as
+                | SampleEntry<SampleEntryTuple>[]
+                | SampleEntryV18<SampleEntryV18Tuple>[],
             options: validationOptions
         });
 

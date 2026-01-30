@@ -5,6 +5,8 @@ import XlsxPopulate from 'xlsx-populate';
 import {
     FORM_PROPERTIES,
     FORM_PROPERTIES_NRL,
+    FORM_PROPERTIES_V18,
+    FORM_PROPERTIES_NRL_V18,
     FileBuffer,
     FileRepository,
     META_ANALYSIS_COMPAREHUMAN_BOOL_CELL,
@@ -34,9 +36,12 @@ import {
     SampleSheetConstants,
     SampleSheetMetaData,
     Urgency,
-    VALID_SHEET_NAME
+    VALID_SHEET_NAME,
+    FORM_PROPERTIES_PATHOGEN_CODE,
+    FORM_PROPERTIES_PATHOGEN_TEXT
 } from '../model/legacy.model';
 import { Sample } from '../model/sample.entity';
+import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 
 type ChangedValueCollection = Record<string, string>;
 
@@ -52,6 +57,7 @@ export class JSONMarshalService {
 
     async createExcel(
         sampleSheet: SampleSheet,
+        version: string,
         nrlSampleSheet: boolean = false
     ): Promise<FileBuffer> {
         const templateFileName = nrlSampleSheet
@@ -59,7 +65,8 @@ export class JSONMarshalService {
             : this.TEMPLATE_FILE_KEY;
 
         const buffer = await this.fileRepository.getFileBuffer(
-            templateFileName
+            templateFileName,
+            version
         );
 
         if (!buffer) {
@@ -73,6 +80,7 @@ export class JSONMarshalService {
 
         const dataToSave = this.fromDataObjToAOO(
             sampleSheet.samples,
+            version,
             nrlSampleSheet
         );
 
@@ -103,22 +111,91 @@ export class JSONMarshalService {
 
     private fromDataObjToAOO(
         sampleCollection: Sample[],
+        version: string,
         nrlSampleSheet: boolean = false
     ): string[][] {
         const dataToSave: string[][] = [];
-        const formProperties: string[] = nrlSampleSheet
-            ? [...FORM_PROPERTIES_NRL]
-            : [...FORM_PROPERTIES];
+
+        let formProperties: string[];
+        switch (version) {
+            case '17': {
+                formProperties = nrlSampleSheet
+                    ? [...FORM_PROPERTIES_NRL]
+                    : [...FORM_PROPERTIES];
+                break;
+            }
+            case '18':
+            default: {
+                formProperties = nrlSampleSheet
+                    ? [...FORM_PROPERTIES_NRL_V18]
+                    : [...FORM_PROPERTIES_V18];
+                break;
+            }
+        }
 
         _.forEach(sampleCollection, (sample: Sample) => {
             const row: string[] = [];
+
+            // ticket: https://github.com/SiLeBAT/mibi-parse-cloud/issues/181
+            const adjustedPathogen = this.adjustPathogenForVTEC(
+                sample,
+                nrlSampleSheet
+            );
+
             _.forEach(formProperties, header => {
-                row.push(sample.getValueFor(header));
+                if (header === FORM_PROPERTIES_PATHOGEN_CODE) {
+                    row.push(adjustedPathogen.pathogenCode);
+                } else if (header === FORM_PROPERTIES_PATHOGEN_TEXT) {
+                    row.push(adjustedPathogen.pathogenText);
+                } else {
+                    row.push(sample.getValueFor(header));
+                }
             });
             dataToSave.push(row);
         });
 
         return dataToSave;
+    }
+
+    private adjustPathogenForVTEC(
+        sample: Sample,
+        nrlSampleSheet: boolean
+    ): { pathogenCode: string; pathogenText: string } {
+        const vtecPathogenCode =
+            'Escherichia coli Shigatoxin/Verocytotoxin bildend';
+        const vtecEscherichiaAlbertii = 'Escherichia albertii';
+        const text = 'Text: ';
+        const code = 'Code: ';
+        const currentPathogenCode =
+            sample.getValueFor(FORM_PROPERTIES_PATHOGEN_CODE) ?? '';
+        const currentPathogenText =
+            sample.getValueFor(FORM_PROPERTIES_PATHOGEN_TEXT) ?? '';
+        const adjustedPathogen = {
+            pathogenCode: currentPathogenCode,
+            pathogenText: currentPathogenText
+        };
+
+        if (
+            sample.getNRL() === NRL_ID_VALUE.NRL_VTEC &&
+            nrlSampleSheet === true
+        ) {
+            if (currentPathogenCode.trim() === vtecEscherichiaAlbertii) {
+                return adjustedPathogen;
+            }
+            if (currentPathogenCode.trim() === vtecPathogenCode) {
+                return adjustedPathogen;
+            }
+            adjustedPathogen.pathogenCode =
+                currentPathogenCode.trim() !== vtecPathogenCode
+                    ? vtecPathogenCode
+                    : currentPathogenCode;
+            adjustedPathogen.pathogenText =
+                currentPathogenText.trim() === ''
+                    ? `${code}${currentPathogenCode}`
+                    : `${code}${currentPathogenCode}; ${text}${currentPathogenText}`;
+        }
+
+        return adjustedPathogen;
     }
 
     private addMetaDataToWorkbook(
