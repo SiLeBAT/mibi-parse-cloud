@@ -6,7 +6,7 @@ import { ParseHookRequest } from '../../../shared/infrastructure';
 import { ZomoPlanObject } from '../../../shared/infrastructure/parse-types';
 import {
     ZomoPlanDuplicationError,
-    ZomoPlanAmoutError,
+    ZomoPlanAmountError,
     ZomoPlanAllowedError
 } from './create-zomo-plan.error';
 import { readFileContent } from '../readFileContent';
@@ -54,7 +54,7 @@ export const beforeZomoPlanSaveHook = async (
 
             const twoExist: boolean = await checkForTwoZomoPlans.execute();
             if (twoExist) {
-                throw new ZomoPlanAmoutError(
+                throw new ZomoPlanAmountError(
                     'There exist already two zomo plans',
                     new Error()
                 );

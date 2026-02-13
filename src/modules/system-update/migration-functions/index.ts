@@ -11,6 +11,7 @@ import { mp86CreateSearchAlias } from './mp86-create-search-alias';
 import { mp151CreateClientDashboard } from './mp151-create-client-dashboard';
 import { mp156CreateZomoPlan } from './mp156-create-zomo-plan';
 import { cloud185UpdateTemplateFile } from './cloud185-update-template-file';
+import { cloud192CreateZomoPlanFile } from './cloud192-create-zomo-plan-file';
 export interface UpdateFunc {
     (): Promise<boolean>;
 }
@@ -31,5 +32,6 @@ export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp86CreateSearchAlias,
     mp151CreateClientDashboard,
     mp156CreateZomoPlan,
-    cloud185UpdateTemplateFile
+    cloud185UpdateTemplateFile,
+    cloud192CreateZomoPlanFile
 ];
