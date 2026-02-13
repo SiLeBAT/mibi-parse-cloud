@@ -18,8 +18,6 @@ class SetZomoPlanCacheUseCase implements UseCase<null, Promise<void>> {
         return await this.zomoPlanRepository
             .retrieve()
             .then(data => {
-                // console.log('SetZomoPlanCacheUseCase, execute, data: ', data);
-
                 this.zomoPlanCache.removeAllData();
                 this.zomoPlanCache.setZomoPlans(data);
             })

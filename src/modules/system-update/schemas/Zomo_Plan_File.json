@@ -1,0 +1,49 @@
+{
+  "className": "Zomo_Plan_File",
+  "fields": {
+    "objectId": {
+      "type": "String"
+    },
+    "createdAt": {
+      "type": "Date"
+    },
+    "updatedAt": {
+      "type": "Date"
+    },
+    "ACL": {
+      "type": "ACL"
+    },
+    "zomoPlanFile": {
+      "type": "File",
+      "required": true
+    },
+    "year": {
+      "type": "String",
+      "required": true
+    }
+  },
+  "classLevelPermissions": {
+    "find": {
+    },
+    "count": {
+    },
+    "get": {
+    },
+    "create": {
+    },
+    "update": {
+    },
+    "delete": {
+    },
+    "addField": {
+    },
+    "protectedFields": {
+      "*": []
+    }
+  },
+  "indexes": {
+    "_id_": {
+      "_id": 1
+    }
+  }
+}
