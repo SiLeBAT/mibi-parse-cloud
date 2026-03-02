@@ -27,11 +27,6 @@ class ReadFileContentUseCase implements UseCase<Parse.File, FileContent> {
     private determineContentType(file: Parse.File): FileContentType {
         const ext = path.extname(file.url());
 
-        console.log(
-            'ReadFileContentUseCase, before_zomo_plan_save_hook.ts,  determineContentType, ext: ',
-            ext
-        );
-
         switch (ext) {
             case '.json':
                 return FileContentType.JSON;

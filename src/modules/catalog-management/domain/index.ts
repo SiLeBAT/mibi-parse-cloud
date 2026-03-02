@@ -5,3 +5,4 @@ export { FileContent } from './file-content.vo';
 export { Pathogen } from './pathogen.vo';
 export { ZomoPlan, ZomoPlanProps } from './zomo-plan.entity';
 export { ZomoPlanInformation } from './zomo-plan-information.vo';
+export { ZomoPlanFileInformation } from './zomo-plan-file-information.vo';

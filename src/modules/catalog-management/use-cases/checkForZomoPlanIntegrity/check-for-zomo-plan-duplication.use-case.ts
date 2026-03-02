@@ -20,11 +20,6 @@ class CheckForZomoPlanDuplicationUseCase
                 value: zomoPlanInformation.year
             });
 
-        console.log(
-            'CheckForZomoPlanInformationUseCase, execute, storedZomoPlans: ',
-            storedZomoPlans
-        );
-
         const zomoPlansWithRightYear = _.filter(storedZomoPlans, {
             year: zomoPlanInformation.year
         });
