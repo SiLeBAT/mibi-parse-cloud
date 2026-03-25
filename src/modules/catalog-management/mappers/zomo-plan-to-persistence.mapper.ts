@@ -1,3 +1,4 @@
+import Parse from 'parse/node';
 import {
     ZomoPlanAttributes,
     ZomoPlanObject,
@@ -37,7 +38,9 @@ function fromUTF8ToBase64(utf8: string): string {
     return buff.toString('base64');
 }
 
-function createFileFromZomoPlan<T>(zomoPlan: ZomoPlan<T>) {
+async function createFileFromZomoPlan<T>(
+    zomoPlan: ZomoPlan<T>
+): Promise<Parse.File> {
     const contentAsJson = zomoPlan.JSON;
     const jsonFile = new Parse.File(
         'zomoPlan' + zomoPlan.zomoPlanInformation.year + '.json',
@@ -45,5 +48,11 @@ function createFileFromZomoPlan<T>(zomoPlan: ZomoPlan<T>) {
             base64: fromUTF8ToBase64(contentAsJson)
         }
     );
-    return jsonFile.save({ useMasterKey: true });
+    const savedFile = await jsonFile.save({ useMasterKey: true });
+
+    if (!savedFile) {
+        throw new Error('Failed to create zomo plan file.');
+    }
+
+    return savedFile;
 }

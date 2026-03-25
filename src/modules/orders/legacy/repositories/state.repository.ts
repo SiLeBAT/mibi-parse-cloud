@@ -1,3 +1,4 @@
+import Parse from 'parse/node';
 import { AVVFormatCollection, State } from '../model/legacy.model';
 
 export class StateRepository {

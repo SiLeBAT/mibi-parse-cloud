@@ -1,3 +1,4 @@
+import Parse from 'parse/node';
 import { logger } from '../../system/logging';
 import {
     afterDeleteUserHook,

@@ -1,3 +1,4 @@
+import Parse from 'parse/node';
 import { logger } from '../../../../system/logging';
 import { UseCase } from '../../../shared/use-cases';
 
@@ -37,7 +38,7 @@ class CheckSystemConfigurationUseCase implements UseCase<null, null> {
         }
         if (defaultValue) {
             logger.info('Setting default: ' + defaultValue);
-            Parse.Config.save({ [name]: defaultValue });
+            Parse.Config.save({ [name]: defaultValue }, { useMasterKey: true });
         }
     }
 }

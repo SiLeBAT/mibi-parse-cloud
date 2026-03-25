@@ -1,3 +1,4 @@
+import Parse from 'parse/node';
 import { AbstractRepository } from '../../../shared/infrastructure';
 import {
     ObjectKeys,

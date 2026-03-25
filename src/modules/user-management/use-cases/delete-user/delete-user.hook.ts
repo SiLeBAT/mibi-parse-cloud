@@ -5,7 +5,10 @@ import {
 import { ParseHookRequest } from '../../../shared/infrastructure';
 import { userInformationRepository } from '../../infrastructure/repositories';
 
-type AfterDeleteUserHookRequest = ParseHookRequest<Parse.User, void>;
+type AfterDeleteUserHookRequest = ParseHookRequest<
+    Parse.User,
+    Record<string, unknown>
+>;
 
 export const afterDeleteUserHook = async (
     request: AfterDeleteUserHookRequest

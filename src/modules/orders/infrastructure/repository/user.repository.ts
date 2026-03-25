@@ -1,3 +1,4 @@
+import Parse from 'parse/node';
 import { User } from 'parse';
 import { Email, EntityId } from '../../../shared/domain/valueObjects';
 
@@ -10,7 +11,7 @@ export class UserRepository {
             useMasterKey: true
         });
 
-        if (userObject) {
+        if (userObject && userObject.id) {
             return EntityId.create({ value: userObject.id });
         }
         throw new Error(`User with email ${email.value} not found`);

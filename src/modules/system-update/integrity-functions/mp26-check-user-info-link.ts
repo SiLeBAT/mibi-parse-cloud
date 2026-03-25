@@ -1,3 +1,4 @@
+import Parse from 'parse/node';
 import { logger } from '../../../system/logging';
 export async function mp26CheckUserInfoLink() {
     const query_User = new Parse.Query(Parse.User);
@@ -18,7 +19,7 @@ export async function mp26CheckUserInfoLink() {
         const queryUsers = new Parse.Query('users');
         const userEmail = user.getEmail();
 
-        if (userEmail === undefined) {
+        if (userEmail === null) {
             logger.warn(
                 'CreateUserInfoLink: No email found in users collection for user id:  ' +
                     user.id

@@ -1,3 +1,5 @@
+import Parse from 'parse/node';
+
 export abstract class AbstractRepository<
     T extends Parse.Object<Parse.Attributes>
 > {

@@ -38,11 +38,19 @@ export class SubmitterPersistenceMapper extends Mapper {
             const lastName = await Name.create({
                 value: userInformationObject.get('lastName')
             });
+
+            const userId = userObject.id;
+            if (!userId) {
+                throw new Error(
+                    'Could not construct Submitter: user id is missing.'
+                );
+            }
+
             const props: SubmitterProps = {
                 institute,
                 firstName,
                 lastName,
-                submitterId: EntityId.create({ value: userObject.id })
+                submitterId: EntityId.create({ value: userId })
             };
             return Submitter.create(props);
         } catch (e) {

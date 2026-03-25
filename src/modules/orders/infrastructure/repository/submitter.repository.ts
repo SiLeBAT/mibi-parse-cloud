@@ -1,3 +1,4 @@
+import Parse from 'parse/node';
 import { User } from 'parse';
 import { EntityId } from '../../../shared/domain/valueObjects';
 import {
@@ -51,7 +52,11 @@ export class SubmitterRepository extends AbstractRepository<UserInformationObjec
 
         const userInformationObject = results[0];
         const institute = userInformationObject.get('institute');
-        const instituteId = EntityId.create({ value: institute.id });
+        const instituteObjectId = institute?.id;
+        if (!instituteObjectId) {
+            throw new Error('UserInformationObject institute id not found');
+        }
+        const instituteId = EntityId.create({ value: instituteObjectId });
         const instituteObject = await this.instituteRepo.getObjectByEntityId(
             instituteId
         );
