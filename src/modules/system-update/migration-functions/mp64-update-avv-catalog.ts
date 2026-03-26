@@ -1,4 +1,3 @@
-import Parse from 'parse/node';
 import { updateSchema } from './update-schema';
 export async function mp64UpdateAVVCatalog() {
     const schemaName = 'AVV_Catalog';

@@ -1,4 +1,3 @@
-import Parse from 'parse/node';
 import { getSystemInformationController } from './get-system-information.controller';
 export { SystemInformationDTO } from './get-system-information.dto';
 

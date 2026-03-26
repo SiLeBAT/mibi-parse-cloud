@@ -1,4 +1,3 @@
-import Parse from 'parse/node';
 import { submitOrderController } from './submit-order.controller';
 
 export const FUNCTION_KEY = 'submitSampleData';

@@ -1,4 +1,3 @@
-import Parse from 'parse/node';
 import { updateSchema } from './update-schema';
 
 export async function mp66UpdateUserInfo() {

@@ -1,4 +1,3 @@
-import Parse from 'parse/node';
 import { ObjectKeys } from '../../../shared/infrastructure/parse-types';
 import { beforeAVVCatalogSaveHook } from './before-avv-catalog-save.hook';
 

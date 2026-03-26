@@ -5,7 +5,6 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
     "types": ["node", "jest"],
-    "typeRoots": ["./node_modules/@types", "./typings"],
     "declaration": true,
     "resolveJsonModule": true,
     // Emit

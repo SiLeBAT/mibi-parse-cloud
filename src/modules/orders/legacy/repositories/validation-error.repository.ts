@@ -1,4 +1,3 @@
-import Parse from 'parse/node';
 import { ValidationError } from '../model/legacy.model';
 export class ValidationErrorRepository {
     constructor() {}

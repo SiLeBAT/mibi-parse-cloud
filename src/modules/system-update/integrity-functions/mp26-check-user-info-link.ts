@@ -1,4 +1,3 @@
-import Parse from 'parse/node';
 import { logger } from '../../../system/logging';
 export async function mp26CheckUserInfoLink() {
     const query_User = new Parse.Query(Parse.User);

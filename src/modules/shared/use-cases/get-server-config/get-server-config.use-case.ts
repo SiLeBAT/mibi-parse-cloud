@@ -1,5 +1,5 @@
-import Parse from 'parse/node';
 import { getLogger } from 'nodemailer/lib/shared';
+
 import { UseCase } from '..';
 import { ServerConfig } from '../../domain/valueObjects';
 

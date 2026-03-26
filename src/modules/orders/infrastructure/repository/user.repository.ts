@@ -1,5 +1,5 @@
-import Parse from 'parse/node';
 import { User } from 'parse';
+
 import { Email, EntityId } from '../../../shared/domain/valueObjects';
 
 export class UserRepository {

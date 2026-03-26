@@ -1,8 +1,7 @@
-import Parse from 'parse/node';
 import {
+    ObjectKeys,
     ZomoPlanAttributes,
-    ZomoPlanObject,
-    ObjectKeys
+    ZomoPlanObject
 } from '../../shared/infrastructure/parse-types';
 import { Mapper } from '../../shared/mappers';
 import { ZomoPlan } from '../domain';

@@ -1,5 +1,5 @@
-import Parse from 'parse/node';
 import { User } from 'parse';
+
 import { EntityId } from '../../../shared/domain/valueObjects';
 import {
     InstituteObject,

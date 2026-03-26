@@ -1,4 +1,3 @@
-import Parse from 'parse/node';
 import { updateSchema } from './update-schema';
 export async function cloud185UpdateTemplateFile() {
     const schemaName = 'Template_File';
