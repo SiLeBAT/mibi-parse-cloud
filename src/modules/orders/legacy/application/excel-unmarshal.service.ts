@@ -43,7 +43,8 @@ import {
     UnmarshalSample,
     UnmarshalSampleSheet,
     Urgency,
-    VALID_SHEET_NAME
+    VALID_SHEET_NAME,
+    EXCEL_RANGE
 } from '../model/legacy.model';
 import { NRLService } from './nrl.service';
 
@@ -328,6 +329,7 @@ export class ExcelUnmarshalService {
 
     private fromWorksheetToData(workSheet: WorkSheet): UnmarshalSample[] {
         const lineNumber = this.getSampleDataHeaderRow(workSheet);
+        workSheet['!ref'] = EXCEL_RANGE;
 
         const data = utils.sheet_to_json<Record<string, string>>(workSheet, {
             header: this.formProperties,

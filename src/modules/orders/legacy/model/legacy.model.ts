@@ -1193,6 +1193,7 @@ export interface FileBuffer {
 }
 
 export const DEFAULT_SAMPLE_DATA_HEADER_ROW = 41;
+export const EXCEL_RANGE = 'A1:Z1071';
 export const SAMPLE_DATA_HEADER_ROW_MARKER = 'Ihre Probe-nummer';
 
 export const META_EXCEL_VERSION = 'B3';
