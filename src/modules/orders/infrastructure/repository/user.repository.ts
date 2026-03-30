@@ -1,10 +1,9 @@
-import { User } from 'parse';
-
+import type { User } from 'parse';
 import { Email, EntityId } from '../../../shared/domain/valueObjects';
 
 export class UserRepository {
     async getIdForEmail(email: Email): Promise<EntityId> {
-        const query = new Parse.Query<User>(User);
+        const query = new Parse.Query<User>(Parse.User);
 
         query.matches('email', RegExp(email.value), 'i');
         const userObject = await query.first({

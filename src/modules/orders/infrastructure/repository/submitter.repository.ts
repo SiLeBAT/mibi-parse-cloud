@@ -1,5 +1,4 @@
-import { User } from 'parse';
-
+import type { User } from 'parse';
 import { EntityId } from '../../../shared/domain/valueObjects';
 import {
     InstituteObject,
@@ -25,7 +24,7 @@ class InnerInstituteRepo {
 
 class InnerUserRepo {
     async getObjectByEntityId(eId: EntityId): Promise<User> {
-        const query = new Parse.Query<User>(User);
+        const query = new Parse.Query<User>(Parse.User);
         const object = query.get(eId.value, {
             useMasterKey: true
         });

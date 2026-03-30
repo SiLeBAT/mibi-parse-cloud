@@ -1,4 +1,4 @@
-import { User } from 'parse';
+import type { User } from 'parse';
 import { Email, EntityId, Name } from '../../shared/domain/valueObjects';
 import {
     InstituteObject,
