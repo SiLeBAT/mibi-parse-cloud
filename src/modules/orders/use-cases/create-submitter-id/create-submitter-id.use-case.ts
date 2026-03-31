@@ -18,7 +18,7 @@ export class CreateSubmitterIdUseCase<T extends HasUserEmail>
     constructor(private userRepository: UserRepository) {}
 
     async execute(request: CreateSubmitterIdParams<T>): Promise<EntityId> {
-        if (request.user) {
+        if (request.user?.id) {
             return EntityId.create({ value: request.user.id });
         } else {
             const submitterEmail = await this.getEmailFromRequest(request);

@@ -41,7 +41,9 @@ function fromUTF8ToBase64(utf8: string): string {
     return buff.toString('base64');
 }
 
-function createFileFromCatalog<T>(catalog: Catalog<T>) {
+async function createFileFromCatalog<T>(
+    catalog: Catalog<T>
+): Promise<Parse.File> {
     const contentAsJson = catalog.JSON;
     const jsonFile = new Parse.File(
         'avv' + catalog.catalogInformation.catalogCode + '.json',
@@ -49,5 +51,11 @@ function createFileFromCatalog<T>(catalog: Catalog<T>) {
             base64: fromUTF8ToBase64(contentAsJson)
         }
     );
-    return jsonFile.save({ useMasterKey: true });
+    const savedFile = await jsonFile.save({ useMasterKey: true });
+
+    if (!savedFile) {
+        throw new Error('Failed to create catalog file.');
+    }
+
+    return savedFile;
 }

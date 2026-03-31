@@ -37,7 +37,7 @@ class CheckSystemConfigurationUseCase implements UseCase<null, null> {
         }
         if (defaultValue) {
             logger.info('Setting default: ' + defaultValue);
-            Parse.Config.save({ [name]: defaultValue });
+            Parse.Config.save({ [name]: defaultValue }, { useMasterKey: true });
         }
     }
 }
