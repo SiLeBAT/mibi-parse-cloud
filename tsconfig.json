@@ -4,8 +4,7 @@
     "baseUrl": "./src",
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "types": ["node", "parse", "jest"],
-    "typeRoots": ["./node_modules/@types", "./typings"],
+    "types": ["node", "jest"],
     "declaration": true,
     "resolveJsonModule": true,
     // Emit

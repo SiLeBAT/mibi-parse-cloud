@@ -18,7 +18,7 @@ export async function mp26CheckUserInfoLink() {
         const queryUsers = new Parse.Query('users');
         const userEmail = user.getEmail();
 
-        if (userEmail === undefined) {
+        if (userEmail === null) {
             logger.warn(
                 'CreateUserInfoLink: No email found in users collection for user id:  ' +
                     user.id

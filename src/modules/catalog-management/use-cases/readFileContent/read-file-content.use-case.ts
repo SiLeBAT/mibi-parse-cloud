@@ -25,7 +25,16 @@ class ReadFileContentUseCase implements UseCase<Parse.File, FileContent> {
     }
 
     private determineContentType(file: Parse.File): FileContentType {
-        const ext = path.extname(file.url());
+        const fileUrl = file.url();
+
+        if (!fileUrl) {
+            throw new UnsupportedFileTypeError(
+                'File URL is missing',
+                new Error()
+            );
+        }
+
+        const ext = path.extname(fileUrl);
 
         switch (ext) {
             case '.json':

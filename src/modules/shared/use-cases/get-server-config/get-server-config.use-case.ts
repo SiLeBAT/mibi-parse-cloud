@@ -1,4 +1,5 @@
 import { getLogger } from 'nodemailer/lib/shared';
+
 import { UseCase } from '..';
 import { ServerConfig } from '../../domain/valueObjects';
 
@@ -7,7 +8,7 @@ export class GetServerConfigUseCase implements UseCase<null, ServerConfig> {
     constructor() {}
 
     async execute(): Promise<ServerConfig> {
-        let config = Parse.Config.current();
+        let config = await Parse.Config.current();
         try {
             config = await Parse.Config.get({ useMasterKey: true });
         } catch (error) {
