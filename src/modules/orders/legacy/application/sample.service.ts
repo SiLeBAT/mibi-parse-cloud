@@ -20,15 +20,13 @@ export class SampleService {
     ) {}
 
     async convertToExcel(sampleSet: SampleSet): Promise<ExcelFileInfo> {
-        const version = sampleSet.meta.version;
         const sampleSheet =
             await this.sampleSheetService.fromSampleSetToSampleSheet(sampleSet);
 
         this.prepareSampleSheetForExport(sampleSheet);
 
         const fileBuffer = await this.jsonMarshalService.createExcel(
-            sampleSheet,
-            version
+            sampleSheet
         );
 
         const fileName = this.amendFileName(

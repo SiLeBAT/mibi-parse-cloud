@@ -3,9 +3,7 @@ import {
     FileInformation,
     Order,
     SampleEntry,
-    SampleEntryTuple,
-    SampleEntryV18,
-    SampleEntryV18Tuple
+    SampleEntryTuple
 } from '../../domain';
 import { antiCorruptionLayers } from '../../legacy';
 
@@ -15,9 +13,7 @@ export class CreateSubmissionFileUseCase
     constructor() {}
 
     async execute(
-        submission:
-            | Order<SampleEntry<SampleEntryTuple>[]>
-            | Order<SampleEntryV18<SampleEntryV18Tuple>[]>
+        submission: Order<SampleEntry<SampleEntryTuple>[]>
     ): Promise<FileInformation> {
         const { excelMarshallAntiCorruptionLayer } = await antiCorruptionLayers;
         return excelMarshallAntiCorruptionLayer.convertToExcel(submission);

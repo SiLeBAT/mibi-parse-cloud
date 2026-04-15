@@ -55,25 +55,22 @@ const submitOrderController = async (
         setLoggingContext(request.log);
 
         const submitterId: EntityId = await createSubmitterId.execute(request);
-        const version = requestDTO.order.sampleSet.meta.version || '18';
         const order: Order<SampleEntryCollection> =
             await OrderDTOMapper.fromDTO(
                 requestDTO.order,
                 requestDTO.comment,
                 samples => {
                     return samples.map((sample: SampleDTO) => {
-                        return SampleEntryDTOMapper.fromDTO(version)(
-                            sample,
-                            t => ({
-                                value: t.value,
-                                errors: t.errors || [],
-                                correctionOffer: t.correctionOffer || [],
-                                oldValue: t.oldValue
-                            })
-                        );
+                        return SampleEntryDTOMapper.fromDTO(sample, t => ({
+                            value: t.value,
+                            errors: t.errors || [],
+                            correctionOffer: t.correctionOffer || [],
+                            oldValue: t.oldValue
+                        }));
                     });
                 }
             );
+
         const validatedSubmission = await submitOrderUseCase.execute({
             order,
             submitterId
@@ -84,7 +81,7 @@ const submitOrderController = async (
                 sampleSet: {
                     samples: validatedSubmission.data.map(
                         (sampleEntry: SampleEntry<SampleEntryTuple>) => {
-                            return SampleEntryDTOMapper.toDTO(version)(
+                            return SampleEntryDTOMapper.toDTO(
                                 sampleEntry,
                                 t => t
                             );

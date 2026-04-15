@@ -1,13 +1,9 @@
 import {
     AnnotatedSampleDataEntry,
     SampleEntry,
-    SampleEntryV18,
     SampleEntryProps,
-    SampleEntryV18Props,
     SampleEntryTuple,
-    SampleEntryV18Tuple,
     SampleSet,
-    SampleSetV18,
     ValidationParameter
 } from '../../domain';
 import { FormAutoCorrectionService } from '../application/form-auto-correction.service';
@@ -43,7 +39,7 @@ export class ValidationAntiCorruptionLayer {
 
     async validateSamples(
         validationParameter: ValidationParameter
-    ): Promise<SampleSet | SampleSetV18> {
+    ): Promise<SampleSet> {
         // 0) Convert to legacy abstractions
         // 1) Auto-correction needs to happen before validation.
         // 2) Assign NRL
@@ -52,14 +48,153 @@ export class ValidationAntiCorruptionLayer {
         const sampleFactory = new SampleFactory(this.nrlService);
 
         const samples: Sample[] = validationParameter.props.data.map(
-            (
-                entry:
-                    | SampleEntry<SampleEntryTuple>
-                    | SampleEntryV18<SampleEntryV18Tuple>
-            ) => {
-                const sampleData = this.createSampleDataFromEntry(entry);
-
-                const sample = sampleFactory.createSample(sampleData);
+            (entry: SampleEntry<SampleEntryTuple>) => {
+                const sample = sampleFactory.createSample({
+                    sample_id: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.sample_id.value,
+                        oldValue: entry.data.sample_id.oldValue
+                    },
+                    sample_id_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.sample_id_avv.value,
+                        oldValue: entry.data.sample_id_avv.oldValue
+                    },
+                    partial_sample_id: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.partial_sample_id.value,
+                        oldValue: entry.data.partial_sample_id.oldValue
+                    },
+                    pathogen_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.pathogen_avv.value,
+                        oldValue: entry.data.pathogen_avv.oldValue
+                    },
+                    pathogen_text: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.pathogen_text.value,
+                        oldValue: entry.data.pathogen_text.oldValue
+                    },
+                    sequence_id: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.sequence_id.value,
+                        oldValue: entry.data.sequence_id.oldValue
+                    },
+                    sequence_status: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.sequence_status.value,
+                        oldValue: entry.data.sequence_status.oldValue
+                    },
+                    sampling_date: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.sampling_date.value,
+                        oldValue: entry.data.sampling_date.oldValue
+                    },
+                    isolation_date: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.isolation_date.value,
+                        oldValue: entry.data.isolation_date.oldValue
+                    },
+                    sampling_location_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.sampling_location_avv.value,
+                        oldValue: entry.data.sampling_location_avv.oldValue
+                    },
+                    sampling_location_zip: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.sampling_location_zip.value,
+                        oldValue: entry.data.sampling_location_zip.oldValue
+                    },
+                    sampling_location_text: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.sampling_location_text.value,
+                        oldValue: entry.data.sampling_location_text.oldValue
+                    },
+                    animal_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.animal_avv.value,
+                        oldValue: entry.data.animal_avv.oldValue
+                    },
+                    matrix_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.matrix_avv.value,
+                        oldValue: entry.data.matrix_avv.oldValue
+                    },
+                    animal_matrix_text: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.animal_matrix_text.value,
+                        oldValue: entry.data.animal_matrix_text.oldValue
+                    },
+                    additional_marks_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.additional_marks_avv.value,
+                        oldValue: entry.data.additional_marks_avv.oldValue
+                    },
+                    control_program_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.control_program_avv.value,
+                        oldValue: entry.data.control_program_avv.oldValue
+                    },
+                    sampling_reason_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.sampling_reason_avv.value,
+                        oldValue: entry.data.sampling_reason_avv.oldValue
+                    },
+                    program_reason_text: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.program_reason_text.value,
+                        oldValue: entry.data.program_reason_text.oldValue
+                    },
+                    operations_mode_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.operations_mode_avv.value,
+                        oldValue: entry.data.operations_mode_avv.oldValue
+                    },
+                    operations_mode_text: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.operations_mode_text.value,
+                        oldValue: entry.data.operations_mode_text.oldValue
+                    },
+                    vvvo: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.vvvo.value,
+                        oldValue: entry.data.vvvo.oldValue
+                    },
+                    program_avv: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.program_avv.value,
+                        oldValue: entry.data.program_avv.oldValue
+                    },
+                    comment: {
+                        errors: [],
+                        correctionOffer: [],
+                        value: entry.data.comment.value,
+                        oldValue: entry.data.comment.oldValue
+                    }
+                });
 
                 sample.setAnalysis(this.nrlService, entry.data.analysis);
                 sample.setUrgency(fromUrgencyStringToEnum(entry.data.urgency));
@@ -78,14 +213,14 @@ export class ValidationAntiCorruptionLayer {
                 validationParameter.props.options
             );
         const results = validationResult.map((s: Sample) => {
-            const props:
-                | SampleEntryProps<AnnotatedSampleDataEntry>
-                | SampleEntryV18Props<AnnotatedSampleDataEntry> = {
+            const props: SampleEntryProps<AnnotatedSampleDataEntry> = {
                 sample_id: s.getEntryFor('sample_id'),
                 sample_id_avv: s.getEntryFor('sample_id_avv'),
                 partial_sample_id: s.getEntryFor('partial_sample_id'),
                 pathogen_avv: s.getEntryFor('pathogen_avv'),
                 pathogen_text: s.getEntryFor('pathogen_text'),
+                sequence_id: s.getEntryFor('sequence_id'),
+                sequence_status: s.getEntryFor('sequence_status'),
                 sampling_date: s.getEntryFor('sampling_date'),
                 isolation_date: s.getEntryFor('isolation_date'),
                 sampling_location_avv: s.getEntryFor('sampling_location_avv'),
@@ -94,7 +229,7 @@ export class ValidationAntiCorruptionLayer {
                 animal_avv: s.getEntryFor('animal_avv'),
                 matrix_avv: s.getEntryFor('matrix_avv'),
                 animal_matrix_text: s.getEntryFor('animal_matrix_text'),
-                primary_production_avv: s.getEntryFor('primary_production_avv'),
+                additional_marks_avv: s.getEntryFor('additional_marks_avv'),
                 control_program_avv: s.getEntryFor('control_program_avv'),
                 sampling_reason_avv: s.getEntryFor('sampling_reason_avv'),
                 program_reason_text: s.getEntryFor('program_reason_text'),
@@ -107,192 +242,10 @@ export class ValidationAntiCorruptionLayer {
                 urgency: s.getUrgency(),
                 analysis: s.getAnalysis()
             };
-            if (
-                s.getEntryFor('sequence_id') &&
-                s.getEntryFor('sequence_status')
-            ) {
-                (
-                    props as SampleEntryV18Props<AnnotatedSampleDataEntry>
-                ).sequence_id = s.getEntryFor('sequence_id');
-                (
-                    props as SampleEntryV18Props<AnnotatedSampleDataEntry>
-                ).sequence_status = s.getEntryFor('sequence_status');
-            }
 
             return SampleEntry.create(props);
         });
 
         return SampleSet.create({ data: results });
-    }
-
-    private createSampleDataFromEntry(
-        entry:
-            | SampleEntry<SampleEntryTuple>
-            | SampleEntryV18<SampleEntryV18Tuple>
-    ) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sampleData: any = {
-            sample_id: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.sample_id.value,
-                oldValue: entry.data.sample_id.oldValue
-            },
-            sample_id_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.sample_id_avv.value,
-                oldValue: entry.data.sample_id_avv.oldValue
-            },
-            partial_sample_id: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.partial_sample_id.value,
-                oldValue: entry.data.partial_sample_id.oldValue
-            },
-            pathogen_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.pathogen_avv.value,
-                oldValue: entry.data.pathogen_avv.oldValue
-            },
-            pathogen_text: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.pathogen_text.value,
-                oldValue: entry.data.pathogen_text.oldValue
-            },
-            sampling_date: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.sampling_date.value,
-                oldValue: entry.data.sampling_date.oldValue
-            },
-            isolation_date: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.isolation_date.value,
-                oldValue: entry.data.isolation_date.oldValue
-            },
-            sampling_location_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.sampling_location_avv.value,
-                oldValue: entry.data.sampling_location_avv.oldValue
-            },
-            sampling_location_zip: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.sampling_location_zip.value,
-                oldValue: entry.data.sampling_location_zip.oldValue
-            },
-            sampling_location_text: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.sampling_location_text.value,
-                oldValue: entry.data.sampling_location_text.oldValue
-            },
-            animal_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.animal_avv.value,
-                oldValue: entry.data.animal_avv.oldValue
-            },
-            matrix_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.matrix_avv.value,
-                oldValue: entry.data.matrix_avv.oldValue
-            },
-            animal_matrix_text: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.animal_matrix_text.value,
-                oldValue: entry.data.animal_matrix_text.oldValue
-            },
-            primary_production_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.primary_production_avv.value,
-                oldValue: entry.data.primary_production_avv.oldValue
-            },
-            control_program_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.control_program_avv.value,
-                oldValue: entry.data.control_program_avv.oldValue
-            },
-            sampling_reason_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.sampling_reason_avv.value,
-                oldValue: entry.data.sampling_reason_avv.oldValue
-            },
-            program_reason_text: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.program_reason_text.value,
-                oldValue: entry.data.program_reason_text.oldValue
-            },
-            operations_mode_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.operations_mode_avv.value,
-                oldValue: entry.data.operations_mode_avv.oldValue
-            },
-            operations_mode_text: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.operations_mode_text.value,
-                oldValue: entry.data.operations_mode_text.oldValue
-            },
-            vvvo: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.vvvo.value,
-                oldValue: entry.data.vvvo.oldValue
-            },
-            program_avv: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.program_avv.value,
-                oldValue: entry.data.program_avv.oldValue
-            },
-            comment: {
-                errors: [],
-                correctionOffer: [],
-                value: entry.data.comment.value,
-                oldValue: entry.data.comment.oldValue
-            }
-        };
-
-        if (this.hasV18Properties(entry)) {
-            (sampleData.sequence_id = {
-                errors: [],
-                correctionOffer: [],
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                value: (entry.data as any).sequence_id.value,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                oldValue: (entry.data as any).sequence_id.oldValue
-            }),
-                (sampleData.sequence_status = {
-                    errors: [],
-                    correctionOffer: [],
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    value: (entry.data as any).sequence_status.value,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    oldValue: (entry.data as any).sequence_status.oldValue
-                });
-        }
-
-        return sampleData;
-    }
-
-    private hasV18Properties(
-        entry:
-            | SampleEntry<SampleEntryTuple>
-            | SampleEntryV18<SampleEntryV18Tuple>
-    ): boolean {
-        return 'sequence_id' in entry.data && 'sequence_status' in entry.data;
     }
 }
