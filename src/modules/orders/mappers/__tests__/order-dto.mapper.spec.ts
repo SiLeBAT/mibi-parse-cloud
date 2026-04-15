@@ -23,8 +23,7 @@ describe('Order DTO Mapper ', () => {
                             contactPerson: 'test test',
                             telephone: 'test',
                             email: 'test@test.com'
-                        },
-                        version: '17'
+                        }
                     }
                 }
             };
@@ -35,9 +34,7 @@ describe('Order DTO Mapper ', () => {
                 '',
                 samples => {
                     return samples.map(s =>
-                        SampleEntryDTOMapper.fromDTO(
-                            orderDto.sampleSet.meta.version || '18'
-                        )(s, t => t.value)
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
                     );
                 }
             );
@@ -45,16 +42,12 @@ describe('Order DTO Mapper ', () => {
         });
 
         it('Should create submission with empty string version', async () => {
-            const dto = { ...orderDto };
-            dto.sampleSet.meta.version = '';
             const submission = await OrderDTOMapper.fromDTO(
                 orderDto,
                 '',
                 samples => {
                     return samples.map(s =>
-                        SampleEntryDTOMapper.fromDTO(
-                            orderDto.sampleSet.meta.version || '18'
-                        )(s, t => t.value)
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
                     );
                 }
             );
@@ -74,9 +67,7 @@ describe('Order DTO Mapper ', () => {
                 '',
                 samples => {
                     return samples.map(s =>
-                        SampleEntryDTOMapper.fromDTO(
-                            orderDto.sampleSet.meta.version || '18'
-                        )(s, t => t.value)
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
                     );
                 }
             );
@@ -92,9 +83,7 @@ describe('Order DTO Mapper ', () => {
             expect(() =>
                 OrderDTOMapper.fromDTO(dto, '', samples => {
                     return samples.map(s =>
-                        SampleEntryDTOMapper.fromDTO(
-                            orderDto.sampleSet.meta.version || '18'
-                        )(s, t => t.value)
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
                     );
                 })
             ).toThrow('Unable to map OrderDTO to Order');
@@ -106,9 +95,7 @@ describe('Order DTO Mapper ', () => {
             expect(() =>
                 OrderDTOMapper.fromDTO(dto, '', samples => {
                     return samples.map(s =>
-                        SampleEntryDTOMapper.fromDTO(
-                            orderDto.sampleSet.meta.version || '18'
-                        )(s, t => t.value)
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
                     );
                 })
             ).toThrow('Unable to map OrderDTO to Order');
@@ -120,9 +107,7 @@ describe('Order DTO Mapper ', () => {
                 '',
                 samples => {
                     return samples.map(s =>
-                        SampleEntryDTOMapper.fromDTO(
-                            orderDto.sampleSet.meta.version || '18'
-                        )(s, t => t.value)
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
                     );
                 }
             );
@@ -149,9 +134,7 @@ describe('Order DTO Mapper ', () => {
                 '',
                 samples => {
                     return samples.map(s =>
-                        SampleEntryDTOMapper.fromDTO(
-                            orderDto.sampleSet.meta.version || '18'
-                        )(s, t => t.value)
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
                     );
                 }
             );
@@ -179,6 +162,12 @@ describe('Order DTO Mapper ', () => {
                         pathogen_text: {
                             value: 'test'
                         },
+                        sequence_id: {
+                            value: 'test'
+                        },
+                        sequence_status: {
+                            value: 'test'
+                        },
                         sampling_date: {
                             value: 'test'
                         },
@@ -203,7 +192,7 @@ describe('Order DTO Mapper ', () => {
                         animal_matrix_text: {
                             value: 'test'
                         },
-                        primary_production_avv: {
+                        additional_marks_avv: {
                             value: 'test'
                         },
                         control_program_avv: {
@@ -257,9 +246,7 @@ describe('Order DTO Mapper ', () => {
                 '',
                 samples => {
                     return samples.map(s =>
-                        SampleEntryDTOMapper.fromDTO(
-                            orderDto.sampleSet.meta.version || '18'
-                        )(s, t => t.value)
+                        SampleEntryDTOMapper.fromDTO(s, t => t.value)
                     );
                 }
             );
@@ -317,7 +304,7 @@ describe('Order DTO Mapper ', () => {
             };
             const orderDTO = OrderDTOMapper.toDTO(submission, samples => {
                 return samples.map(s =>
-                    SampleEntryDTOMapper.toDTO('18')(s, t => ({ value: t }))
+                    SampleEntryDTOMapper.toDTO(s, t => ({ value: t }))
                 );
             });
             expect(orderDTO).toMatchObject(orderDto);

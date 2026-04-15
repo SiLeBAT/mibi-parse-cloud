@@ -448,12 +448,10 @@ export const baseConstraints: ValidationConstraints = {
 
     animal_matrix_text: {},
 
-    primary_production_avv: {
-        inAVVCatalogs: {
-            error: 100,
-            error17: 100,
-            error18: 125,
-            catalogs: ['avv316', 'avv337']
+    additional_marks_avv: {
+        inAVVCatalog: {
+            error: 125,
+            catalog: 'avv337'
         }
     },
 

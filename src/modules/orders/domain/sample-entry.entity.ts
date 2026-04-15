@@ -41,6 +41,8 @@ export type SampleEntryProps<T> = {
     partial_sample_id: T;
     pathogen_avv: T;
     pathogen_text: T;
+    sequence_id: T;
+    sequence_status: T;
     sampling_date: T;
     isolation_date: T;
     sampling_location_avv: T;
@@ -49,7 +51,7 @@ export type SampleEntryProps<T> = {
     animal_avv: T;
     matrix_avv: T;
     animal_matrix_text: T;
-    primary_production_avv: T;
+    additional_marks_avv: T;
     control_program_avv: T;
     sampling_reason_avv: T;
     program_reason_text: T;
