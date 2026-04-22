@@ -5,6 +5,7 @@ import { UseCase } from '../../../shared/use-cases';
 
 export type ExcelVersionCheck = {
     uploadedExcelVersion: string;
+    currentVersions: string[];
     valid: boolean;
 };
 class CheckExcelVersionUseCase
@@ -26,6 +27,9 @@ class CheckExcelVersionUseCase
 
         return {
             uploadedExcelVersion,
+            currentVersions: Array.isArray(validExcelVersion)
+                ? validExcelVersion
+                : [],
             valid: isValid
         };
     }
