@@ -48,6 +48,7 @@ type ErrorDTO = {
 export interface EmailValidationErrorDTO extends ErrorDTO {}
 export interface ExcelVersionErrorDTO extends ErrorDTO {
     version: string;
+    currentVersions: string[];
 }
 
 /*
@@ -83,6 +84,7 @@ const parseSampleDataController = loggedController(
             if (!matchesExcelVersion.valid) {
                 throw new ExcelVersionError(
                     `Invalid Excel Version:${matchesExcelVersion.uploadedExcelVersion}`,
+                    matchesExcelVersion.currentVersions,
                     new Error(
                         `Invalid Excel Version:${matchesExcelVersion.uploadedExcelVersion}`
                     )
@@ -132,7 +134,8 @@ const parseSampleDataController = loggedController(
                 const dto: ExcelVersionErrorDTO = {
                     code: SERVER_ERROR_CODE.INVALID_VERSION,
                     message: error.message,
-                    version: version
+                    version: version,
+                    currentVersions: error.currentVersions || []
                 };
 
                 return dto;
