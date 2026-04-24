@@ -102,7 +102,7 @@ export class ZomoCsvParser {
         const zomoData = zomoPlanRows.map((row: ZomoPlanInput) => {
             return {
                 '303': this.parseCodeField(row['303']),
-                '316': this.parseCodeField(row['316']),
+                '337': this.parseCodeField(row['337']),
                 '319': this.parseCodeField(row['319']),
                 '324': this.parse324(row['324']),
                 '328': this.parseCodeField(row['328']),
@@ -120,7 +120,7 @@ export class ZomoCsvParser {
         return result;
     }
 
-    // Parses a field value (like from "303", "319", "328", "339")
+    // Parses a field value (like from "303", "319", "328", "339", "337")
     // which is either an empty string or one or more codes separated by semicolon.
     private parseCodeField(rowValue: string) {
         const basicCodeRegex: RegExp = /^\d+\|\d+\|$/;

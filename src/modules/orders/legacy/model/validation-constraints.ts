@@ -76,6 +76,19 @@ export const zoMoConstraints: ValidationConstraints = {
         }
     },
 
+    additional_marks_avv: {
+        matchesZoMo: {
+            error: 126,
+            date: 'sampling_date',
+            zomoKey: '337',
+            codeType: 'basic',
+            programField: {
+                attr: 'program_avv',
+                zomoKey: '328'
+            }
+        }
+    },
+
     operations_mode_avv: {
         atLeastOneOf: {
             error: 48,
