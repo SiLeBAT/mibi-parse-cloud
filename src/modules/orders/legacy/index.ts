@@ -28,29 +28,21 @@ import { JSONMarshalService } from './application/json-marshal.service';
 import { MailService } from './application/mail';
 import { NotificationService } from './application/notification.service';
 import { NRLService } from './application/nrl.service';
-import { PDFConfigProviderV18Service } from './application/pdf-config-provider-v18.service';
 import { PDFConfigProviderService } from './application/pdf-config-provider.service';
-import { PDFCreatorV18Service } from './application/pdf-creator-v18.service';
 import { PDFCreatorService } from './application/pdf-creator.service';
 import { PDFService } from './application/pdf.service';
 import { SampleSheetService } from './application/sample-sheet.service';
 import { SampleService } from './application/sample.service';
 import { ValidationErrorProvider } from './application/validation-error-provider.service';
-import {
-    pdfConstants,
-    pdfConstantsV18,
-    sampleSheetConstants,
-    sampleSheetV18Constants
-} from './model/legacy.model';
+import { pdfConstants, sampleSheetConstants } from './model/legacy.model';
 import { initialiseRepository as catalogRepositoryInit } from './repositories/catalog.repository';
 import { stateRepository } from './repositories/state.repository';
 import { validationErrorRepository } from './repositories/validation-error.repository';
 
 const fileRepository = {
-    getFileBuffer: async (key: string, version: string) => {
+    getFileBuffer: async (key: string) => {
         const query = new Parse.Query(ObjectKeys.TEMPLATE_FILE);
         query.equalTo('key', key.toUpperCase());
-        query.equalTo('version', version);
         const templateFileObject = await query.first({ useMasterKey: true });
         if (!templateFileObject) {
             throw Error("Can't find template file with key: " + key);
@@ -132,18 +124,10 @@ const antiCorruptionLayers = (async function init() {
         sampleSheetConstants,
         pdfConstants
     );
-    const configProviderV18 = new PDFConfigProviderV18Service(
-        sampleSheetV18Constants,
-        pdfConstantsV18
-    );
+
     const pdfCreatorService = new PDFCreatorService(
         pdfService,
         configProvider,
-        catalogService
-    );
-    const pdfCreatorV18Service = new PDFCreatorV18Service(
-        pdfService,
-        configProviderV18,
         catalogService
     );
 
@@ -151,7 +135,6 @@ const antiCorruptionLayers = (async function init() {
         notificationService,
         jSONMarshalService,
         pdfCreatorService,
-        pdfCreatorV18Service,
         nrlService,
         sampleSheetService,
         catalogService

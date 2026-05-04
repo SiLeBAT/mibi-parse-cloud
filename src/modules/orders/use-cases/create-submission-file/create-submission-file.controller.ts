@@ -26,7 +26,6 @@ const createSubmissionFileController = loggedController(
         request: CreateSubmissionFileRequest
     ): Promise<CreateSubmissionFileResponse> => {
         const orderContainerDTO = request.params;
-        const version = orderContainerDTO.order.sampleSet.meta.version || '18';
 
         const order: Order<SampleEntry<SampleEntryTuple>[]> =
             await OrderDTOMapper.fromDTO(
@@ -34,7 +33,7 @@ const createSubmissionFileController = loggedController(
                 '',
                 samples => {
                     return samples.map(s =>
-                        SampleEntryDTOMapper.fromDTO(version)(s, t => ({
+                        SampleEntryDTOMapper.fromDTO(s, t => ({
                             value: t.value,
                             oldValue: t.oldValue || ''
                         }))

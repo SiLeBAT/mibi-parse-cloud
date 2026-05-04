@@ -1,6 +1,5 @@
 import Fuse from 'fuse.js';
 import _ from 'lodash';
-
 import {
     ADVCatalogEntry,
     AVV324Data,

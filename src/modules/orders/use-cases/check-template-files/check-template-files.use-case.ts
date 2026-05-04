@@ -32,7 +32,7 @@ class CheckTemplateFilesUseCase implements UseCase<null, null> {
             return file.get('key');
         });
         return (
-            files.length === 4 &&
+            files.length === 2 &&
             filekeys.includes('NRL') &&
             filekeys.includes('USER')
         );

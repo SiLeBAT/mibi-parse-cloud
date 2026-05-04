@@ -3,15 +3,11 @@ import _ from 'lodash';
 import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { ReceiveAs } from '../../domain/enums';
 import { CatalogService } from '../application/catalog.service';
-import {
-    sampleSheetPDFConfig,
-    sampleSheetV18PDFConfig
-} from './sample-sheet-pdf.config';
+import { sampleSheetPDFConfig } from './sample-sheet-pdf.config';
 import { sampleSheetPDFStyles } from './sample-sheet-pdf.styles';
 import { Sample } from './sample.entity';
 import { NRLService } from '../application/nrl.service';
 import { WorkSheet } from 'xlsx';
-import { ValidationErrorProvider } from '../application/validation-error-provider.service';
 export enum SampleSheetAnalysisOption {
     OMIT,
     ACTIVE,
@@ -162,13 +158,7 @@ export const sampleSheetMetaStrings = {
         cellProtectionInstruction2:
             'sind nicht zielführend und werden beim Einlesen der Daten durch das BfR nicht berücksichtigt.'
     },
-    footer17: {
-        validated:
-            'OE-Mibi-SOP-059_FB_A01_Elektronischer Einsendebogen_V17 gültig ab 01.01.2024',
-        page: 'Seite',
-        pageOf: 'von'
-    },
-    footer18: {
+    footer: {
         validated:
             'OE-Mibi-SOP-059_FB_A01_Untersuchungsauftrag_V18 gültig ab 01.02.2026',
         page: 'Seite',
@@ -177,45 +167,6 @@ export const sampleSheetMetaStrings = {
 };
 
 export const sampleSheetSamplesStrings = {
-    titles: {
-        sample_id: 'Ihre Probe-nummer',
-        sample_id_avv: 'Probe-nummer nach AVV Data',
-        partial_sample_id: 'AVV DatA-Teil-pro-ben-Nr.',
-        pathogen_avv: 'Erreger',
-        pathogen_text: 'Erreger',
-        sampling_date: 'Datum der Probe-nahme',
-        isolation_date: 'Datum der Isolierung',
-        sampling_location_zip: 'Ort der Probe-nahme',
-        sampling_location_text: 'Ort der Probe-nahme',
-        animal_matrix_text: 'Tiere / Matrix',
-        primary_production_text_avv: 'Angaben zur Primär-produktion',
-        program_reason_text: 'Kontrollprogramm / Untersuchungsgrund',
-        operations_mode_text: 'Betriebsart',
-        vvvo: 'VVVO-Nr / Herde',
-        program_text_avv: 'Programm',
-        comment: 'Bemerkung'
-    },
-    subtitles: {
-        sample_id: '',
-        sample_id_avv: '',
-        partial_sample_id: '',
-        pathogen_avv: '(Text aus AVV DatA-Kat-Nr. 324)',
-        pathogen_text: '(Text)',
-        sampling_date: '',
-        isolation_date: '',
-        sampling_location_zip: '(PLZ)',
-        sampling_location_text: '(Text)',
-        animal_matrix_text: '(Text)',
-        primary_production_text_avv: '(Text aus AVV DatA-Kat-Nr. 316)',
-        program_reason_text: '(Text)',
-        operations_mode_text: '(Text)',
-        vvvo: '',
-        program_text_avv: '(Text aus AVV DatA-Kat-Nr. 328)',
-        comment: ''
-    }
-};
-
-export const sampleSheetV18SamplesStrings = {
     titles: {
         sample_id: 'Ihre Probe-nummer',
         sample_id_avv: 'Probe-nummer nach AVV Data',
@@ -270,34 +221,8 @@ export const sampleSheetNRLStrings: Record<NRL_ID_VALUE, string> = {
     'KL-Yersinia': 'Konsiliarlabor für Yersinia',
     'Labor nicht erkannt': ''
 };
+
 export const sampleSheetConfig = {
-    version: 17,
-    svgLogoPath: './assets/BfR_Logo_de_RGB_pdf.svg',
-    page: {
-        size: 'A4',
-        orientation: 'landscape',
-        margins: {
-            left: 22,
-            top: 16,
-            right: 9,
-            bottom: 19
-        }
-    },
-    footer: {
-        margins: {
-            left: 22,
-            top: 3,
-            right: 9,
-            bottom: 0
-        }
-    },
-    fileInfo: {
-        title: 'Untersuchungsauftrag für Isolate/Proben',
-        author: 'BfR',
-        creator: 'MiBi-Portal'
-    }
-};
-export const sampleSheetV18Config = {
     version: 18,
     svgLogoPath: './assets/BfR_Logo_de_RGB_pdf.svg',
     page: {
@@ -409,13 +334,11 @@ export const sampleSheetStyles = {
 };
 
 export interface FileRepository {
-    getFileBuffer(fileName: string, version: string): Promise<Buffer>;
+    getFileBuffer(fileName: string): Promise<Buffer>;
 }
 export type SampleSheetConfig = typeof sampleSheetConfig;
-export type SampleSheetV18Config = typeof sampleSheetV18Config;
 export type SampleSheetMetaStrings = typeof sampleSheetMetaStrings;
 export type SampleSheetSamplesStrings = typeof sampleSheetSamplesStrings;
-export type SampleSheetV18SamplesStrings = typeof sampleSheetV18SamplesStrings;
 export type SampleSheetNRLStrings = typeof sampleSheetNRLStrings;
 
 export const sampleSheetConstants: SampleSheetConstants = {
@@ -426,17 +349,8 @@ export const sampleSheetConstants: SampleSheetConstants = {
     samplesStrings: sampleSheetSamplesStrings,
     nrlStrings: sampleSheetNRLStrings
 };
-export const sampleSheetV18Constants: SampleSheetV18Constants = {
-    config: sampleSheetV18Config,
-    defaultStyle: sampleSheetDefaultStyle,
-    styles: sampleSheetStyles,
-    metaStrings: sampleSheetMetaStrings,
-    samplesStrings: sampleSheetV18SamplesStrings,
-    nrlStrings: sampleSheetNRLStrings
-};
 
 export type SampleSheetPDFConfig = typeof sampleSheetPDFConfig;
-export type SampleSheetV18PDFConfig = typeof sampleSheetV18PDFConfig;
 
 export interface PDFConstants {
     readonly config: SampleSheetPDFConfig;
@@ -447,15 +361,6 @@ export const pdfConstants: PDFConstants = {
     config: sampleSheetPDFConfig,
     styles: sampleSheetPDFStyles
 };
-export interface PDFConstantsV18 {
-    readonly config: SampleSheetV18PDFConfig;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly styles: any;
-}
-export const pdfConstantsV18: PDFConstantsV18 = {
-    config: sampleSheetV18PDFConfig,
-    styles: sampleSheetPDFStyles
-};
 export interface SampleSheetConstants {
     readonly config: SampleSheetConfig;
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -464,16 +369,6 @@ export interface SampleSheetConstants {
     readonly styles: {};
     readonly metaStrings: SampleSheetMetaStrings;
     readonly samplesStrings: SampleSheetSamplesStrings;
-    readonly nrlStrings: SampleSheetNRLStrings;
-}
-export interface SampleSheetV18Constants {
-    readonly config: SampleSheetV18Config;
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    readonly defaultStyle: {};
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    readonly styles: {};
-    readonly metaStrings: SampleSheetMetaStrings;
-    readonly samplesStrings: SampleSheetV18SamplesStrings;
     readonly nrlStrings: SampleSheetNRLStrings;
 }
 
@@ -518,7 +413,6 @@ export interface ValidatorConfig {
     dateFormat: string;
     dateTimeFormat: string;
     catalogService: CatalogService;
-    validationErrorProvider: ValidationErrorProvider;
 }
 
 export interface Validator {
@@ -611,6 +505,8 @@ export interface SampleData {
     partial_sample_id: AnnotatedSampleDataEntry;
     pathogen_avv: AnnotatedSampleDataEntry;
     pathogen_text: AnnotatedSampleDataEntry;
+    sequence_id: AnnotatedSampleDataEntry;
+    sequence_status: AnnotatedSampleDataEntry;
     sampling_date: AnnotatedSampleDataEntry;
     isolation_date: AnnotatedSampleDataEntry;
     sampling_location_avv: AnnotatedSampleDataEntry;
@@ -619,7 +515,7 @@ export interface SampleData {
     animal_avv: AnnotatedSampleDataEntry;
     matrix_avv: AnnotatedSampleDataEntry;
     animal_matrix_text: AnnotatedSampleDataEntry;
-    primary_production_avv: AnnotatedSampleDataEntry;
+    additional_marks_avv: AnnotatedSampleDataEntry;
     control_program_avv: AnnotatedSampleDataEntry;
     sampling_reason_avv: AnnotatedSampleDataEntry;
     program_reason_text: AnnotatedSampleDataEntry;
@@ -1053,31 +949,6 @@ export const FORM_PROPERTIES: string[] = [
     'partial_sample_id',
     'pathogen_avv',
     'pathogen_text',
-    'sampling_date',
-    'isolation_date',
-    'sampling_location_avv',
-    'sampling_location_zip',
-    'sampling_location_text',
-    'animal_avv',
-    'matrix_avv',
-    'animal_matrix_text',
-    'primary_production_avv',
-    'control_program_avv',
-    'sampling_reason_avv',
-    'program_reason_text',
-    'operations_mode_avv',
-    'operations_mode_text',
-    'vvvo',
-    'program_avv',
-    'comment'
-];
-
-export const FORM_PROPERTIES_V18: string[] = [
-    'sample_id',
-    'sample_id_avv',
-    'partial_sample_id',
-    'pathogen_avv',
-    'pathogen_text',
     'sequence_id',
     'sequence_status',
     'sampling_date',
@@ -1088,7 +959,7 @@ export const FORM_PROPERTIES_V18: string[] = [
     'animal_avv',
     'matrix_avv',
     'animal_matrix_text',
-    'primary_production_avv',
+    'additional_marks_avv',
     'control_program_avv',
     'sampling_reason_avv',
     'program_reason_text',
@@ -1105,39 +976,6 @@ export const FORM_PROPERTIES_NRL: string[] = [
     'partial_sample_id',
     'pathogen_avv',
     'pathogen_text',
-    'sampling_date',
-    'isolation_date',
-    'sampling_location_avv',
-    'sampling_location_text_avv',
-    'sampling_location_zip',
-    'sampling_location_text',
-    'animal_avv',
-    'animal_text_avv',
-    'matrix_avv',
-    'matrix_text_avv',
-    'animal_matrix_text',
-    'primary_production_avv',
-    'primary_production_text_avv',
-    'control_program_avv',
-    'control_program_text_avv',
-    'sampling_reason_avv',
-    'sampling_reason_text_avv',
-    'program_reason_text',
-    'operations_mode_avv',
-    'operations_mode_text_avv',
-    'operations_mode_text',
-    'vvvo',
-    'program_avv',
-    'program_text_avv',
-    'comment'
-];
-
-export const FORM_PROPERTIES_NRL_V18: string[] = [
-    'sample_id',
-    'sample_id_avv',
-    'partial_sample_id',
-    'pathogen_avv',
-    'pathogen_text',
     'sequence_id',
     'sequence_status',
     'sampling_date',
@@ -1151,8 +989,8 @@ export const FORM_PROPERTIES_NRL_V18: string[] = [
     'matrix_avv',
     'matrix_text_avv',
     'animal_matrix_text',
-    'primary_production_avv',
-    'primary_production_text_avv',
+    'additional_marks_avv',
+    'additional_marks_text_avv',
     'control_program_avv',
     'control_program_text_avv',
     'sampling_reason_avv',
@@ -1171,7 +1009,7 @@ export const FORM_PROPERTIES_AVV_CODES: string[] = [
     'sampling_location_avv',
     'animal_avv',
     'matrix_avv',
-    'primary_production_avv',
+    'additional_marks_avv',
     'control_program_avv',
     'sampling_reason_avv',
     'operations_mode_avv',
@@ -1180,11 +1018,6 @@ export const FORM_PROPERTIES_AVV_CODES: string[] = [
 
 export const FORM_PROPERTIES_PATHOGEN_CODE: string = 'pathogen_avv';
 export const FORM_PROPERTIES_PATHOGEN_TEXT: string = 'pathogen_text';
-
-export enum ExcelVersion {
-    V17 = '17',
-    V18 = '18'
-}
 
 export interface FileBuffer {
     buffer: Buffer;
