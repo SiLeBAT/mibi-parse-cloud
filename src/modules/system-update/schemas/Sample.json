@@ -1,0 +1,65 @@
+{
+  "className": "Sample",
+  "fields": {
+    "objectId": {
+      "type": "String"
+    },
+    "createdAt": {
+      "type": "Date"
+    },
+    "updatedAt": {
+      "type": "Date"
+    },
+    "ACL": {
+      "type": "ACL"
+    },
+    "order": {
+      "type": "Pointer",
+      "targetClass": "Order",
+      "required": true
+    },
+    "position": {
+      "type": "number",
+      "required": true
+    },
+    "sampleData": {
+      "type": "string",
+      "required": false
+    },
+    "sampleMeta": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "classLevelPermissions": {
+    "find": {
+      "*": true
+    },
+    "count": {
+      "*": true
+    },
+    "get": {
+      "*": true
+    },
+    "create": {
+      "*": true
+    },
+    "update": {
+      "*": true
+    },
+    "delete": {
+      "*": true
+    },
+    "addField": {
+      "*": true
+    },
+    "protectedFields": {
+      "*": []
+    }
+  },
+  "indexes": {
+    "_id_": {
+      "_id": 1
+    }
+  }
+}

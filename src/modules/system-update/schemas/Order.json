@@ -1,0 +1,77 @@
+{
+  "className": "Order",
+  "fields": {
+    "objectId": {
+      "type": "String"
+    },
+    "createdAt": {
+      "type": "Date"
+    },
+    "updatedAt": {
+      "type": "Date"
+    },
+    "ACL": {
+      "type": "ACL"
+    },
+    "user": {
+      "type": "Pointer",
+      "targetClass": "_User",
+      "required": true
+    },
+    "fileName": {
+      "type": "String",
+      "required": false
+    },
+    "pathogens": {
+      "type": "Array",
+      "required": false
+    },
+    "nrls": {
+      "type": "Array",
+      "required": false
+    },
+    "sampleCount": {
+      "type": "number",
+      "required": false
+    },
+    "results": {
+      "type": "String",
+      "required": false
+    },
+    "meta": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "classLevelPermissions": {
+    "find": {
+      "*": true
+    },
+    "count": {
+      "*": true
+    },
+    "get": {
+      "*": true
+    },
+    "create": {
+      "*": true
+    },
+    "update": {
+      "*": true
+    },
+    "delete": {
+      "*": true
+    },
+    "addField": {
+      "*": true
+    },
+    "protectedFields": {
+      "*": []
+    }
+  },
+  "indexes": {
+    "_id_": {
+      "_id": 1
+    }
+  }
+}

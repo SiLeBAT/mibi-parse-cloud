@@ -12,6 +12,9 @@ import { mp151CreateClientDashboard } from './mp151-create-client-dashboard';
 import { mp156CreateZomoPlan } from './mp156-create-zomo-plan';
 import { cloud185UpdateTemplateFile } from './cloud185-update-template-file';
 import { cloud192CreateZomoPlanFile } from './cloud192-create-zomo-plan-file';
+import { mp197CreateOrder } from './mp197-create-order';
+import { mp197CreateSample } from './mp197-create-sample';
+
 export interface UpdateFunc {
     (): Promise<boolean>;
 }
@@ -33,5 +36,7 @@ export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp151CreateClientDashboard,
     mp156CreateZomoPlan,
     cloud185UpdateTemplateFile,
-    cloud192CreateZomoPlanFile
+    cloud192CreateZomoPlanFile,
+    mp197CreateOrder,
+    mp197CreateSample
 ];

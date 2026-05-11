@@ -1,7 +1,9 @@
 import './check-avv-catalog-collection-completeness';
 import './check-template-files';
+import './create-order-list';
 import './create-submission-file';
 import './parse-sample-data';
+import './save-order';
 import './set-avv-catalog-cache';
 import './set-nrl-cache';
 import './set-plz-cache';

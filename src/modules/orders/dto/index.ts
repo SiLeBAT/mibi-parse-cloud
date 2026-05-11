@@ -5,3 +5,4 @@ export {
     SampleDataEntryDTO,
     SampleSetDTO
 } from './submission.dto';
+export { OrderCollectionDTO, OrderEntryDTO } from './order-list.dto';

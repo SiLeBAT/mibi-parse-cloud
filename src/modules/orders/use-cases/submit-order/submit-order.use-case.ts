@@ -1,62 +1,28 @@
 import { EntityId } from '../../../shared/domain/valueObjects';
 import { UseCase } from '../../../shared/use-cases';
-import {
-    AnnotatedSampleDataEntry,
-    Order,
-    SampleEntry,
-    SampleSet
-} from '../../domain';
+import { AnnotatedSampleDataEntry, Order, SampleEntry } from '../../domain';
+import { OrderDTO } from '../../dto';
 import { antiCorruptionLayers } from '../../legacy';
 import { createSubmitter } from '../create-submitter';
-import { validateOrder } from '../validate-order';
-import {
-    AutoCorrectedInputError,
-    InvalidInputError
-} from './submit-order.error';
 
 type SubmitOrderInput = {
     order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>;
+    savedOrder: OrderDTO;
     submitterId: EntityId;
 };
 export class SubmitOrderUseCase
-    implements UseCase<SubmitOrderInput, Promise<SampleSet>>
+    implements UseCase<SubmitOrderInput, Promise<void>>
 {
     constructor() {}
 
-    async execute({
-        order,
-        submitterId
-    }: SubmitOrderInput): Promise<SampleSet> {
-        const sampleSet = SampleSet.create({
-            data: order.sampleEntryCollection
-        });
-
-        const validatedSubmission = await validateOrder.execute({
-            submitterId,
-            sampleSet
-        });
-
-        if (validatedSubmission.hasErrors()) {
-            throw new InvalidInputError(
-                'Input validation failed',
-                new Error('Input validation failed')
-            );
-        }
-
-        if (validatedSubmission.hasAutoCorrections()) {
-            throw new AutoCorrectedInputError(
-                'Has been auto-corrected',
-                new Error('Has been auto-corrected')
-            );
-        }
+    async execute({ order, submitterId }: SubmitOrderInput): Promise<void> {
         const { submissionAntiCorruptionLayer } = await antiCorruptionLayers;
         const submissionACLayer = await submissionAntiCorruptionLayer;
         const submitter = await createSubmitter.execute({
             submitterId: submitterId
         });
-        await submissionACLayer.sendSamples(order, submitter);
 
-        return validatedSubmission;
+        await submissionACLayer.sendSamples(order, submitter);
     }
 }
 
