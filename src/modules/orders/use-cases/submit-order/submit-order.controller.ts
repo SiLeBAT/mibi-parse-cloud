@@ -5,16 +5,20 @@ import {
     AnnotatedSampleDataEntry,
     Order,
     SampleEntry,
-    SampleEntryTuple
+    SampleEntryTuple,
+    SampleSet
 } from '../../domain';
 import { SERVER_ERROR_CODE } from '../../domain/enums';
 import { OrderDTO, SampleDTO } from '../../dto';
 import { SampleEntryDTOMapper } from '../../mappers';
 import { OrderDTOMapper } from '../../mappers/order-dto.mapper';
 import { createSubmitterId } from '../create-submitter-id';
+import { OrderSavingError, saveOrder } from '../save-order';
+import { validateOrder } from '../validate-order';
 import {
     AutoCorrectedInputError,
-    InvalidInputError
+    InvalidInputError,
+    OrderSubmissionError
 } from './submit-order.error';
 import { submitOrderUseCase } from './submit-order.use-case';
 
@@ -46,6 +50,14 @@ export interface AutoCorrectedInputErrorDTO extends DefaultServerErrorDTO {
     order: OrderDTO;
 }
 
+export interface OrderSavingErrorDTO extends DefaultServerErrorDTO {
+    order: OrderDTO;
+}
+
+export interface OrderSubmissionErrorDTO extends DefaultServerErrorDTO {
+    order: OrderDTO;
+}
+
 const submitOrderController = async (
     request: SubmitOrderRequest
 ): Promise<SubmitOrderResponseDTO | ErrorDTO> => {
@@ -71,28 +83,60 @@ const submitOrderController = async (
                 }
             );
 
-        const validatedSubmission = await submitOrderUseCase.execute({
-            order,
-            submitterId
+        // Step 1: Validate the order.
+        const sampleSet = SampleSet.create({
+            data: order.sampleEntryCollection
+        });
+        const validatedSampleSet = await validateOrder.execute({
+            submitterId,
+            sampleSet
         });
 
-        const result = {
-            order: {
-                sampleSet: {
-                    samples: validatedSubmission.data.map(
-                        (sampleEntry: SampleEntry<SampleEntryTuple>) => {
-                            return SampleEntryDTOMapper.toDTO(
-                                sampleEntry,
-                                t => t
-                            );
-                        }
-                    ),
-                    meta: requestDTO.order.sampleSet.meta
-                }
+        if (validatedSampleSet.hasErrors()) {
+            throw new InvalidInputError(
+                'Input validation failed',
+                new Error('Input validation failed')
+            );
+        }
+        if (validatedSampleSet.hasAutoCorrections()) {
+            throw new AutoCorrectedInputError(
+                'Has been auto-corrected',
+                new Error('Has been auto-corrected')
+            );
+        }
+
+        const validatedOrderDTO: OrderDTO = {
+            sampleSet: {
+                samples: validatedSampleSet.data.map(
+                    (sampleEntry: SampleEntry<SampleEntryTuple>) =>
+                        SampleEntryDTOMapper.toDTO(sampleEntry, t => t)
+                ),
+                meta: requestDTO.order.sampleSet.meta
             }
         };
 
-        return result;
+        // Step 2: Save the order — throws OrderSavingError on failure (internal rollback already done).
+        const savedOrderDTO = await saveOrder.execute({
+            order: validatedOrderDTO,
+            userId: submitterId
+        });
+
+        // Step 3: Submit the order — on failure, roll back the save to keep the two steps transactional.
+        try {
+            await submitOrderUseCase.execute({
+                order,
+                savedOrder: savedOrderDTO,
+                submitterId
+            });
+        } catch (submitError) {
+            await saveOrder.rollback(savedOrderDTO);
+            throw new OrderSubmissionError(
+                'Order was saved but submission failed; the saved order and samples have been rolled back.',
+                submitError
+            );
+        }
+
+        return { order: savedOrderDTO };
     } catch (error) {
         if (error instanceof InvalidInputError) {
             const errorDTO: InvalidInputErrorDTO = {
@@ -108,6 +152,22 @@ const submitOrderController = async (
                 order: requestDTO.order
             };
             return errorDTO;
+        } else if (error instanceof OrderSavingError) {
+            const dto: OrderSavingErrorDTO = {
+                code: SERVER_ERROR_CODE.ORDER_SAVING_FAILED,
+                message:
+                    'The order was validated successfully but could not be saved to the database. Please try again.',
+                order: requestDTO.order
+            };
+            return dto;
+        } else if (error instanceof OrderSubmissionError) {
+            const dto: OrderSubmissionErrorDTO = {
+                code: SERVER_ERROR_CODE.ORDER_SUBMISSION_FAILED,
+                message:
+                    'The order was saved successfully but the submission step failed. The saved order has been rolled back. Please try again.',
+                order: requestDTO.order
+            };
+            return dto;
         } else {
             const dto: DefaultServerErrorDTO = {
                 code: SERVER_ERROR_CODE.UNKNOWN_ERROR,

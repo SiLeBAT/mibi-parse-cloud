@@ -82,6 +82,7 @@ interface SampleMetaDTO {
 export interface SampleDTO {
     sampleData: SampleDataDTO;
     sampleMeta: SampleMetaDTO;
+    objectId?: string;
 }
 
 export interface SampleSetDTO {
@@ -91,6 +92,7 @@ export interface SampleSetDTO {
 
 export interface OrderDTO {
     sampleSet: SampleSetDTO;
+    objectId?: string;
 }
 
 export interface OrderContainerDTO {

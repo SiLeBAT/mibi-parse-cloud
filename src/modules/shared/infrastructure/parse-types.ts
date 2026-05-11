@@ -9,7 +9,9 @@ export const ObjectKeys = {
     AnalysisProcedure: 'Analysis_Procedure',
     SearchAlias: 'Search_Alias',
     ZomoPlan: 'Zomo_Plan',
-    ZomoPlanFile: 'Zomo_Plan_File'
+    ZomoPlanFile: 'Zomo_Plan_File',
+    Order: 'Order',
+    Sample: 'Sample'
 };
 
 export interface AVVCatalogAttributes extends Parse.Attributes {
@@ -119,3 +121,24 @@ export interface TemplateFileAttributes extends Parse.Attributes {
 
 export interface TemplateFileObject
     extends Parse.Object<TemplateFileAttributes> {}
+
+export interface OrderAttributes extends Parse.Attributes {
+    user: Parse.User;
+    fileName?: string;
+    pathogens?: string[];
+    nrls?: string[];
+    sampleCount?: number;
+    results?: string;
+    meta?: string;
+}
+
+export interface OrderObject extends Parse.Object<OrderAttributes> {}
+
+export interface SampleAttributes extends Parse.Attributes {
+    order: OrderObject;
+    sampleData?: string;
+    sampleMeta?: string;
+    position: number;
+}
+
+export interface SampleObject extends Parse.Object<SampleAttributes> {}
