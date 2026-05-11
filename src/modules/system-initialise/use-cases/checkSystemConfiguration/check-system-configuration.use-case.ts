@@ -16,7 +16,7 @@ class CheckSystemConfigurationUseCase implements UseCase<null, null> {
             this.checkValue('jobRecipient', jobRecipient);
             this.checkValue('supportContact', supportContact);
             this.checkValue('excelVersion', excelVersion);
-        } catch (error) {
+        } catch (_error) {
             logger.error(
                 'Serious error: Unable to retrieve Parse Configuration'
             );

@@ -363,9 +363,7 @@ export const pdfConstants: PDFConstants = {
 };
 export interface SampleSheetConstants {
     readonly config: SampleSheetConfig;
-    // eslint-disable-next-line @typescript-eslint/ban-types
     readonly defaultStyle: {};
-    // eslint-disable-next-line @typescript-eslint/ban-types
     readonly styles: {};
     readonly metaStrings: SampleSheetMetaStrings;
     readonly samplesStrings: SampleSheetSamplesStrings;

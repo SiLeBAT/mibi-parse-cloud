@@ -40,7 +40,7 @@ class CheckCollectionsForContentUseCase implements UseCase<null, null> {
                 const repo = this.createTemporaryRepository(r);
                 await this.checkRepository(repo, r);
             });
-        } catch (error) {
+        } catch (_error) {
             logger.error(
                 'Serious error: Unable to check Collections for content'
             );

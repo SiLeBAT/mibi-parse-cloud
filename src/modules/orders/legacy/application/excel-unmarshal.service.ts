@@ -368,7 +368,7 @@ export class ExcelUnmarshalService {
                 return date;
             }
             return parsedMoment.format('DD.MM.YYYY');
-        } catch (e) {
+        } catch (_e) {
             return date;
         }
     }

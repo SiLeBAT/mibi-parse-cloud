@@ -24,7 +24,7 @@ export class CreateValidationOptionsUseCase
                     submitterId
                 });
                 options.state = submitter.getStateAbbreviation();
-            } catch (error) {
+            } catch (_error) {
                 console.error(
                     `Unable to retrieve user information for user: ${submitterId.value}. Ignoring state information.`
                 );

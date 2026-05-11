@@ -12,7 +12,7 @@ export async function createSchema(
             `System Update: Schema for ${schemaName} already exists. Skipping creation`
         );
         return true;
-    } catch (error) {
+    } catch (_error) {
         logger.verbose(
             `System Update: Schema for ${schemaName} does not exist.  Will create it.`
         );

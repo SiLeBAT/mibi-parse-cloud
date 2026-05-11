@@ -334,7 +334,7 @@ export class JSONMarshalService {
                     const rng = sheet.range(startCell + ':' + endCell);
                     rng.style({ fill: 'ffffff' });
                     this.highlightEdits(sheet, highlights, startCol, startRow);
-                } catch (e) {
+                } catch (_e) {
                     throw new Error('Unable to apply styling to Excel');
                 }
             }

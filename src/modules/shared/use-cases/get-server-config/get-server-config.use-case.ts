@@ -11,7 +11,7 @@ export class GetServerConfigUseCase implements UseCase<null, ServerConfig> {
         let config = await Parse.Config.current();
         try {
             config = await Parse.Config.get({ useMasterKey: true });
-        } catch (error) {
+        } catch (_error) {
             this.logger.warn(
                 'Unable to retrieve Config: Using cached version.'
             );

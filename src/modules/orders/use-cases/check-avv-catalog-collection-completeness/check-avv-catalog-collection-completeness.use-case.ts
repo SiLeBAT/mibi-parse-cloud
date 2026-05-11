@@ -39,7 +39,7 @@ class CheckAVVCollectionCompletenessUseCase implements UseCase<null, null> {
                     )} not found in Database.`
                 );
             }
-        } catch (error) {
+        } catch (_error) {
             logger.error(
                 'Serious error: Unable to check AVV Collections for completeness'
             );

@@ -18,7 +18,7 @@ class CheckTemplateFilesUseCase implements UseCase<null, null> {
             if (!this.hasCorrectEntries(files)) {
                 logger.error('Incorrect entries in Template File Collection');
             }
-        } catch (error) {
+        } catch (_error) {
             logger.error(
                 'Serious error: Unable to check Template File Collection for content'
             );
