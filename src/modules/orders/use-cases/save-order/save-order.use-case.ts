@@ -37,7 +37,7 @@ export class SaveOrderUseCase
             )
         ];
 
-        const results = '0/0';
+        const results = `0/${samples.length}`;
 
         const orderAttrs = OrderPersistenceMapper.toPersistence(order, userId, {
             pathogens,
