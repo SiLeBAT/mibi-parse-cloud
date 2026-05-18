@@ -6,3 +6,4 @@ export { SamplePersistenceMapper } from './sample-persistence.mapper';
 export { SubmitterPersistenceMapper } from './submitter-persistence.mapper';
 export { NRLPersistenceMapper } from './nrl-persistence.mapper';
 export { ZomoPlanPersistenceMapper } from './zomo-plan-persistence.mapper';
+export { AttachSavedIdsMapper } from './attach-saved-ids.mapper';

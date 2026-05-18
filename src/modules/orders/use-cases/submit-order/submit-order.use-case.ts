@@ -1,13 +1,11 @@
 import { EntityId } from '../../../shared/domain/valueObjects';
 import { UseCase } from '../../../shared/use-cases';
 import { AnnotatedSampleDataEntry, Order, SampleEntry } from '../../domain';
-import { OrderDTO } from '../../dto';
 import { antiCorruptionLayers } from '../../legacy';
 import { createSubmitter } from '../create-submitter';
 
 type SubmitOrderInput = {
     order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>;
-    savedOrder: OrderDTO;
     submitterId: EntityId;
 };
 export class SubmitOrderUseCase

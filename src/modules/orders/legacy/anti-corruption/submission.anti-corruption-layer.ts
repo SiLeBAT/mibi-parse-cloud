@@ -136,7 +136,8 @@ export class SubmissionAntiCorruptionLayer {
                                 entry.data.urgency
                             ),
                             analysis: entry.data.analysis
-                        }
+                        },
+                        entry.id.value
                     );
                 }),
                 meta: {

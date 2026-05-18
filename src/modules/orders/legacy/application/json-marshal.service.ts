@@ -29,6 +29,7 @@ import {
     META_SENDER_ZIP_CITY_CELL,
     META_SIGNATURE_DATE_CELL,
     META_URGENCY_CELL,
+    NRL_SAMPLE_OBJECT_ID_COLUMN,
     SampleSheet,
     SampleSheetAnalysisOption,
     SampleSheetConstants,
@@ -87,6 +88,13 @@ export class JSONMarshalService {
             highlights,
             nrlSampleSheet
         );
+
+        if (nrlSampleSheet) {
+            workbook = this.addSampleObjectIdsToWorkbook(
+                workbook,
+                sampleSheet.samples
+            );
+        }
 
         workbook = this.addMetaDataToWorkbook(workbook, sampleSheet.meta);
 
@@ -288,6 +296,29 @@ export class JSONMarshalService {
             default:
                 return 'NORMAL';
         }
+    }
+
+    private addSampleObjectIdsToWorkbook(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        workbook: any,
+        samples: Sample[]
+    ) {
+        const searchTerm = 'Ihre Probe-';
+        const sheet = workbook.sheet(VALID_SHEET_NAME);
+        if (!sheet) {
+            return workbook;
+        }
+        const result = sheet.find(searchTerm);
+        if (result.length === 0) {
+            return workbook;
+        }
+        const startRow = result[0].row().rowNumber() + 1;
+        samples.forEach((sample, index) => {
+            sheet
+                .cell(`${NRL_SAMPLE_OBJECT_ID_COLUMN}${startRow + index}`)
+                .value(sample.getObjectId());
+        });
+        return workbook;
     }
 
     private addValidatedDataToWorkbook(

@@ -18,19 +18,28 @@ import {
 } from '../model/legacy.model';
 
 export class Sample {
-    static create(data: SampleData, meta: SampleMetaData): Sample {
+    static create(
+        data: SampleData,
+        meta: SampleMetaData,
+        objectId: string = ''
+    ): Sample {
         const cleanedData = _.cloneDeep(data);
         _.forEach(cleanedData, (v, k) => {
             cleanedData[k].value = ('' + v.value).trim();
         });
 
-        return new Sample(cleanedData, meta);
+        return new Sample(cleanedData, meta, objectId);
     }
 
     private constructor(
         private _data: SampleData,
-        private _meta: SampleMetaData
+        private _meta: SampleMetaData,
+        private _objectId: string = ''
     ) {}
+
+    getObjectId(): string {
+        return this._objectId;
+    }
 
     getDataEntries(): SampleDataEntries {
         const entriesOnly: SampleDataEntries = {};
@@ -258,6 +267,6 @@ export class Sample {
     clone(): Sample {
         const d = _.cloneDeep(this._data);
         const m = _.cloneDeep(this._meta);
-        return new Sample(d, m);
+        return new Sample(d, m, this._objectId);
     }
 }

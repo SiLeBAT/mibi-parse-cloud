@@ -10,7 +10,7 @@ import {
 } from '../../domain';
 import { SERVER_ERROR_CODE } from '../../domain/enums';
 import { OrderDTO, SampleDTO } from '../../dto';
-import { SampleEntryDTOMapper } from '../../mappers';
+import { AttachSavedIdsMapper, SampleEntryDTOMapper } from '../../mappers';
 import { OrderDTOMapper } from '../../mappers/order-dto.mapper';
 import { createSubmitterId } from '../create-submitter-id';
 import { OrderSavingError, saveOrder } from '../save-order';
@@ -122,10 +122,10 @@ const submitOrderController = async (
         });
 
         // Step 3: Submit the order — on failure, roll back the save to keep the two steps transactional.
+        const enrichedOrder = AttachSavedIdsMapper.attach(order, savedOrderDTO);
         try {
             await submitOrderUseCase.execute({
-                order,
-                savedOrder: savedOrderDTO,
+                order: enrichedOrder,
                 submitterId
             });
         } catch (submitError) {
