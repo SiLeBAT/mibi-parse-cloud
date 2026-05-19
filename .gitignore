@@ -10,6 +10,11 @@
 # dependencies
 /node_modules
 
+# AI
+.claude/
+AGENTS.md
+CLAUDE.md
+
 # IDEs and editors
 /.idea
 .project
@@ -44,6 +49,7 @@ config/*
 # System Files
 .DS_Store
 Thumbs.db
+.gitnexus
 
 # app
 /config/*
