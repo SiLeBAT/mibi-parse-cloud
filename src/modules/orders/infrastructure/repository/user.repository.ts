@@ -5,7 +5,7 @@ export class UserRepository {
     async getIdForEmail(email: Email): Promise<EntityId> {
         const query = new Parse.Query<User>(Parse.User);
 
-        query.matches('email', RegExp(email.value), 'i');
+        query.equalTo('email', email.value);
         const userObject = await query.first({
             useMasterKey: true
         });

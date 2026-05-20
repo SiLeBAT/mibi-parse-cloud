@@ -24,6 +24,11 @@ type UserInfo = {
 export const beforeSaveUserHook = async (
     request: BeforeSaveUserHookRequest
 ) => {
+    // Keycloak-materialized _User rows carry a keycloakSub; the legacy
+    // registration hook would otherwise strip materialize()'s fields.
+    if (request.object.get('keycloakSub')) {
+        return;
+    }
     try {
         setLoggingContext(request.log);
         const registrationDetails = request.object;
@@ -44,15 +49,15 @@ export const beforeSaveUserHook = async (
 };
 
 export const afterSaveUserHook = async (request: AfterSaveUserHookRequest) => {
+    // Keycloak-materialized saves leave request.context undefined (beforeSave sentinel
+    // skipped the legacy staging). materialize() owns User_Info creation in that path.
+    if (!request.context) {
+        return;
+    }
     try {
         setLoggingContext(request.log);
         const userInfo = request.context as UserInfo;
-        if (
-            userInfo &&
-            userInfo.instituteId &&
-            userInfo.firstName &&
-            userInfo.lastName
-        ) {
+        if (userInfo.instituteId && userInfo.firstName && userInfo.lastName) {
             saveUserInfo(userInfo, request.object);
         } else {
             getLogger().warn(

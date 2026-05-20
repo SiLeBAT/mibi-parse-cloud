@@ -363,8 +363,8 @@ export const pdfConstants: PDFConstants = {
 };
 export interface SampleSheetConstants {
     readonly config: SampleSheetConfig;
-    readonly defaultStyle: {};
-    readonly styles: {};
+    readonly defaultStyle: Record<string, unknown>;
+    readonly styles: Record<string, unknown>;
     readonly metaStrings: SampleSheetMetaStrings;
     readonly samplesStrings: SampleSheetSamplesStrings;
     readonly nrlStrings: SampleSheetNRLStrings;
