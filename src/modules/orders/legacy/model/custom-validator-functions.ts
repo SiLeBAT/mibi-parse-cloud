@@ -572,7 +572,14 @@ function createFacettenMap(facettenValues: string): Map<number, number[]> {
     facetten.forEach(facette => {
         const ids = facette.split('-');
         const facettenNameBegriffsId = convertStringToNumber(ids[0]);
-        const wertNameBegriffsIds: number[] = [];
+
+        if (facettenNameBegriffsId instanceof Error) {
+            return;
+        }
+
+        const wertNameBegriffsIds: number[] =
+            facettenMap.get(facettenNameBegriffsId) ?? [];
+
         if (ids.length > 1) {
             ids[1].split(':').forEach(wertNameBegriffsId => {
                 const id = convertStringToNumber(wertNameBegriffsId);
@@ -582,9 +589,7 @@ function createFacettenMap(facettenValues: string): Map<number, number[]> {
             });
         }
 
-        if (!(facettenNameBegriffsId instanceof Error)) {
-            facettenMap.set(facettenNameBegriffsId, wertNameBegriffsIds);
-        }
+        facettenMap.set(facettenNameBegriffsId, wertNameBegriffsIds);
     });
 
     return facettenMap;
