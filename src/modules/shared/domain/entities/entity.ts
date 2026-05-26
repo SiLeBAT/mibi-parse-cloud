@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'crypto';
 import { EntityId } from '../valueObjects/entity-id.vo';
 
 export abstract class Entity<T> {
@@ -7,7 +7,7 @@ export abstract class Entity<T> {
     protected props: T;
 
     constructor(props: T, id?: EntityId) {
-        this._id = id ? id : EntityId.create({ value: uuid() });
+        this._id = id ? id : EntityId.create({ value: randomUUID() });
         this.props = props;
     }
 
