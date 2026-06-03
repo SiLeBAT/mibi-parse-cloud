@@ -1,3 +1,4 @@
+import { escapeRegExp } from 'lodash';
 import { logger } from '../../../system/logging';
 export async function mp26CheckUserInfoLink() {
     const query_User = new Parse.Query(Parse.User);
@@ -26,7 +27,10 @@ export async function mp26CheckUserInfoLink() {
             return;
         }
 
-        queryUsers.matches('email', RegExp(userEmail), 'i');
+        queryUsers.matches(
+            'email',
+            new RegExp('^' + escapeRegExp(userEmail) + '$', 'i')
+        );
         const old_user = await queryUsers.find({ useMasterKey: true });
         if (old_user.length !== 1) {
             logger.warn(
