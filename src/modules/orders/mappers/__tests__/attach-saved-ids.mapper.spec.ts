@@ -59,8 +59,7 @@ const buildOrder = async (
         instituteName: '',
         department: '',
         street: '',
-        zip: '',
-        city: '',
+        zipCity: '',
         contactPerson: '',
         telephone: '',
         email
@@ -95,8 +94,7 @@ const buildSavedOrderDTO = (
                 sender: {
                     instituteName: '',
                     street: '',
-                    zip: '',
-                    city: '',
+                    zipCity: '',
                     contactPerson: '',
                     telephone: '',
                     email: ''

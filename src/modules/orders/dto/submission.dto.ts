@@ -4,8 +4,7 @@ interface AddressDTO {
     instituteName: string;
     department?: string;
     street: string;
-    zip: string;
-    city: string;
+    zipCity: string;
     contactPerson: string;
     telephone: string;
     email: string;
@@ -108,8 +107,7 @@ export const orderContainerDTOSchema = object({
                     instituteName: string().required(),
                     department: string(),
                     street: string().required(),
-                    zip: string().required(),
-                    city: string().required(),
+                    zipCity: string().required(),
                     contactPerson: string().required(),
                     telephone: string().required(),
                     email: string().required()
