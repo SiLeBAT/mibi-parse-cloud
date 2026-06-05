@@ -8,8 +8,7 @@ interface ContactProps extends ValueObjectProps {
     instituteName: string;
     department?: string;
     street: string;
-    zip: string;
-    city: string;
+    zipCity: string;
     contactPerson: string;
     telephone: string;
     email: Email;
@@ -38,11 +37,8 @@ export class Contact extends ValueObject<ContactProps> {
     get street(): string {
         return this.props.street;
     }
-    get zip(): string {
-        return this.props.zip;
-    }
-    get city(): string {
-        return this.props.city;
+    get zipCity(): string {
+        return this.props.zipCity;
     }
     get contactPerson(): string {
         return this.props.contactPerson;

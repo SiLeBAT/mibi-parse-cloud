@@ -18,8 +18,7 @@ describe('Order DTO Mapper ', () => {
                             instituteName: 'test',
                             department: 'test',
                             street: 'test',
-                            zip: 'test',
-                            city: 'test',
+                            zipCity: 'test',
                             contactPerson: 'test test',
                             telephone: 'test',
                             email: 'test@test.com'
@@ -115,8 +114,7 @@ describe('Order DTO Mapper ', () => {
                 'test'
             );
             expect(submission.customer.contact.props.street).toEqual('test');
-            expect(submission.customer.contact.props.zip).toEqual('test');
-            expect(submission.customer.contact.props.city).toEqual('test');
+            expect(submission.customer.contact.props.zipCity).toEqual('test');
             expect(submission.customer.contact.props.contactPerson).toEqual(
                 'test test'
             );
@@ -264,8 +262,7 @@ describe('Order DTO Mapper ', () => {
                 instituteName: 'test',
                 department: 'test',
                 street: 'test',
-                zip: 'test',
-                city: 'test',
+                zipCity: 'test',
                 contactPerson: 'test test',
                 telephone: 'test',
                 email: await Email.create({ value: 'test@test.com' })
@@ -293,8 +290,7 @@ describe('Order DTO Mapper ', () => {
                             instituteName: 'test',
                             department: 'test',
                             street: 'test',
-                            zip: 'test',
-                            city: 'test',
+                            zipCity: 'test',
                             contactPerson: 'test test',
                             telephone: 'test',
                             email: 'test@test.com'

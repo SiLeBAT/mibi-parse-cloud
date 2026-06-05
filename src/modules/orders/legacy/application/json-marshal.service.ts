@@ -223,17 +223,7 @@ export class JSONMarshalService {
                 .value(meta.sender.department);
             sheet.cell(META_SENDER_STREET_CELL).value(meta.sender.street);
 
-            let place = '';
-            const zip = meta.sender.zip;
-            const city = meta.sender.city;
-            if (zip !== '' && city !== '') {
-                place = zip + ', ' + city;
-            } else if (zip !== '') {
-                place = zip;
-            } else if (city !== '') {
-                place = city;
-            }
-            sheet.cell(META_SENDER_ZIP_CITY_CELL).value(place);
+            sheet.cell(META_SENDER_ZIP_CITY_CELL).value(meta.sender.zipCity);
 
             sheet
                 .cell(META_SENDER_CONTACTPERSON_CELL)

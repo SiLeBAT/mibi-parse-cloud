@@ -178,8 +178,7 @@ export class ExcelMarshallAntiCorruptionLayer {
                     instituteName: order.customer.contact.instituteName,
                     department: order.customer.contact.department || '',
                     street: order.customer.contact.street,
-                    zip: order.customer.contact.zip,
-                    city: order.customer.contact.city,
+                    zipCity: order.customer.contact.zipCity,
                     contactPerson: order.customer.contact.contactPerson,
                     telephone: order.customer.contact.telephone,
                     email: order.customer.contact.email.value

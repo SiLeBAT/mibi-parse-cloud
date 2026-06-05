@@ -248,16 +248,7 @@ export class PDFCreatorService {
 
     private createMetaSender(address: Address) {
         const strings = this.strings.meta.sender;
-        let place = ' ';
-        const zip = address.zip;
-        const city = address.city;
-        if (zip !== '' && city !== '') {
-            place = zip + ', ' + city;
-        } else if (zip !== '') {
-            place = zip;
-        } else if (city !== '') {
-            place = city;
-        }
+        const place = address.zipCity !== '' ? address.zipCity : ' ';
         return {
             stack: [
                 { text: strings.title, style: 'heading1' },

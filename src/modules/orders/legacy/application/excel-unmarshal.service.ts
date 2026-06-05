@@ -156,15 +156,9 @@ export class ExcelUnmarshalService {
                 workSheet[META_SENDER_DEPARTMENT_CELL]
             ),
             street: this.getStringFromCell(workSheet[META_SENDER_STREET_CELL]),
-            zip: this.getStringFromCell(workSheet[META_SENDER_ZIP_CITY_CELL])
-                .split(',')[0]
-                .trim(),
-            city: (
-                this.getStringFromCell(workSheet[META_SENDER_ZIP_CITY_CELL]) +
-                ','
-            )
-                .split(',')[1]
-                .trim(),
+            zipCity: this.getStringFromCell(
+                workSheet[META_SENDER_ZIP_CITY_CELL]
+            ).trim(),
             contactPerson: this.getStringFromCell(
                 workSheet[META_SENDER_CONTACTPERSON_CELL]
             ),
