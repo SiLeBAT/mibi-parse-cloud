@@ -81,7 +81,6 @@ export class JSONMarshalService {
         );
 
         let workbook = await this.fromFileToWorkbook(buffer);
-
         workbook = this.addValidatedDataToWorkbook(
             workbook,
             dataToSave,
@@ -354,7 +353,13 @@ export class JSONMarshalService {
                         endCol + (startRow + dataToSave.length).toString();
                     const rng = sheet.range(startCell + ':' + endCell);
                     rng.style({ fill: 'ffffff' });
-                    this.highlightEdits(sheet, highlights, startCol, startRow);
+                    this.highlightEdits(
+                        sheet,
+                        highlights,
+                        startCol,
+                        startRow,
+                        formProperties
+                    );
                 } catch (_e) {
                     throw new Error('Unable to apply styling to Excel');
                 }
@@ -379,12 +384,13 @@ export class JSONMarshalService {
         sheet: any,
         highlights: ChangedValueCollection[],
         startCol: string,
-        startRow: number
+        startRow: number,
+        formProperties: string[]
     ) {
         _.forEach(highlights, (row, index) => {
             if (!_.isEmpty(row)) {
                 _.forEach(row, (v, k) => {
-                    const col = _.findIndex(FORM_PROPERTIES, e => e === k);
+                    const col = _.findIndex(formProperties, e => e === k);
                     if (col !== -1) {
                         const changedCol = String.fromCharCode(
                             startCol.charCodeAt(0) + col
