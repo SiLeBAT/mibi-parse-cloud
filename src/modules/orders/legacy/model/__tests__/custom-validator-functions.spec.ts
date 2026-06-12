@@ -1,7 +1,13 @@
 import moment from 'moment';
 import { NRL_ID_VALUE } from '../../../../shared/domain/valueObjects';
 import { AVVCatalog, createAVVCatalog } from '../avvcatalog.entity';
-import { AVV324Data, MibiCatalogFacettenData, ZOMO_ID } from '../legacy.model';
+import {
+    AVV324Data,
+    CodeType,
+    MibiCatalogFacettenData,
+    ZOMO_ID,
+    ZomoData
+} from '../legacy.model';
 import {
     atLeastOneOf,
     dateAllowEmpty,
@@ -1393,5 +1399,682 @@ describe('matchesZoMo', () => {
             } as any
         );
         expect(result).toBeNull();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// matchesZoMo — full ZomoPlan paths (BASIC + PATHOGEN code types)
+// ---------------------------------------------------------------------------
+
+describe('matchesZoMo (with ZomoPlan data)', () => {
+    const MOCK_ZOMO_PLAN: ZomoData[] = [
+        {
+            '303': [{ 'my-program': {} }],
+            '316': [{ 'my-matrix': {} }],
+            '319': [{ 'my-animal': {} }],
+            '324': ['Salmonella.*'],
+            '328': [{}],
+            '339': [{}]
+        }
+    ];
+
+    it('returns error when program is not found in the ZomoPlan', () => {
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            'my-animal',
+            {
+                ...BASE_OPTIONS,
+                date: 'sampling_date',
+                zomoKey: '319',
+                codeType: CodeType.BASIC,
+                programField: { attr: 'program_avv', zomoKey: '303' }
+            } as any,
+            'animal_avv',
+            {
+                animal_avv: 'my-animal',
+                sampling_date: '01.01.2023',
+                program_avv: 'unknown-program'
+            } as any
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('returns null when program found and BASIC code matches ZomoPlan entry', () => {
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            'my-animal',
+            {
+                ...BASE_OPTIONS,
+                date: 'sampling_date',
+                zomoKey: '319',
+                codeType: CodeType.BASIC,
+                programField: { attr: 'program_avv', zomoKey: '303' }
+            } as any,
+            'animal_avv',
+            {
+                animal_avv: 'my-animal',
+                sampling_date: '01.01.2023',
+                program_avv: 'my-program'
+            } as any
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error when program found but BASIC code does not match', () => {
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            'unknown-animal',
+            {
+                ...BASE_OPTIONS,
+                date: 'sampling_date',
+                zomoKey: '319',
+                codeType: CodeType.BASIC,
+                programField: { attr: 'program_avv', zomoKey: '303' }
+            } as any,
+            'animal_avv',
+            {
+                animal_avv: 'unknown-animal',
+                sampling_date: '01.01.2023',
+                program_avv: 'my-program'
+            } as any
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('returns null when PATHOGEN pattern matches the value', () => {
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            'Salmonella spp.',
+            {
+                ...BASE_OPTIONS,
+                date: 'sampling_date',
+                zomoKey: '324',
+                codeType: CodeType.PATHOGEN,
+                programField: { attr: 'program_avv', zomoKey: '303' }
+            } as any,
+            'pathogen_avv',
+            {
+                pathogen_avv: 'Salmonella spp.',
+                sampling_date: '01.01.2023',
+                program_avv: 'my-program'
+            } as any
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error when PATHOGEN pattern does not match the value', () => {
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            'Unknown pathogen',
+            {
+                ...BASE_OPTIONS,
+                date: 'sampling_date',
+                zomoKey: '324',
+                codeType: CodeType.PATHOGEN,
+                programField: { attr: 'program_avv', zomoKey: '303' }
+            } as any,
+            'pathogen_avv',
+            {
+                pathogen_avv: 'Unknown pathogen',
+                sampling_date: '01.01.2023',
+                program_avv: 'my-program'
+            } as any
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// matchesProgramZoMo — full ZomoPlan paths
+// ---------------------------------------------------------------------------
+
+describe('matchesProgramZoMo (with ZomoPlan data)', () => {
+    const MOCK_ZOMO_PLAN: ZomoData[] = [
+        {
+            '303': [{ 'my-program': {} }],
+            '316': [{}],
+            '319': [{}],
+            '324': [],
+            '328': [{}],
+            '339': [{}]
+        }
+    ];
+    const ZOMO_ATTRS = {
+        control_program_avv: ZOMO_ID.code,
+        program_reason_text: '',
+        sampling_date: '01.01.2023',
+        program_avv: 'my-program'
+    };
+
+    it('returns null when program is found in ZomoPlan', () => {
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
+        const validator = matchesProgramZoMo(svc as any);
+        const result = validator(
+            'my-program',
+            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '303' } as any,
+            'program_avv',
+            ZOMO_ATTRS as any
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error when program is NOT found in ZomoPlan', () => {
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
+        const validator = matchesProgramZoMo(svc as any);
+        const result = validator(
+            'unknown-program',
+            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '303' } as any,
+            'program_avv',
+            { ...ZOMO_ATTRS, program_avv: 'unknown-program' } as any
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// referenceDate — latest option and additional paths
+// ---------------------------------------------------------------------------
+
+describe('referenceDate (latest option)', () => {
+    it('returns null when value is on or before the latest reference', () => {
+        const result = referenceDate(
+            '01-03-2024',
+            { ...BASE_OPTIONS, latest: 'sampling_date' },
+            'isolation_date',
+            { sampling_date: '15-03-2024' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error when value is after the latest reference', () => {
+        const result = referenceDate(
+            '20-03-2024',
+            { ...BASE_OPTIONS, latest: 'sampling_date' },
+            'isolation_date',
+            { sampling_date: '15-03-2024' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('applies modifier when provided with latest option', () => {
+        // reference = 01-03-2024 + 1 year = 01-03-2025; value 15-06-2024 < 01-03-2025 → null
+        const result = referenceDate(
+            '15-06-2024',
+            {
+                ...BASE_OPTIONS,
+                latest: 'sampling_date',
+                modifier: { value: 1, unit: 'year' }
+            },
+            'isolation_date',
+            { sampling_date: '01-03-2024' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('uses a static date string as reference when key is not in attributes and not NOW', () => {
+        // earliest = '01-03-2024' literal; value '15-03-2024' >= '01-03-2024' → null
+        const result = referenceDate(
+            '15-03-2024',
+            { ...BASE_OPTIONS, earliest: '01-03-2024' },
+            'some_date',
+            {}
+        );
+        expect(result).toBeNull();
+    });
+
+    it('throws when neither earliest nor latest is provided', () => {
+        expect(() =>
+            referenceDate('01-03-2024', BASE_OPTIONS, 'some_field' as any, {})
+        ).toThrow();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// isHierarchyCode — Basiseintrag=false
+// ---------------------------------------------------------------------------
+
+describe('isHierarchyCode (non-base entry)', () => {
+    function makeCatalogWithNonBaseEntry(): MibiCatalogFacettenData {
+        return {
+            version: '1',
+            gueltigAb: '2023-01-01',
+            katalogNummer: '316',
+            katalogName: 'Facetten',
+            facettenErlaubt: true,
+            eintraege: {
+                '100|200|': {
+                    Text: 'Basiseintrag',
+                    Basiseintrag: true,
+                    FacettenIds: [],
+                    Facettenzuordnungen: []
+                },
+                '200|300|': {
+                    Text: 'Untereintrag',
+                    Basiseintrag: false,
+                    FacettenIds: [],
+                    Facettenzuordnungen: []
+                }
+            },
+            facetten: {}
+        };
+    }
+
+    it('returns error for Basiseintrag=false entry without facetten values', () => {
+        const cat = createAVVCatalog(makeCatalogWithNonBaseEntry());
+        const svc = makeMockCatalogService(cat);
+        const validator = isHierarchyCode(svc as any);
+        const result = validator(
+            '200|300|',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: '200|300|', sampling_date: '' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('returns null for Basiseintrag=false entry when facetten values ARE present', () => {
+        const cat = createAVVCatalog(makeCatalogWithNonBaseEntry());
+        const svc = makeMockCatalogService(cat);
+        const validator = isHierarchyCode(svc as any);
+        const result = validator(
+            '200|300|10-20',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: '200|300|10-20', sampling_date: '' }
+        );
+        expect(result).toBeNull();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// multipleFacettenAllowed — additional paths
+// ---------------------------------------------------------------------------
+
+describe('multipleFacettenAllowed (additional paths)', () => {
+    function makeCatalogWithNonBaseEntry(): MibiCatalogFacettenData {
+        return {
+            version: '1',
+            gueltigAb: '2023-01-01',
+            katalogNummer: '316',
+            katalogName: 'Facetten',
+            facettenErlaubt: true,
+            eintraege: {
+                '100|200|': {
+                    Text: 'Basiseintrag',
+                    Basiseintrag: true,
+                    FacettenIds: [1],
+                    Facettenzuordnungen: []
+                },
+                '200|300|': {
+                    Text: 'Untereintrag',
+                    Basiseintrag: false,
+                    FacettenIds: [],
+                    Facettenzuordnungen: []
+                }
+            },
+            facetten: {
+                '10': {
+                    FacettenId: 1,
+                    MehrfachAuswahl: false,
+                    Text: 'Tierart',
+                    FacettenWerte: {
+                        '20': { Text: 'Rind' },
+                        '21': { Text: 'Schwein' }
+                    }
+                }
+            }
+        };
+    }
+
+    it('returns null when AVV code is not present in the catalog', () => {
+        const facettenCat = createAVVCatalog(makeFacettenCatalogData());
+        const svc = makeMockCatalogService(facettenCat);
+        const validator = multipleFacettenAllowed(svc as any);
+        const result = validator(
+            '999|888|10-20',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: '999|888|10-20', sampling_date: '' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns null when entry is Basiseintrag=false (hierarchy code, facetten check skipped)', () => {
+        const cat = createAVVCatalog(makeCatalogWithNonBaseEntry());
+        const svc = makeMockCatalogService(cat);
+        const validator = multipleFacettenAllowed(svc as any);
+        const result = validator(
+            '200|300|10-20',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: '200|300|10-20', sampling_date: '' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns null when MehrfachAuswahl=false but only one facetten value is provided', () => {
+        const facettenCat = createAVVCatalog(makeFacettenCatalogData());
+        const svc = makeMockCatalogService(facettenCat);
+        const validator = multipleFacettenAllowed(svc as any);
+        const result = validator(
+            '100|200|10-20',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: '100|200|10-20', sampling_date: '' }
+        );
+        expect(result).toBeNull();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// inAVVFacettenCatalog — hasFacettenInfo=false path
+// ---------------------------------------------------------------------------
+
+describe('inAVVFacettenCatalog (hasFacettenInfo=false)', () => {
+    it('returns error when code is not a basic code and fails the facetten format', () => {
+        const facettenCat = createAVVCatalog(makeFacettenCatalogData());
+        const svc = makeMockCatalogService(facettenCat);
+        const validator = inAVVFacettenCatalog(svc as any);
+        // 'abc|def|' is not a basic code (non-numeric) and fails facettenCodeRegex
+        const result = validator(
+            'abc|def|',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: 'abc|def|', sampling_date: '' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('returns error for a basic AVV code not found in the facetten catalog', () => {
+        const facettenCat = createAVVCatalog(makeFacettenCatalogData());
+        const svc = makeMockCatalogService(facettenCat);
+        const validator = inAVVFacettenCatalog(svc as any);
+        const result = validator(
+            '999|888|',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: '999|888|', sampling_date: '' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// matchesIdToSpecificYear — static regex (no year placeholder)
+// ---------------------------------------------------------------------------
+
+describe('matchesIdToSpecificYear (static regex)', () => {
+    it('uses regex entry as-is when it contains no year placeholder', () => {
+        const result = matchesIdToSpecificYear(
+            'FIXED-VALUE',
+            { ...BASE_OPTIONS, regex: ['^FIXED-VALUE$'] },
+            'sample_id_avv',
+            {}
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error when value does not match a static regex', () => {
+        const result = matchesIdToSpecificYear(
+            'WRONG-VALUE',
+            { ...BASE_OPTIONS, regex: ['^FIXED-VALUE$'] },
+            'sample_id_avv',
+            {}
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// matchesZoMo — FACETTEN code type (checkFacettenCodeForZomo)
+// ---------------------------------------------------------------------------
+
+describe('matchesZoMo (FACETTEN code type)', () => {
+    function makeZomoPlanWithFacetten(facettenEntry: object): ZomoData[] {
+        return [
+            {
+                '303': [{ 'my-program': {} }],
+                '316': [facettenEntry],
+                '319': [{}],
+                '324': [],
+                '328': [{}],
+                '339': [{}]
+            }
+        ];
+    }
+
+    const FACETTEN_OPTS = {
+        ...BASE_OPTIONS,
+        date: 'sampling_date',
+        zomoKey: '316',
+        codeType: CodeType.FACETTEN,
+        programField: { attr: 'program_avv', zomoKey: '303' }
+    } as any;
+
+    function makeAttrs(matrixValue: string) {
+        return {
+            matrix_avv: matrixValue,
+            sampling_date: '01.01.2023',
+            program_avv: 'my-program'
+        } as any;
+    }
+
+    it('returns null when ZomoPlan FACETTEN entry is effectively empty', () => {
+        const zomoPlan = makeZomoPlanWithFacetten({});
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(zomoPlan) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            '100|200|',
+            FACETTEN_OPTS,
+            'matrix_avv',
+            makeAttrs('100|200|')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns null when FACETTEN entry has empty-string key and value is empty (zomoPlanHasEmptyProperty)', () => {
+        const zomoPlan = makeZomoPlanWithFacetten({ '': {} });
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(zomoPlan) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            '',
+            FACETTEN_OPTS,
+            'matrix_avv',
+            makeAttrs('')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns null when basic code is found in ZomoPlan FACETTEN entry with empty facetten object', () => {
+        const zomoPlan = makeZomoPlanWithFacetten({ '100|200|': {} });
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(zomoPlan) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            '100|200|',
+            FACETTEN_OPTS,
+            'matrix_avv',
+            makeAttrs('100|200|')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error when basic code is NOT in ZomoPlan FACETTEN entry', () => {
+        const zomoPlan = makeZomoPlanWithFacetten({ '999|888|': {} });
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(zomoPlan) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            '100|200|',
+            FACETTEN_OPTS,
+            'matrix_avv',
+            makeAttrs('100|200|')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('returns null when code with facetten satisfies AND constraint in ZomoPlan', () => {
+        // ZomoPlan: '100|200|' → { '10': { and: [20] } }
+        // value '100|200|10-20': facettenField = [['10', ['20']]]
+        // andValues = [20], numericDetails = [20] → all match → true
+        const zomoPlan = makeZomoPlanWithFacetten({
+            '100|200|': { '10': { and: [20] } }
+        });
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(zomoPlan) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            '100|200|10-20',
+            FACETTEN_OPTS,
+            'matrix_avv',
+            makeAttrs('100|200|10-20')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error when code with facetten does NOT satisfy AND constraint', () => {
+        // ZomoPlan requires facette 10 AND value 20, but we supply value 21
+        const zomoPlan = makeZomoPlanWithFacetten({
+            '100|200|': { '10': { and: [20] } }
+        });
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(zomoPlan) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            '100|200|10-21',
+            FACETTEN_OPTS,
+            'matrix_avv',
+            makeAttrs('100|200|10-21')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('returns null when code with facetten satisfies OR constraint in ZomoPlan', () => {
+        // ZomoPlan: '100|200|' → { '10': { or: [20, 21] } }
+        // value '100|200|10-20': 20 is in [20, 21] → true
+        const zomoPlan = makeZomoPlanWithFacetten({
+            '100|200|': { '10': { or: [20, 21] } }
+        });
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(zomoPlan) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            '100|200|10-20',
+            FACETTEN_OPTS,
+            'matrix_avv',
+            makeAttrs('100|200|10-20')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error when code with facetten does NOT satisfy OR constraint', () => {
+        // ZomoPlan requires facette 10 with OR [20, 21], but we supply 99
+        const zomoPlan = makeZomoPlanWithFacetten({
+            '100|200|': { '10': { or: [20, 21] } }
+        });
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(zomoPlan) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            '100|200|10-99',
+            FACETTEN_OPTS,
+            'matrix_avv',
+            makeAttrs('100|200|10-99')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('returns error when entire ZomoPlan is a single empty entry', () => {
+        // getProgramIndexForZomo([{}], ...) → isZomoPlanEntryEmpty([{}]) → returns -1
+        const svc = { getZomoPlan: jest.fn().mockReturnValue([{}]) };
+        const validator = matchesZoMo(svc as any);
+        const result = validator(
+            '100|200|',
+            FACETTEN_OPTS,
+            'matrix_avv',
+            makeAttrs('100|200|')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// hasObligatoryFacettenValues — entry with obligatory facetten
+// ---------------------------------------------------------------------------
+
+describe('hasObligatoryFacettenValues (obligatory facetten present)', () => {
+    function makeCatalogWithObligatoryFacetten(): MibiCatalogFacettenData {
+        return {
+            version: '1',
+            gueltigAb: '2023-01-01',
+            katalogNummer: '316',
+            katalogName: 'Facetten',
+            facettenErlaubt: true,
+            eintraege: {
+                '100|200|': {
+                    Text: 'Pflichtfacette',
+                    Basiseintrag: true,
+                    FacettenIds: [1],
+                    Facettenzuordnungen: [
+                        { FacettenId: 1, FacettenwertId: 10, Festgelegt: true }
+                    ]
+                }
+            },
+            facetten: {
+                '10': {
+                    FacettenId: 1,
+                    MehrfachAuswahl: false,
+                    Text: 'Tierart',
+                    FacettenWerte: { '20': { Text: 'Rind' } }
+                }
+            },
+            facettenIds: {
+                '1': {
+                    '10': { FacettenNameBegriffsId: 10, WertNameBegriffsId: 20 }
+                }
+            }
+        };
+    }
+
+    it('returns error when entry requires obligatory facetten but none are provided', () => {
+        const cat = createAVVCatalog(makeCatalogWithObligatoryFacetten());
+        const svc = makeMockCatalogService(cat);
+        const validator = hasObligatoryFacettenValues(svc as any);
+        const result = validator(
+            '100|200|',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: '100|200|', sampling_date: '' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('returns null when all obligatory facetten values are correctly provided', () => {
+        const cat = createAVVCatalog(makeCatalogWithObligatoryFacetten());
+        const svc = makeMockCatalogService(cat);
+        const validator = hasObligatoryFacettenValues(svc as any);
+        // createFacettenMap('10-20') → Map { 10 => [20] }
+        // facettenIds[1][10].WertNameBegriffsId = 20, included in [20] → valid
+        const result = validator(
+            '100|200|10-20',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: '100|200|10-20', sampling_date: '' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error when obligatory facetten value does not match required WertNameBegriffsId', () => {
+        const cat = createAVVCatalog(makeCatalogWithObligatoryFacetten());
+        const svc = makeMockCatalogService(cat);
+        const validator = hasObligatoryFacettenValues(svc as any);
+        // createFacettenMap('10-99') → Map { 10 => [99] }
+        // WertNameBegriffsId = 20, not in [99] → invalid
+        const result = validator(
+            '100|200|10-99',
+            { ...BASE_OPTIONS, catalog: 'avv316', key: 'matrix_avv' },
+            'matrix_avv',
+            { matrix_avv: '100|200|10-99', sampling_date: '' }
+        );
+        expect(result).toEqual(TEST_ERROR);
     });
 });
