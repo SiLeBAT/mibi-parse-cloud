@@ -14,7 +14,7 @@ type ZomoPlanData = {
 
 type ZomoData = {
     '303': object[];
-    '316': object[];
+    '337': object[];
     '319': object[];
     '324': string[];
     '328': object[];

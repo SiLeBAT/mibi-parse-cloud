@@ -1,0 +1,247 @@
+"Berichtsjahr","303","328","319","339","337","324"
+"2026","62722|57621|;62724|57624|;10469|57619|;20398|57599|","213057|211506|","8232|185713|;8235|184948|185085-189059",,,"[
+'^.*Salmonella.*$'
+]"
+"2026","62726|57604|","213058|211507|","189009|187134|","67211|186526|1212-67466,63421-1508:1512,1334-(1350,1352,1356,1365,1370,1373,1374,1380,68061,68062,188089,188090,188091,188092)","!21525|12304|","[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","62726|57604|","213059|211508|","189009|187134|","67211|186526|1212-67466,63421-1508:1512,1334-(1350,1352,1356,1365,1370,1373,1374,1380,68061,68062,188089,188090,188091,188092)","21525|12304|;","[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","62726|57604|","213060|211509|","60715|187287|","67211|186526|1212-67466,63421-1508:1512,1334-(1350,1352,1356,1365,1370,1373,1374,1380,68061,68062,188089,188090,188091,188092)","!21525|12304|","[
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$'
+]"
+"2026","62726|57604|","213061|211510|","60715|187287|","67211|186526|1212-67466,63421-1508:1512,1334-(1350,1352,1356,1365,1370,1373,1374,1380,68061,68062,188089,188090,188091,188092)","21525|12304|;","[
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$'
+]"
+"2026","62729|57612|;62724|57624|;!62724|57624|2-68041,63420-2295:2803,63422-10492:63515:63559,63423-10565","213062|211511|","9171|187178|185142-61004","2464|186528|1212-905,63421-1508:1512","21525|12304|;","[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Enterococcus (spp.|faecalis|faecium)$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Campy.*$',
+'^.*Salmonella.*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","62729|57612|;62724|57624|","213063|211512|","189172|187271|185142-189026","2464|186528|1212-905,63421-1508:1512","21525|12304|;","[
+'^.*Campy.*$',
+'^.*Salmonella.*$',
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$'
+]"
+"2026","62729|57612|;62724|57624|","213064|211513|","9171|187178|185142-61004","67211|186526|1212-67466,63421-1508:1512","21525|12304|;","[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Enterococcus (spp.|faecalis|faecium)$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Campy.*$',
+'^.*Salmonella.*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","62729|57612|;62724|57624|","213065|211514|","189172|187271|185142-189026","67211|186526|1212-67466,63421-1508:1512","21525|12304|;","[
+'^.*Salmonella.*$'
+]"
+"2026","62729|57612|;62724|57624|","213066|211515|","9171|187178|185142-61004","193680|192187|1334-1342;193680|192187|1334-1343",,"[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^.*Campy.*$',
+'^.*Salmonella.*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","62729|57612|;62724|57624|","213067|211516|","189002|187127|","193680|192187|1334-1342;193680|192187|1334-1343",,"[
+'^.*Yers.*$',
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$'
+]"
+"2026","66895|57601|","213068|211517|","182336|184855|6843-6906,183670-2296:184247,185085-6986;182336|184855|6843-6899,183670-2296:184247,185085-6986",,"21525|12304|;","[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Salmonella.*$',
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","66895|57601|","213069|211518|","182336|184855|6843-6906,183670-1298:2296,185085-6986;182336|184855|6843-6899,183670-1298:2296,185085-6986",,"21525|12304|;","[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Salmonella.*$',
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","10469|57619|","213070|211519|","182336|184855|6843-6872:6906,183670-2296:184247,185085-6986",,,"[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Campy.*$',
+'^.*Salmonella.*$',
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","10469|57619|","213071|211520|","182336|184855|6843-6872:6906,183670-1298:2296,185085-6986",,"!21525|12304|","[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Campy.*$',
+'^.*Salmonella.*$',
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","10469|57619|","213072|211521|","182336|184855|6843-6872:6906,183670-1298:2296,185085-6986",,"21525|12304|;","[
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Campy.*$',
+'^.*Salmonella.*$',
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","10469|57619|","213073|211522|","4688|183890|183670-4690,185085-213113;4688|183890|183670-4690,185085-213114",,"21525|12304|;","[
+'^.*(Carba|ESBL|mpC).*$',
+'^Klebsiella.*$',
+'^.*Listeria.*$',
+'^.*Salmonella.*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","10469|57619|","213074|211523|","6141|185643|6843-6899,185142-185151;6141|185643|6843-6906,185142-185151;6141|185643|6843-6872:6899,185142-182337;6141|185643|6843-6872:6906,185142-182337",,"21525|12304|;","[
+'^.*Vibrio.*$',
+'^.*(Carba|ESBL|mpC).*$',
+'^.*Escherichia marmotae*$',
+'^Escherichia coli beta-Glucuronidase-positiv$',
+'^Escherichia coli$',
+'^Klebsiella.*$',
+'^.*Listeria.*$',
+'^.*Salmonella.*$',
+'^.*Staphylococcus (spp.|aureus($|,| - Toxin)|- koagulase.*).*$',
+'^.*Escherichia albertii*$',
+'^.*Escherichia coli O.*$',
+'^.*Escherichia coli enter.*$',
+'^.*Escherichia coli.*[Tt]oxin.*$',
+'^.*STEC.*$',
+'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli mit eae - Gen$',
+'^Escherichia coli nekrotoxisch$',
+'^Verocytotoxin$'
+]"
+"2026","10469|57619|","213075|211524|","182286|185153|6843-183381:6909:6943:6906,183670-766:2296,185085-6986,185142-6691;182286|185153|6843-183381:6909:6913:6906,183670-766:2296,185085-6986,185142-6691;182258|185366|6843-183381:6900:6909:6943:6906,183670-766:2296,185142-6691;182258|185366|6843-183381:6900:6909:6913:6906,183670-766:2296,185142-6691;182258|185366|6843-183381:6900:6909:6939,183670-766:2296,185142-6691",,"21525|12304|;","[
+'^.*Listeria.*$',
+'^.*Salmonella.*$'
+]"
+"2026","10469|57619|","213076|211525|","1946|184733|183670-906,185142-6697",,"21525|12304|;","[
+'^.*(Carba|ESBL|mpC).*$',
+'^Klebsiella.*$',
+'^.*Campy.*$',
+'^.*Salmonella.*$'
+]"

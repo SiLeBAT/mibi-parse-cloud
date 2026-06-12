@@ -1290,7 +1290,7 @@ describe('matchesProgramZoMo', () => {
         const validator = matchesProgramZoMo(svc as any);
         const result = validator(
             'some-program',
-            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '303' } as any,
+            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '328' } as any,
             'program_avv',
             NON_ZOMO_ATTRS as any
         );
@@ -1308,7 +1308,7 @@ describe('matchesProgramZoMo', () => {
         };
         const result = validator(
             '',
-            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '303' } as any,
+            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '328' } as any,
             'program_avv',
             attrs as any
         );
@@ -1326,7 +1326,7 @@ describe('matchesProgramZoMo', () => {
         };
         const result = validator(
             'some-program',
-            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '303' } as any,
+            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '328' } as any,
             'program_avv',
             attrs as any
         );
@@ -1344,7 +1344,7 @@ describe('matchesProgramZoMo', () => {
         };
         const result = validator(
             'some-program',
-            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '303' } as any,
+            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '328' } as any,
             'program_avv',
             attrs as any
         );
@@ -1365,9 +1365,9 @@ describe('matchesZoMo', () => {
             {
                 ...BASE_OPTIONS,
                 date: 'sampling_date',
-                zomoKey: '303',
-                codeType: 'basic',
-                programField: { attr: 'program_avv', zomoKey: '303' }
+                zomoKey: '339',
+                codeType: 'facetten',
+                programField: { attr: 'program_avv', zomoKey: '328' }
             } as any,
             'animal_avv',
             {
@@ -1387,9 +1387,9 @@ describe('matchesZoMo', () => {
             {
                 ...BASE_OPTIONS,
                 date: 'sampling_date',
-                zomoKey: '303',
-                codeType: 'basic',
-                programField: { attr: 'program_avv', zomoKey: '303' }
+                zomoKey: '339',
+                codeType: 'facetten',
+                programField: { attr: 'program_avv', zomoKey: '328' }
             } as any,
             'animal_avv',
             {
@@ -1407,13 +1407,15 @@ describe('matchesZoMo', () => {
 // ---------------------------------------------------------------------------
 
 describe('matchesZoMo (with ZomoPlan data)', () => {
+    // 303 = operations_mode, 319 = matrix, 337 = additional_marks (basic),
+    // 339 = animal, 324 = pathogen, 328 = program.
     const MOCK_ZOMO_PLAN: ZomoData[] = [
         {
-            '303': [{ 'my-program': {} }],
-            '316': [{ 'my-matrix': {} }],
-            '319': [{ 'my-animal': {} }],
+            '303': [{}],
+            '337': [{ 'my-marks': {} }],
+            '319': [{}],
             '324': ['Salmonella.*'],
-            '328': [{}],
+            '328': [{ 'my-program': {} }],
             '339': [{}]
         }
     ];
@@ -1422,17 +1424,17 @@ describe('matchesZoMo (with ZomoPlan data)', () => {
         const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
         const validator = matchesZoMo(svc as any);
         const result = validator(
-            'my-animal',
+            'my-marks',
             {
                 ...BASE_OPTIONS,
                 date: 'sampling_date',
-                zomoKey: '319',
+                zomoKey: '337',
                 codeType: CodeType.BASIC,
-                programField: { attr: 'program_avv', zomoKey: '303' }
+                programField: { attr: 'program_avv', zomoKey: '328' }
             } as any,
-            'animal_avv',
+            'additional_marks_avv',
             {
-                animal_avv: 'my-animal',
+                additional_marks_avv: 'my-marks',
                 sampling_date: '01.01.2023',
                 program_avv: 'unknown-program'
             } as any
@@ -1444,17 +1446,17 @@ describe('matchesZoMo (with ZomoPlan data)', () => {
         const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
         const validator = matchesZoMo(svc as any);
         const result = validator(
-            'my-animal',
+            'my-marks',
             {
                 ...BASE_OPTIONS,
                 date: 'sampling_date',
-                zomoKey: '319',
+                zomoKey: '337',
                 codeType: CodeType.BASIC,
-                programField: { attr: 'program_avv', zomoKey: '303' }
+                programField: { attr: 'program_avv', zomoKey: '328' }
             } as any,
-            'animal_avv',
+            'additional_marks_avv',
             {
-                animal_avv: 'my-animal',
+                additional_marks_avv: 'my-marks',
                 sampling_date: '01.01.2023',
                 program_avv: 'my-program'
             } as any
@@ -1466,17 +1468,17 @@ describe('matchesZoMo (with ZomoPlan data)', () => {
         const svc = { getZomoPlan: jest.fn().mockReturnValue(MOCK_ZOMO_PLAN) };
         const validator = matchesZoMo(svc as any);
         const result = validator(
-            'unknown-animal',
+            'unknown-marks',
             {
                 ...BASE_OPTIONS,
                 date: 'sampling_date',
-                zomoKey: '319',
+                zomoKey: '337',
                 codeType: CodeType.BASIC,
-                programField: { attr: 'program_avv', zomoKey: '303' }
+                programField: { attr: 'program_avv', zomoKey: '328' }
             } as any,
-            'animal_avv',
+            'additional_marks_avv',
             {
-                animal_avv: 'unknown-animal',
+                additional_marks_avv: 'unknown-marks',
                 sampling_date: '01.01.2023',
                 program_avv: 'my-program'
             } as any
@@ -1494,7 +1496,7 @@ describe('matchesZoMo (with ZomoPlan data)', () => {
                 date: 'sampling_date',
                 zomoKey: '324',
                 codeType: CodeType.PATHOGEN,
-                programField: { attr: 'program_avv', zomoKey: '303' }
+                programField: { attr: 'program_avv', zomoKey: '328' }
             } as any,
             'pathogen_avv',
             {
@@ -1516,7 +1518,7 @@ describe('matchesZoMo (with ZomoPlan data)', () => {
                 date: 'sampling_date',
                 zomoKey: '324',
                 codeType: CodeType.PATHOGEN,
-                programField: { attr: 'program_avv', zomoKey: '303' }
+                programField: { attr: 'program_avv', zomoKey: '328' }
             } as any,
             'pathogen_avv',
             {
@@ -1534,13 +1536,14 @@ describe('matchesZoMo (with ZomoPlan data)', () => {
 // ---------------------------------------------------------------------------
 
 describe('matchesProgramZoMo (with ZomoPlan data)', () => {
+    // The program is catalog 328.
     const MOCK_ZOMO_PLAN: ZomoData[] = [
         {
-            '303': [{ 'my-program': {} }],
-            '316': [{}],
+            '303': [{}],
+            '337': [{}],
             '319': [{}],
             '324': [],
-            '328': [{}],
+            '328': [{ 'my-program': {} }],
             '339': [{}]
         }
     ];
@@ -1556,7 +1559,7 @@ describe('matchesProgramZoMo (with ZomoPlan data)', () => {
         const validator = matchesProgramZoMo(svc as any);
         const result = validator(
             'my-program',
-            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '303' } as any,
+            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '328' } as any,
             'program_avv',
             ZOMO_ATTRS as any
         );
@@ -1568,7 +1571,7 @@ describe('matchesProgramZoMo (with ZomoPlan data)', () => {
         const validator = matchesProgramZoMo(svc as any);
         const result = validator(
             'unknown-program',
-            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '303' } as any,
+            { ...BASE_OPTIONS, date: 'sampling_date', zomoKey: '328' } as any,
             'program_avv',
             { ...ZOMO_ATTRS, program_avv: 'unknown-program' } as any
         );
@@ -1835,14 +1838,15 @@ describe('matchesIdToSpecificYear (static regex)', () => {
 // ---------------------------------------------------------------------------
 
 describe('matchesZoMo (FACETTEN code type)', () => {
+    // matrix_avv = catalog 319 (facetten), program = catalog 328.
     function makeZomoPlanWithFacetten(facettenEntry: object): ZomoData[] {
         return [
             {
-                '303': [{ 'my-program': {} }],
-                '316': [facettenEntry],
-                '319': [{}],
+                '303': [{}],
+                '337': [{}],
+                '319': [facettenEntry],
                 '324': [],
-                '328': [{}],
+                '328': [{ 'my-program': {} }],
                 '339': [{}]
             }
         ];
@@ -1851,9 +1855,9 @@ describe('matchesZoMo (FACETTEN code type)', () => {
     const FACETTEN_OPTS = {
         ...BASE_OPTIONS,
         date: 'sampling_date',
-        zomoKey: '316',
+        zomoKey: '319',
         codeType: CodeType.FACETTEN,
-        programField: { attr: 'program_avv', zomoKey: '303' }
+        programField: { attr: 'program_avv', zomoKey: '328' }
     } as any;
 
     function makeAttrs(matrixValue: string) {
@@ -2076,5 +2080,232 @@ describe('hasObligatoryFacettenValues (obligatory facetten present)', () => {
             { matrix_avv: '100|200|10-99', sampling_date: '' }
         );
         expect(result).toEqual(TEST_ERROR);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// matchesZoMo — forbidden ("not") codes
+// ---------------------------------------------------------------------------
+
+describe('matchesZoMo (forbidden "not" codes)', () => {
+    // 337 = additional_marks (basic), 303 = operations_mode (facetten),
+    // 319 = matrix (facetten), 328 = program.
+    function makePlan(field: keyof ZomoData, entries: object[]): ZomoData[] {
+        const base: ZomoData = {
+            '303': [{}],
+            '337': [{}],
+            '319': [{}],
+            '324': [],
+            '328': [{ 'my-program': {} }],
+            '339': [{}]
+        };
+        return [{ ...base, [field]: entries }];
+    }
+
+    function makeValidator(plan: ZomoData[]) {
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(plan) };
+        return matchesZoMo(svc as any);
+    }
+
+    function basicOpts(zomoKey: keyof ZomoData) {
+        return {
+            ...BASE_OPTIONS,
+            date: 'sampling_date',
+            zomoKey,
+            codeType: CodeType.BASIC,
+            programField: { attr: 'program_avv', zomoKey: '328' }
+        } as any;
+    }
+
+    function facettenOpts(zomoKey: keyof ZomoData) {
+        return {
+            ...BASE_OPTIONS,
+            date: 'sampling_date',
+            zomoKey,
+            codeType: CodeType.FACETTEN,
+            programField: { attr: 'program_avv', zomoKey: '328' }
+        } as any;
+    }
+
+    function attrs(field: string, value: string) {
+        return {
+            [field]: value,
+            sampling_date: '01.01.2023',
+            program_avv: 'my-program'
+        } as any;
+    }
+
+    // --- BASIC (337), forbidden only: every other code allowed -------------
+
+    it('rejects a forbidden BASIC code (337) when it is the only entry', () => {
+        const plan = makePlan('337', [{ not: { '21525|12304|': {} } }]);
+        const result = makeValidator(plan)(
+            '21525|12304|',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '21525|12304|')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('allows any other BASIC code (337) when the field has only a forbidden code', () => {
+        const plan = makePlan('337', [{ not: { '21525|12304|': {} } }]);
+        const result = makeValidator(plan)(
+            '99999|88888|',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '99999|88888|')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('allows an empty value when the field has only a forbidden code', () => {
+        const plan = makePlan('337', [{ not: { '21525|12304|': {} } }]);
+        const result = makeValidator(plan)(
+            '',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '')
+        );
+        expect(result).toBeNull();
+    });
+
+    // --- BASIC (337), obligatory + forbidden -------------------------------
+
+    it('allows the obligatory BASIC code when an obligatory and a forbidden code coexist', () => {
+        const plan = makePlan('337', [
+            { '11111|22222|': {} },
+            { not: { '21525|12304|': {} } }
+        ]);
+        const result = makeValidator(plan)(
+            '11111|22222|',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '11111|22222|')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('rejects the forbidden BASIC code even when an obligatory code exists', () => {
+        const plan = makePlan('337', [
+            { '11111|22222|': {} },
+            { not: { '21525|12304|': {} } }
+        ]);
+        const result = makeValidator(plan)(
+            '21525|12304|',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '21525|12304|')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('rejects a BASIC code that is neither the obligatory nor a forbidden code', () => {
+        const plan = makePlan('337', [
+            { '11111|22222|': {} },
+            { not: { '21525|12304|': {} } }
+        ]);
+        const result = makeValidator(plan)(
+            '99999|88888|',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '99999|88888|')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    // --- FACETTEN (303), broad obligatory + specific forbidden ------------
+    // Mirrors the ticket: "62724|57624|" is obligatory (broad), but the
+    // specific detailed code is forbidden.
+
+    const FORBIDDEN_FACETTEN = {
+        '62724|57624|': {
+            '2': { and: [68041] },
+            '63420': { and: [2295, 2803] },
+            '63422': { and: [10492, 63515, 63559] },
+            '63423': { and: [10565] }
+        }
+    };
+
+    function makeMixedFacettenPlan() {
+        return makePlan('303', [
+            { '62724|57624|': {} },
+            { not: FORBIDDEN_FACETTEN }
+        ]);
+    }
+
+    it('allows the broad obligatory facetten (basic) code', () => {
+        const result = makeValidator(makeMixedFacettenPlan())(
+            '62724|57624|',
+            facettenOpts('303'),
+            'operations_mode_avv',
+            attrs('operations_mode_avv', '62724|57624|')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('rejects the exact forbidden facetten code', () => {
+        const result = makeValidator(makeMixedFacettenPlan())(
+            '62724|57624|2-68041,63420-2295:2803,63422-10492:63515:63559,63423-10565',
+            facettenOpts('303'),
+            'operations_mode_avv',
+            attrs(
+                'operations_mode_avv',
+                '62724|57624|2-68041,63420-2295:2803,63422-10492:63515:63559,63423-10565'
+            )
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('rejects the forbidden facetten code even when facetten are in a different order (semantic match)', () => {
+        const reordered =
+            '62724|57624|63420-2803:2295,2-68041,63423-10565,63422-63559:10492:63515';
+        const result = makeValidator(makeMixedFacettenPlan())(
+            reordered,
+            facettenOpts('303'),
+            'operations_mode_avv',
+            attrs('operations_mode_avv', reordered)
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('allows a more specific code that does not match the full forbidden combination', () => {
+        // Only one of the forbidden facetten ids is present, so it is not the
+        // forbidden code; it still matches the broad obligatory code.
+        const result = makeValidator(makeMixedFacettenPlan())(
+            '62724|57624|2-68041',
+            facettenOpts('303'),
+            'operations_mode_avv',
+            attrs('operations_mode_avv', '62724|57624|2-68041')
+        );
+        expect(result).toBeNull();
+    });
+
+    // --- FACETTEN (319), forbidden only -----------------------------------
+
+    it('rejects a forbidden facetten code (319) when it is the only entry', () => {
+        const plan = makePlan('319', [
+            { not: { '100|200|': { '10': { and: [20] } } } }
+        ]);
+        const result = makeValidator(plan)(
+            '100|200|10-20',
+            facettenOpts('319'),
+            'matrix_avv',
+            attrs('matrix_avv', '100|200|10-20')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('allows any other facetten code (319) when the field has only a forbidden code', () => {
+        const plan = makePlan('319', [
+            { not: { '100|200|': { '10': { and: [20] } } } }
+        ]);
+        const result = makeValidator(plan)(
+            '999|888|',
+            facettenOpts('319'),
+            'matrix_avv',
+            attrs('matrix_avv', '999|888|')
+        );
+        expect(result).toBeNull();
     });
 });

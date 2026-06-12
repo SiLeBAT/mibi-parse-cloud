@@ -18,6 +18,15 @@ type BasicCodeObj = {
     [basicCode: string]: Facetten;
 };
 
+// A forbidden code is represented as a single aggregating "not" object that
+// holds the forbidden codes parsed in the same way as obligatory codes, so a
+// facetten code keeps its nested facetten structure (basic code -> facetten).
+type ForbiddenCodeObj = {
+    not: BasicCodeObj;
+};
+
+type CodeFieldEntry = BasicCodeObj | ForbiddenCodeObj;
+
 type Facetten = {
     [facettenId: string]: FacettenDetail;
 };
@@ -41,6 +50,10 @@ export class ZomoCsvParser {
     private readonly PARENTESIS_CLOSE = ')';
     private readonly AND_SEMANTIC = 'and';
     private readonly OR_SEMANTIC = 'or';
+    private readonly FORBIDDEN_PREFIX = '!';
+    private readonly NOT_KEY = 'not';
+    private readonly CODE_REGEX_GROUP: RegExp =
+        /^(?<basicCode>\d+\|\d+\|)(?<facettenPart>.+)$/;
 
     constructor() {}
 
@@ -122,42 +135,73 @@ export class ZomoCsvParser {
 
     // Parses a field value (like from "303", "319", "328", "339", "337")
     // which is either an empty string or one or more codes separated by semicolon.
-    private parseCodeField(rowValue: string) {
-        const basicCodeRegex: RegExp = /^\d+\|\d+\|$/;
-        const codeRegexGroup: RegExp =
-            /^(?<basicCode>\d+\|\d+\|)(?<facettenPart>.+)$/;
-        const resultList: BasicCodeObj[] = [];
-
+    // A code prefixed with "!" is a forbidden code: all forbidden codes of the
+    // field are aggregated into a single trailing "not" entry. Forbidden codes
+    // are parsed like obligatory codes, so a facetten code keeps its nested
+    // facetten structure (basic code -> facetten).
+    private parseCodeField(rowValue: string): CodeFieldEntry[] {
         if (!rowValue || rowValue.trim() === '') {
             return [{}];
         }
 
         const codes = rowValue
             .split(this.ROW_VALUE_SEPARATOR)
-            .map(code => code.trim());
+            .map(code => code.trim())
+            .filter(code => code !== '');
+
+        const obligatoryEntries: BasicCodeObj[] = [];
+        const forbiddenCodes: BasicCodeObj = {};
 
         for (const code of codes) {
-            let basicCode = '';
-            let facettenPart = '';
-            if (basicCodeRegex.test(code)) {
-                basicCode = code;
-                facettenPart = '';
+            if (code.startsWith(this.FORBIDDEN_PREFIX)) {
+                const forbiddenCode = code.slice(this.FORBIDDEN_PREFIX.length);
+                Object.assign(
+                    forbiddenCodes,
+                    this.parseObligatoryCode(forbiddenCode)
+                );
+            } else {
+                obligatoryEntries.push(this.parseObligatoryCode(code));
             }
+        }
 
-            const match = code.match(codeRegexGroup);
-            if (match && match.groups) {
-                basicCode = match.groups['basicCode'];
-                facettenPart = match.groups['facettenPart'];
-            }
+        const resultList: CodeFieldEntry[] = [...obligatoryEntries];
 
-            const parsed =
-                facettenPart !== '' ? this.parseFacettenPart(facettenPart) : {};
-            const result: BasicCodeObj = {};
-            result[basicCode] = parsed;
-            resultList.push(result);
+        if (Object.keys(forbiddenCodes).length > 0) {
+            resultList.push({ [this.NOT_KEY]: forbiddenCodes });
+        }
+
+        // Could happen if the field contained only empty/whitespace codes.
+        if (resultList.length === 0) {
+            return [{}];
         }
 
         return resultList;
+    }
+
+    // Splits a single code into its basic code part and its facetten part.
+    // A pure basic code (e.g. "9171|187178|") has an empty facetten part.
+    private splitCode(code: string): {
+        basicCode: string;
+        facettenPart: string;
+    } {
+        const match = code.match(this.CODE_REGEX_GROUP);
+        if (match && match.groups) {
+            return {
+                basicCode: match.groups['basicCode'],
+                facettenPart: match.groups['facettenPart']
+            };
+        }
+
+        return { basicCode: code, facettenPart: '' };
+    }
+
+    // Turns a single obligatory code into a "{ basicCode: facetten }" object.
+    private parseObligatoryCode(code: string): BasicCodeObj {
+        const { basicCode, facettenPart } = this.splitCode(code);
+        const parsed =
+            facettenPart !== '' ? this.parseFacettenPart(facettenPart) : {};
+
+        return { [basicCode]: parsed };
     }
 
     // Parses the field "324" which is a stringified array using single quotes.
