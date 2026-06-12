@@ -29,6 +29,7 @@ import { AVVCatalog } from './avvcatalog.entity';
 
 moment.locale('de');
 const SAMPLING_DATE = 'sampling_date';
+const NOT_KEY = 'not';
 
 function nrlExists(
     value: string,
@@ -826,32 +827,79 @@ function executeMatchingCodeType(
     value: string,
     codeType: CodeType
 ) {
-    let codeCheckResult = false;
-
-    switch (codeType) {
-        case CodeType.BASIC:
-            codeCheckResult = checkBasicCodeForZomo(
-                zomoPlanEntry as Record<string, object>[],
-                value
-            );
-            break;
-        case CodeType.FACETTEN:
-            codeCheckResult = checkFacettenCodeForZomo(
-                zomoPlanEntry as Record<string, object>[],
-                value
-            );
-            break;
-        case CodeType.PATHOGEN:
-            codeCheckResult = checkPathogenForZomo(
-                zomoPlanEntry as unknown as string[],
-                value
-            );
-            break;
-        default:
-            console.log('CodeType not known');
+    // The pathogen field (324) is a list of regular expressions and never
+    // contains forbidden ("not") codes.
+    if (codeType === CodeType.PATHOGEN) {
+        return checkPathogenForZomo(
+            zomoPlanEntry as unknown as string[],
+            value
+        );
     }
 
-    return codeCheckResult;
+    const entries = zomoPlanEntry as Record<string, object>[];
+    const forbiddenEntries = entries.filter(isForbiddenEntry);
+    const obligatoryEntries = entries.filter(entry => !isForbiddenEntry(entry));
+
+    // A forbidden ("not") code in the sample fails validation, even if the
+    // sample would otherwise match an obligatory code.
+    if (matchesForbiddenCode(forbiddenEntries, value, codeType)) {
+        return false;
+    }
+
+    // Forbidden codes but no obligatory code => every other code is allowed.
+    if (forbiddenEntries.length > 0 && obligatoryEntries.length === 0) {
+        return true;
+    }
+
+    return checkObligatoryCode(obligatoryEntries, value, codeType);
+}
+
+function checkObligatoryCode(
+    obligatoryEntries: Record<string, object>[],
+    value: string,
+    codeType: CodeType
+) {
+    switch (codeType) {
+        case CodeType.BASIC:
+            return checkBasicCodeForZomo(obligatoryEntries, value);
+        case CodeType.FACETTEN:
+            return checkFacettenCodeForZomo(obligatoryEntries, value);
+        default:
+            console.log('CodeType not known');
+            return false;
+    }
+}
+
+function isForbiddenEntry(entry: Record<string, object>): boolean {
+    return NOT_KEY in entry;
+}
+
+// Each forbidden ("not") entry aggregates one or more forbidden codes in the
+// same shape as obligatory code entries. They are flattened into a list of
+// single-code entries so the existing matchers can be reused for the (order
+// independent) comparison.
+function matchesForbiddenCode(
+    forbiddenEntries: Record<string, object>[],
+    value: string,
+    codeType: CodeType
+) {
+    if (!value) {
+        return false;
+    }
+
+    const forbiddenCodeEntries = forbiddenEntries.flatMap(entry => {
+        const forbiddenCodes = entry[NOT_KEY] as Record<string, object>;
+
+        return Object.entries(forbiddenCodes).map(([code, facetten]) => ({
+            [code]: facetten
+        }));
+    });
+
+    if (forbiddenCodeEntries.length === 0) {
+        return false;
+    }
+
+    return checkObligatoryCode(forbiddenCodeEntries, value, codeType);
 }
 
 function getProgramIndexForZomo(
