@@ -17,12 +17,6 @@
     "pretty": "prettier --write \"src/**/*.ts\"",
     "prepare": "(husky -v && husky install) || echo husky not installed"
   },
-  "lint-staged": {
-    "src/**/*.ts": [
-      "npm run pretty",
-      "npm run lint"
-    ]
-  },
   "dependencies": {
     "config": "~4.4.1",
     "fast-csv": "^5.0.2",
