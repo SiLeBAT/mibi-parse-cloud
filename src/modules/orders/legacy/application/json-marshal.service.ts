@@ -322,7 +322,6 @@ export class JSONMarshalService {
         const formProperties: string[] = nrlSampleSheet
             ? [...FORM_PROPERTIES_NRL]
             : [...FORM_PROPERTIES];
-
         if (sheet) {
             const startCol = 'A';
             const endCol = this.getColumnName(
@@ -392,8 +391,8 @@ export class JSONMarshalService {
                 _.forEach(row, (v, k) => {
                     const col = _.findIndex(formProperties, e => e === k);
                     if (col !== -1) {
-                        const changedCol = String.fromCharCode(
-                            startCol.charCodeAt(0) + col
+                        const changedCol = this.getColumnName(
+                            startCol.charCodeAt(0) - 64 + col
                         );
                         sheet
                             .cell(changedCol + (startRow + index).toString())
