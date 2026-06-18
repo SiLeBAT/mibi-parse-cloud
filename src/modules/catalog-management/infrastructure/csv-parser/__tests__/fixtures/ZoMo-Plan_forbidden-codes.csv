@@ -2,7 +2,7 @@
 "2026","62722|57621|;62724|57624|;10469|57619|;20398|57599|","213057|211506|","8232|185713|;8235|184948|185085-189059",,,"[
 '^.*Salmonella.*$'
 ]"
-"2026","62726|57604|","213058|211507|","189009|187134|","67211|186526|1212-67466,63421-1508:1512,1334-(1350,1352,1356,1365,1370,1373,1374,1380,68061,68062,188089,188090,188091,188092)","!21525|12304|","[
+"2026","62726|57604|","213058|211507|","189009|187134|","67211|186526|1212-67466,63421-1508:1512,1334-(1350,1352,1356,1365,1370,1373,1374,1380,68061,68062,188089,188090,188091,188092)","!21525|12304|;21537|12168|;59143|192041|","[
 '^.*(Carba|ESBL|mpC).*$',
 '^.*Escherichia marmotae*$',
 '^Escherichia coli beta-Glucuronidase-positiv$',
@@ -13,7 +13,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -29,7 +29,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -54,7 +54,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -78,7 +78,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -98,7 +98,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -120,7 +120,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -138,7 +138,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -157,7 +157,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -176,7 +176,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -195,7 +195,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -210,7 +210,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'
@@ -230,7 +230,7 @@
 '^.*Escherichia coli enter.*$',
 '^.*Escherichia coli.*[Tt]oxin.*$',
 '^.*STEC.*$',
-'^Escherichia coli diffus adhaÌrent$',
+'^Escherichia coli diffus adhärent$',
 '^Escherichia coli mit eae - Gen$',
 '^Escherichia coli nekrotoxisch$',
 '^Verocytotoxin$'

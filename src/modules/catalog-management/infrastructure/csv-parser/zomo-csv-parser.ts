@@ -52,6 +52,8 @@ export class ZomoCsvParser {
     private readonly OR_SEMANTIC = 'or';
     private readonly FORBIDDEN_PREFIX = '!';
     private readonly NOT_KEY = 'not';
+    // Key for the "empty field is allowed" entry, signalled by a trailing ";".
+    private readonly EMPTY_CODE = '';
     private readonly CODE_REGEX_GROUP: RegExp =
         /^(?<basicCode>\d+\|\d+\|)(?<facettenPart>.+)$/;
 
@@ -139,6 +141,8 @@ export class ZomoCsvParser {
     // field are aggregated into a single trailing "not" entry. Forbidden codes
     // are parsed like obligatory codes, so a facetten code keeps its nested
     // facetten structure (basic code -> facetten).
+    // A semicolon that yields an empty code (e.g. a trailing ";") means the
+    // field may also be left empty; this is represented by an `{ "": {} }` entry.
     private parseCodeField(rowValue: string): CodeFieldEntry[] {
         if (!rowValue || rowValue.trim() === '') {
             return [{}];
@@ -146,14 +150,16 @@ export class ZomoCsvParser {
 
         const codes = rowValue
             .split(this.ROW_VALUE_SEPARATOR)
-            .map(code => code.trim())
-            .filter(code => code !== '');
+            .map(code => code.trim());
 
         const obligatoryEntries: BasicCodeObj[] = [];
         const forbiddenCodes: BasicCodeObj = {};
+        let emptyFieldAllowed = false;
 
         for (const code of codes) {
-            if (code.startsWith(this.FORBIDDEN_PREFIX)) {
+            if (code === '') {
+                emptyFieldAllowed = true;
+            } else if (code.startsWith(this.FORBIDDEN_PREFIX)) {
                 const forbiddenCode = code.slice(this.FORBIDDEN_PREFIX.length);
                 Object.assign(
                     forbiddenCodes,
@@ -165,6 +171,10 @@ export class ZomoCsvParser {
         }
 
         const resultList: CodeFieldEntry[] = [...obligatoryEntries];
+
+        if (emptyFieldAllowed) {
+            resultList.push({ [this.EMPTY_CODE]: {} });
+        }
 
         if (Object.keys(forbiddenCodes).length > 0) {
             resultList.push({ [this.NOT_KEY]: forbiddenCodes });
