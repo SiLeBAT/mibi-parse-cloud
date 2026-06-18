@@ -2309,3 +2309,158 @@ describe('matchesZoMo (forbidden "not" codes)', () => {
         expect(result).toBeNull();
     });
 });
+
+// ---------------------------------------------------------------------------
+// matchesZoMo — empty field allowed via "" entry (trailing ";" in the plan)
+// ---------------------------------------------------------------------------
+//
+// A trailing ";" in a ZoMo plan field means the field may also be left empty.
+// The parser represents this as an additional `{ "": {} }` entry, e.g.
+//   "337": [ { "21525|12304|": {} }, { "": {} } ]
+// An empty sample value must then be accepted, while a non-empty value must
+// still match one of the listed codes.
+
+describe('matchesZoMo (empty field allowed via "" entry)', () => {
+    // 337 = additional_marks (basic), 319 = matrix (facetten), 328 = program.
+    function makePlan(field: keyof ZomoData, entries: object[]): ZomoData[] {
+        const base: ZomoData = {
+            '303': [{}],
+            '337': [{}],
+            '319': [{}],
+            '324': [],
+            '328': [{ 'my-program': {} }],
+            '339': [{}]
+        };
+        return [{ ...base, [field]: entries }];
+    }
+
+    function makeValidator(plan: ZomoData[]) {
+        const svc = { getZomoPlan: jest.fn().mockReturnValue(plan) };
+        return matchesZoMo(svc as any);
+    }
+
+    function basicOpts(zomoKey: keyof ZomoData) {
+        return {
+            ...BASE_OPTIONS,
+            date: 'sampling_date',
+            zomoKey,
+            codeType: CodeType.BASIC,
+            programField: { attr: 'program_avv', zomoKey: '328' }
+        } as any;
+    }
+
+    function facettenOpts(zomoKey: keyof ZomoData) {
+        return {
+            ...BASE_OPTIONS,
+            date: 'sampling_date',
+            zomoKey,
+            codeType: CodeType.FACETTEN,
+            programField: { attr: 'program_avv', zomoKey: '328' }
+        } as any;
+    }
+
+    function attrs(field: string, value: string) {
+        return {
+            [field]: value,
+            sampling_date: '01.01.2023',
+            program_avv: 'my-program'
+        } as any;
+    }
+
+    // --- BASIC (337) with obligatory code + "" entry ----------------------
+
+    it('allows an empty value when a BASIC field permits empty via the "" entry', () => {
+        const plan = makePlan('337', [{ '21525|12304|': {} }, { '': {} }]);
+        const result = makeValidator(plan)(
+            '',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('allows the obligatory BASIC code when empty is also permitted', () => {
+        const plan = makePlan('337', [{ '21525|12304|': {} }, { '': {} }]);
+        const result = makeValidator(plan)(
+            '21525|12304|',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '21525|12304|')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('still rejects an unrelated BASIC code even though empty is permitted', () => {
+        const plan = makePlan('337', [{ '21525|12304|': {} }, { '': {} }]);
+        const result = makeValidator(plan)(
+            '99999|88888|',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '99999|88888|')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('rejects an empty value when a BASIC field has an obligatory code but no "" entry', () => {
+        const plan = makePlan('337', [{ '21525|12304|': {} }]);
+        const result = makeValidator(plan)(
+            '',
+            basicOpts('337'),
+            'additional_marks_avv',
+            attrs('additional_marks_avv', '')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    // --- FACETTEN (319) with obligatory code + "" entry -------------------
+
+    it('allows an empty value when a FACETTEN field permits empty via the "" entry', () => {
+        const plan = makePlan('319', [
+            { '100|200|': { '10': { and: [20] } } },
+            { '': {} }
+        ]);
+        const result = makeValidator(plan)(
+            '',
+            facettenOpts('319'),
+            'matrix_avv',
+            attrs('matrix_avv', '')
+        );
+        expect(result).toBeNull();
+    });
+
+    it('still validates a real facetten code normally when empty is also permitted', () => {
+        const plan = makePlan('319', [
+            { '100|200|': { '10': { and: [20] } } },
+            { '': {} }
+        ]);
+        const validator = makeValidator(plan);
+
+        const matching = validator(
+            '100|200|10-20',
+            facettenOpts('319'),
+            'matrix_avv',
+            attrs('matrix_avv', '100|200|10-20')
+        );
+        expect(matching).toBeNull();
+
+        const nonMatching = validator(
+            '100|200|10-21',
+            facettenOpts('319'),
+            'matrix_avv',
+            attrs('matrix_avv', '100|200|10-21')
+        );
+        expect(nonMatching).toEqual(TEST_ERROR);
+    });
+
+    it('rejects an empty value when a FACETTEN field has a code but no "" entry', () => {
+        const plan = makePlan('319', [{ '100|200|': { '10': { and: [20] } } }]);
+        const result = makeValidator(plan)(
+            '',
+            facettenOpts('319'),
+            'matrix_avv',
+            attrs('matrix_avv', '')
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+});

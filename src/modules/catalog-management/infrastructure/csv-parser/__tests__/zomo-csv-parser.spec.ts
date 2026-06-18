@@ -185,14 +185,81 @@ describe('ZomoCsvParser', () => {
             }
         ]);
 
-        // Trailing ";" must not produce an empty "" key entry.
+        // Trailing ";" means the field may also be left empty -> { "": {} }.
         expect(result.data.zomoData[0]['337']).toEqual([
-            { '21525|12304|': {} }
+            { '21525|12304|': {} },
+            { '': {} }
         ]);
 
         expect(result.data.zomoData[0]['319']).toEqual([
             { '9171|187178|': { '185142': { and: [61004] } } }
         ]);
+    });
+});
+
+describe('ZomoCsvParser empty field semantic (trailing ";")', () => {
+    async function parseField(field: string, value: string) {
+        const csv = buildCsv(HEADERS, [
+            {
+                '303': '',
+                '337': '',
+                '319': '',
+                '324': '',
+                '328': '',
+                '339': '',
+                [field]: value,
+                Berichtsjahr: '2026'
+            }
+        ]);
+        const result = await parseCsv(csv);
+        return result.data.zomoData[0][field];
+    }
+
+    it('adds an empty-field entry { "": {} } for a trailing ";" after a basic code', async () => {
+        expect(await parseField('337', '21525|12304|;')).toEqual([
+            { '21525|12304|': {} },
+            { '': {} }
+        ]);
+    });
+
+    it('adds an empty-field entry after a facetten code', async () => {
+        expect(await parseField('303', '62726|57604|2-1566;')).toEqual([
+            { '62726|57604|': { '2': { and: [1566] } } },
+            { '': {} }
+        ]);
+    });
+
+    it('keeps a single empty-field entry after multiple obligatory codes', async () => {
+        expect(await parseField('337', '21525|12304|;21537|12168|;')).toEqual([
+            { '21525|12304|': {} },
+            { '21537|12168|': {} },
+            { '': {} }
+        ]);
+    });
+
+    it('orders entries obligatory, then empty-field, then forbidden "not"', async () => {
+        expect(await parseField('337', '21537|12168|;!21525|12304|;')).toEqual([
+            { '21537|12168|': {} },
+            { '': {} },
+            { not: { '21525|12304|': {} } }
+        ]);
+    });
+
+    it('allows an empty field together with only a forbidden code', async () => {
+        expect(await parseField('337', '!21525|12304|;')).toEqual([
+            { '': {} },
+            { not: { '21525|12304|': {} } }
+        ]);
+    });
+
+    it('does NOT add an empty-field entry when there is no trailing ";"', async () => {
+        expect(await parseField('337', '21525|12304|')).toEqual([
+            { '21525|12304|': {} }
+        ]);
+    });
+
+    it('returns [{}] (not an empty-field entry) for a fully empty field', async () => {
+        expect(await parseField('337', '')).toEqual([{}]);
     });
 });
 
@@ -239,14 +306,22 @@ describe('ZomoCsvParser with the #cloud202 forbidden-code fixture', () => {
         expect(zomoData[0]['337']).toEqual([{}]);
     });
 
-    it('parses a forbidden-only 337 field into a single "not" entry', () => {
-        // Row with 328 "213058|211507|" (index 1) has 337 = "!21525|12304|".
-        expect(zomoData[1]['337']).toEqual([{ not: { '21525|12304|': {} } }]);
+    it('parses obligatory codes plus a forbidden code in 337 (obligatory first, "not" last)', () => {
+        // Row index 1 (328 "213058|211507|") has
+        // 337 = "!21525|12304|;21537|12168|;59143|192041|".
+        expect(zomoData[1]['337']).toEqual([
+            { '21537|12168|': {} },
+            { '59143|192041|': {} },
+            { not: { '21525|12304|': {} } }
+        ]);
     });
 
-    it('treats a trailing ";" after an obligatory code as a single entry', () => {
+    it('treats a trailing ";" after an obligatory code as an "empty field allowed" entry', () => {
         // Row index 2 has 337 = "21525|12304|;".
-        expect(zomoData[2]['337']).toEqual([{ '21525|12304|': {} }]);
+        expect(zomoData[2]['337']).toEqual([
+            { '21525|12304|': {} },
+            { '': {} }
+        ]);
     });
 
     it('parses the forbidden facetten code into the "not" entry after obligatory codes', () => {
