@@ -24,6 +24,23 @@ export class PDFCreatorService {
     private readonly SEPARATOR = '. ';
     private readonly USER_PREFIX = 'User';
 
+    // Maximum number of characters allowed for meta values so that they fit
+    // into the PDF layout without breaking the design. Longer values are
+    // truncated before being added to the PDF.
+    private readonly META_MAX_LENGTHS = {
+        customerRefNumber: 18,
+        signatureDate: 49,
+        sender: {
+            instituteName: 365,
+            department: 134,
+            street: 131,
+            zipCity: 68,
+            contactPerson: 68,
+            telephone: 57,
+            email: 57
+        }
+    };
+
     private readonly config;
     private readonly strings;
 
@@ -111,6 +128,8 @@ export class PDFCreatorService {
     // Meta content
 
     private createMeta(metaData: SampleSheetMetaData) {
+        const truncatedMetaData = this.truncateMetaData(metaData);
+
         return {
             stack: [
                 this.createMetaMainRow(
@@ -121,14 +140,14 @@ export class PDFCreatorService {
                 this.EMPTY,
                 this.EMPTY,
                 this.createMetaMainRow(
-                    this.createMetaRecipient(metaData.nrl),
+                    this.createMetaRecipient(truncatedMetaData.nrl),
                     this.EMPTY,
-                    this.createMetaStamp(metaData.customerRefNumber)
+                    this.createMetaStamp(truncatedMetaData.customerRefNumber)
                 ),
                 this.EMPTY,
                 this.createMetaMainRow(
-                    this.createMetaSender(metaData.sender),
-                    this.createMetaAnalysis(metaData.analysis),
+                    this.createMetaSender(truncatedMetaData.sender),
+                    this.createMetaAnalysis(truncatedMetaData.analysis),
                     this.EMPTY
                 ),
                 this.EMPTY,
@@ -136,9 +155,9 @@ export class PDFCreatorService {
                 this.createMetaMainRow(
                     this.createMetaSignature(
                         this.strings.meta.signature.date,
-                        metaData.signatureDate
+                        truncatedMetaData.signatureDate
                     ),
-                    this.createMetaUrgency(metaData.urgency),
+                    this.createMetaUrgency(truncatedMetaData.urgency),
                     this.EMPTY
                 ),
                 this.EMPTY,
@@ -156,6 +175,73 @@ export class PDFCreatorService {
                 this.createInstructions()
             ]
         };
+    }
+
+    // Truncates the meta values that are added to the PDF to their maximum
+    // allowed length so that they fit into the PDF layout without breaking the
+    // design. Returns a copy of the meta data; the original is not mutated.
+    private truncateMetaData(
+        metaData: SampleSheetMetaData
+    ): SampleSheetMetaData {
+        const maxLengths = this.META_MAX_LENGTHS;
+        return {
+            ...metaData,
+            customerRefNumber: this.truncate(
+                metaData.customerRefNumber,
+                maxLengths.customerRefNumber
+            ),
+            signatureDate: this.truncate(
+                metaData.signatureDate,
+                maxLengths.signatureDate
+            ),
+            sender: {
+                ...metaData.sender,
+                instituteName: this.truncate(
+                    metaData.sender.instituteName,
+                    maxLengths.sender.instituteName
+                ),
+                department: this.truncate(
+                    metaData.sender.department,
+                    maxLengths.sender.department
+                ),
+                street: this.truncate(
+                    metaData.sender.street,
+                    maxLengths.sender.street
+                ),
+                zipCity: this.truncate(
+                    metaData.sender.zipCity,
+                    maxLengths.sender.zipCity
+                ),
+                contactPerson: this.truncate(
+                    metaData.sender.contactPerson,
+                    maxLengths.sender.contactPerson
+                ),
+                telephone: this.truncate(
+                    metaData.sender.telephone,
+                    maxLengths.sender.telephone
+                ),
+                email: this.truncate(
+                    metaData.sender.email,
+                    maxLengths.sender.email
+                )
+            }
+        };
+    }
+
+    private truncate<T extends string | undefined>(
+        value: T,
+        maxLength: number
+    ): T {
+        if (!value) {
+            return value;
+        }
+        // Replace any line feed character(s) with a space so that the value
+        // does not break the PDF layout, then truncate to the maximum length.
+        const sanitized = value.replace(/[\r\n]+/g, ' ');
+        if (sanitized.length > maxLength) {
+            return sanitized.slice(0, maxLength) as T;
+        }
+        return sanitized as T;
     }
 
     private createMetaHeader() {
