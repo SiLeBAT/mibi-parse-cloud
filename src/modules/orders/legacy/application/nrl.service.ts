@@ -31,6 +31,17 @@ export class NRLService {
         }
         return NRL_ID_VALUE.UNKNOWN;
     }
+    /**
+     * A pathogen is "relevant for a BfR lab" when its name matches one of the
+     * current RegEx selectors of the NRL table (i.e. it can be assigned to an
+     * NRL). The selectors are read live from the cache, so changes to the
+     * selector column take effect immediately - no re-parsing of any catalog
+     * is required.
+     */
+    isPathogenRelevantForBfR(pathogen: string): boolean {
+        return this.getNRLForPathogen(pathogen) !== NRL_ID_VALUE.UNKNOWN;
+    }
+
     getOptionalAnalysisFor(nrl: NRL_ID_VALUE): Partial<Analysis> {
         const found = this.nrlCache.getNRLById(nrl);
         if (!found) {

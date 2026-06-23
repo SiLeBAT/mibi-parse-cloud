@@ -150,6 +150,34 @@ describe('NRLService.getNRLForPathogen', () => {
 });
 
 // ---------------------------------------------------------------------------
+// isPathogenRelevantForBfR
+// ---------------------------------------------------------------------------
+
+describe('NRLService.isPathogenRelevantForBfR', () => {
+    it('returns true when the pathogen matches a current NRL selector', () => {
+        const nrl = makeNRLConfig(NRL_ID_VALUE.NRL_Salm, ['Salmonella']);
+        const cache = makeMockCache([nrl]);
+        const svc = new NRLService(cache);
+        expect(svc.isPathogenRelevantForBfR('Salmonella spp.')).toBe(true);
+    });
+
+    it('returns false when no NRL selector matches the pathogen', () => {
+        const nrl = makeNRLConfig(NRL_ID_VALUE.NRL_Campy, ['Campylobacter']);
+        const cache = makeMockCache([nrl]);
+        const svc = new NRLService(cache);
+        expect(svc.isPathogenRelevantForBfR('Listeria monocytogenes')).toBe(
+            false
+        );
+    });
+
+    it('returns false for an empty value', () => {
+        const cache = makeMockCache([]);
+        const svc = new NRLService(cache);
+        expect(svc.isPathogenRelevantForBfR('')).toBe(false);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // assignNRLsToSamples
 // ---------------------------------------------------------------------------
 

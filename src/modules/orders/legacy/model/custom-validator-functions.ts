@@ -659,7 +659,20 @@ function matchAVVCodeOrString(
                 }
 
                 if (altKey === 'Text') {
-                    if (!cat.containsTextEintrag(trimmedValue)) {
+                    // A free-text pathogen is recognised either when it exists
+                    // in the catalog OR when it is relevant for a BfR lab, i.e.
+                    // it matched one of the current NRL RegEx selectors. The
+                    // selector match is reflected by the sample's nrl attribute
+                    // (assigned right before validation), so we always honour
+                    // the current selector values.
+                    const nrl = (attributes as Record<string, string>).nrl;
+                    const isRelevantForBfR =
+                        nrl !== undefined && nrl !== NRL_ID_VALUE.UNKNOWN;
+
+                    if (
+                        !cat.containsTextEintrag(trimmedValue) &&
+                        !isRelevantForBfR
+                    ) {
                         return { ...options.message };
                     }
 

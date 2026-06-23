@@ -241,15 +241,16 @@ export const baseConstraints: ValidationConstraints = {
             allowEmpty: false
         },
 
+        // Recognises the pathogen either as a valid AVV324 code/text entry or
+        // - for pathogens relevant to BfR labs - via the current NRL RegEx
+        // selectors (handled inside matchAVVCodeOrString through the sample's
+        // nrl attribute). A separate inAVVCatalog check would reject
+        // BfR-relevant pathogens that are not literally part of the catalog,
+        // so it is intentionally omitted here.
         matchAVVCodeOrString: {
             error: 8,
             catalog: 'avv324',
             alternateKey: 'Text'
-        },
-
-        inAVVCatalog: {
-            error: 98,
-            catalog: 'avv324'
         },
 
         nrlExists: {

@@ -13,8 +13,12 @@ import {
     SearchAlias
 } from '../model/legacy.model';
 import { CatalogService } from './catalog.service';
+import { NRLService } from './nrl.service';
 
-function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
+function autoCorrectAVV324(
+    catalogService: CatalogService,
+    nrlService: NRLService
+): CorrectionFunction {
     const catalogName = 'avv324';
     const property: SampleProperty = 'pathogen_avv';
     const options = getFuseOptions();
@@ -37,6 +41,13 @@ function autoCorrectAVV324(catalogService: CatalogService): CorrectionFunction {
 
         // Ignore empty entries
         if (!trimmedEntry) {
+            return null;
+        }
+
+        // A pathogen that is relevant for a BfR lab (matches one of the current
+        // NRL RegEx selectors) is already a valid value, even when it is not a
+        // literal catalog entry - so there is nothing to auto-correct.
+        if (nrlService.isPathogenRelevantForBfR(trimmedEntry)) {
             return null;
         }
 

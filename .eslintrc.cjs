@@ -5,7 +5,7 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   parserOptions: { project: ['./tsconfig.json'] },
   root: true,
-  ignorePatterns: ['src/**/__mocks__/**','src/**/*.spec.ts', 'dist/*', 'lib/*', 'jest.config.js', 'lint-staged.config.js', 'coverage/**'],
+  ignorePatterns: ['src/**/__mocks__/**','src/**/*.spec.ts', 'dist/*', 'lib/*', 'jest.config.js', 'lint-staged.config.js', 'coverage/**', 'scripts/**'],
   rules: {
     '@typescript-eslint/no-empty-object-type': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { caughtErrorsIgnorePattern: '^_' }]

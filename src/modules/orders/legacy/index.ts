@@ -101,7 +101,8 @@ const antiCorruptionLayers = (async function init() {
 
     const formAutoCorrectionService = new FormAutoCorrectionService(
         catalogService,
-        validationErrorProvider
+        validationErrorProvider,
+        nrlService
     );
 
     const validationAntiCorruptionLayer = new ValidationAntiCorruptionLayer(

@@ -759,6 +759,51 @@ describe('matchAVVCodeOrString', () => {
         expect(result).toEqual(TEST_ERROR);
     });
 
+    it('returns null for a non-catalog text when the pathogen is relevant for a BfR lab (nrl assigned)', () => {
+        const avvCat = createAVVCatalog(makeAvv324Data());
+        const svc = makeMockCatalogService(avvCat);
+        const validator = matchAVVCodeOrString(svc as any);
+        const result = validator(
+            'BfR pathogen not in catalog',
+            {
+                ...BASE_OPTIONS,
+                catalog: 'avv324',
+                key: 'pathogen_avv',
+                alternateKey: 'Text'
+            } as any,
+            'pathogen_avv',
+            {
+                pathogen_avv: 'BfR pathogen not in catalog',
+                sampling_date: '',
+                // nrl was assigned from a current NRL selector match
+                nrl: NRL_ID_VALUE.NRL_AR
+            } as any
+        );
+        expect(result).toBeNull();
+    });
+
+    it('returns error for a non-catalog text when no NRL was assigned (nrl UNKNOWN)', () => {
+        const avvCat = createAVVCatalog(makeAvv324Data());
+        const svc = makeMockCatalogService(avvCat);
+        const validator = matchAVVCodeOrString(svc as any);
+        const result = validator(
+            'BfR pathogen not in catalog',
+            {
+                ...BASE_OPTIONS,
+                catalog: 'avv324',
+                key: 'pathogen_avv',
+                alternateKey: 'Text'
+            } as any,
+            'pathogen_avv',
+            {
+                pathogen_avv: 'BfR pathogen not in catalog',
+                sampling_date: '',
+                nrl: NRL_ID_VALUE.UNKNOWN
+            } as any
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
     it('returns error for a plain string that is not an AVV code and alternateKey is empty', () => {
         const avvCat = createAVVCatalog(makeAvv324Data());
         const svc = makeMockCatalogService(avvCat);

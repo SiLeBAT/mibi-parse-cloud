@@ -91,10 +91,17 @@ function makeValidationErrorProvider() {
     };
 }
 
+function makeNrlService() {
+    return {
+        isPathogenRelevantForBfR: jest.fn().mockReturnValue(false)
+    };
+}
+
 function makeService() {
     return new FormAutoCorrectionService(
         makeCatalogService() as any,
-        makeValidationErrorProvider() as any
+        makeValidationErrorProvider() as any,
+        makeNrlService() as any
     );
 }
 

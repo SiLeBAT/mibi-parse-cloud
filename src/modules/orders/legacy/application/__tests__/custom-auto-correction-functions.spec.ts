@@ -96,6 +96,12 @@ function makeCatalogService(avv324DataOverride?: Partial<AVV324Data>) {
     };
 }
 
+function makeNrlService(isRelevant = false) {
+    return {
+        isPathogenRelevantForBfR: jest.fn().mockReturnValue(isRelevant)
+    };
+}
+
 // ---------------------------------------------------------------------------
 // autoCorrectAVV324
 // ---------------------------------------------------------------------------
@@ -103,28 +109,36 @@ function makeCatalogService(avv324DataOverride?: Partial<AVV324Data>) {
 describe('autoCorrectAVV324', () => {
     it('returns null for an empty pathogen_avv value', () => {
         const svc = makeCatalogService();
-        const fn = autoCorrectAVV324(svc as any);
+        const fn = autoCorrectAVV324(svc as any, makeNrlService() as any);
         const result = fn(makeSampleData(''));
         expect(result).toBeNull();
     });
 
     it('returns null for a value that already exists as a text entry (correct value)', () => {
         const svc = makeCatalogService();
-        const fn = autoCorrectAVV324(svc as any);
+        const fn = autoCorrectAVV324(svc as any, makeNrlService() as any);
         const result = fn(makeSampleData('Escherichia coli'));
         expect(result).toBeNull();
     });
 
     it('returns null for a value with only whitespace', () => {
         const svc = makeCatalogService();
-        const fn = autoCorrectAVV324(svc as any);
+        const fn = autoCorrectAVV324(svc as any, makeNrlService() as any);
         const result = fn(makeSampleData('   '));
+        expect(result).toBeNull();
+    });
+
+    it('returns null (no correction) for a pathogen that is relevant for a BfR lab even when it is not a catalog entry', () => {
+        const svc = makeCatalogService();
+        // value is not in the catalog, but the NRL selectors recognise it
+        const fn = autoCorrectAVV324(svc as any, makeNrlService(true) as any);
+        const result = fn(makeSampleData('Some BfR pathogen not in catalog'));
         expect(result).toBeNull();
     });
 
     it('returns correction suggestion (code 88) when value is a bare AVV code with known text', () => {
         const svc = makeCatalogService();
-        const fn = autoCorrectAVV324(svc as any);
+        const fn = autoCorrectAVV324(svc as any, makeNrlService() as any);
         const result = fn(
             makeSampleData('9876|1234|')
         ) as CorrectionSuggestions;
@@ -136,7 +150,7 @@ describe('autoCorrectAVV324', () => {
 
     it('returns correction for "Genus {value}" when genus form exists in catalog', () => {
         const svc = makeCatalogService();
-        const fn = autoCorrectAVV324(svc as any);
+        const fn = autoCorrectAVV324(svc as any, makeNrlService() as any);
         // 'Campylobacter' → 'Genus Campylobacter' is a text entry
         const result = fn(
             makeSampleData('Campylobacter')
@@ -148,7 +162,7 @@ describe('autoCorrectAVV324', () => {
 
     it('returns fuzzy search suggestions when no exact match is found', () => {
         const svc = makeCatalogService();
-        const fn = autoCorrectAVV324(svc as any);
+        const fn = autoCorrectAVV324(svc as any, makeNrlService() as any);
         // 'Campylobactr' → typo, fuzzy should match 'Campylobacter jejuni'
         const result = fn(
             makeSampleData('Campylobactr')
@@ -170,7 +184,10 @@ describe('autoCorrectAVV324', () => {
                 }
             ])
         };
-        const fn = autoCorrectAVV324(svcWithAlias as any);
+        const fn = autoCorrectAVV324(
+            svcWithAlias as any,
+            makeNrlService() as any
+        );
         // 'E. coli' is an alias for 'Escherichia coli'
         const result = fn(makeSampleData('E. coli')) as CorrectionSuggestions;
         expect(result).not.toBeNull();
@@ -179,7 +196,7 @@ describe('autoCorrectAVV324', () => {
 
     it('sets correction field to "pathogen_avv"', () => {
         const svc = makeCatalogService();
-        const fn = autoCorrectAVV324(svc as any);
+        const fn = autoCorrectAVV324(svc as any, makeNrlService() as any);
         const result = fn(
             makeSampleData('9876|1234|')
         ) as CorrectionSuggestions;
@@ -188,7 +205,7 @@ describe('autoCorrectAVV324', () => {
 
     it('preserves the original value in the correction suggestion', () => {
         const svc = makeCatalogService();
-        const fn = autoCorrectAVV324(svc as any);
+        const fn = autoCorrectAVV324(svc as any, makeNrlService() as any);
         const result = fn(
             makeSampleData('9876|1234|')
         ) as CorrectionSuggestions;

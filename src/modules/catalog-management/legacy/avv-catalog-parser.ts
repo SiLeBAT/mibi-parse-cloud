@@ -1,7 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
 import * as _ from 'lodash';
 
-import { pathogenRepository } from '../infrastructure/repository';
 import {
     AttributWert,
     Eintrag,
@@ -403,8 +402,21 @@ export class AVVCatalogParser {
     private async avv324(xmlData: string): Promise<LegacyCatalog<AVV324Data>> {
         // Katalogtyp: Polyhierarchische Klassifikation
         // Parameter
+        //
+        // This parser only extracts the catalogue folders that hold the
+        // pathogens relevant to the BfR labs. Whether a concrete pathogen is
+        // actually "relevant for a BfR lab" is decided dynamically against the
+        // current RegEx selectors of the NRL table at recognition/validation
+        // time (see NRLService and matchAVVCodeOrString) - just like the
+        // ZoMo-Plan does. The parser therefore no longer bakes in a static
+        // snapshot of additional pathogens.
 
-        const filter: string[] = ['DNA', 'Mikroorganismen', 'Bakterientoxine'];
+        const filter: string[] = [
+            'DNA',
+            'Mikroorganismen',
+            'Bakterientoxine',
+            'Futtermittelzusatzstoffe'
+        ];
 
         const catalog324: KatalogInstance = this.parser.parse(
             xmlData
@@ -430,14 +442,9 @@ export class AVVCatalogParser {
 
         // tslint:disable-next-line
         const avv324Unique: MibiEintrag[] = _.uniqWith(avv324, _.isEqual);
-        const additionalPathogens = await this.getAdditionalPathogens();
-        const duplicatePathogens: string[] = [];
 
         avv324Unique.forEach((tempEintrag: TempEintrag) => {
             const normalizedText = tempEintrag.Text.normalize('NFC');
-            if (additionalPathogens.includes(normalizedText)) {
-                duplicatePathogens.push(normalizedText);
-            }
 
             mibiEintraege[tempEintrag.Kode] = {
                 Text: normalizedText,
@@ -448,23 +455,6 @@ export class AVVCatalogParser {
                 Kode: tempEintrag.Kode,
                 Text: normalizedText,
                 Basiseintrag: tempEintrag.Basiseintrag
-            });
-        });
-
-        /* Refactor this one second: addition of additionalPathogens should     * happen external to XML parsing:
-         * 1) Parse the XML and create a JSON Catalog
-         * 2) add the additional Pathogens to that catalog
-         */
-        const filteredPathogens = additionalPathogens.filter(
-            pathogen => !duplicatePathogens.includes(pathogen)
-        );
-
-        filteredPathogens.forEach((bfrErreger: string) => {
-            textEintraege[bfrErreger] = '';
-            fuzzyEintraege.push({
-                Kode: '',
-                Text: bfrErreger.normalize('NFC'),
-                Basiseintrag: true
             });
         });
 
@@ -916,15 +906,5 @@ export class AVVCatalogParser {
         }
 
         return [gemeindeBezeichnung, plz];
-    }
-
-    // Refactor this one first: DB access should be handled with a properly injected repository -> done!
-    private async getAdditionalPathogens(): Promise<string[]> {
-        const allPathogens = await pathogenRepository.getAllEntries();
-
-        const pathogens = allPathogens.map(pathogen => {
-            return pathogen.pathogen;
-        });
-        return pathogens;
     }
 }

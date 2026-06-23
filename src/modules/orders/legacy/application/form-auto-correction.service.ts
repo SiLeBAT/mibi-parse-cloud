@@ -9,6 +9,7 @@ import {
     autoCorrectAVV324,
     autoCorrectSequenceStatus
 } from './custom-auto-correction-functions';
+import { NRLService } from './nrl.service';
 import { ValidationErrorProvider } from './validation-error-provider.service';
 
 export class FormAutoCorrectionService {
@@ -16,7 +17,8 @@ export class FormAutoCorrectionService {
 
     constructor(
         private catalogService: CatalogService,
-        private validationErrorProvider: ValidationErrorProvider
+        private validationErrorProvider: ValidationErrorProvider,
+        private nrlService: NRLService
     ) {
         this.registerCorrectionFunctions();
     }
@@ -56,7 +58,9 @@ export class FormAutoCorrectionService {
     }
 
     private registerCorrectionFunctions() {
-        this.correctionFunctions.push(autoCorrectAVV324(this.catalogService));
+        this.correctionFunctions.push(
+            autoCorrectAVV324(this.catalogService, this.nrlService)
+        );
         this.correctionFunctions.push(autoCorrectSequenceStatus());
     }
 }
