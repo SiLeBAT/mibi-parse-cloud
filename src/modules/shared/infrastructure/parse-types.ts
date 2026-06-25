@@ -86,6 +86,8 @@ export interface UserInformationAttributes extends Parse.Attributes {
     user: Parse.User;
     firstName: string;
     lastName: string;
+    dataSaveAgreed: boolean;
+    dataSaveViewed: boolean;
 }
 
 export interface UserInformationObject
