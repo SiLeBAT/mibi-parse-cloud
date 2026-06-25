@@ -29,6 +29,16 @@
     "firstName": {
       "type": "String",
       "required": true
+    },
+    "dataSaveAgreed": {
+      "type": "Boolean",
+      "required": true,
+      "defaultValue": false
+    },
+    "dataSaveViewed": {
+      "type": "Boolean",
+      "required": true,
+      "defaultValue": false
     }
   },
   "classLevelPermissions": {
