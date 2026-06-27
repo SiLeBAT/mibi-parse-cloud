@@ -70,9 +70,11 @@ export interface SampleDataEntryDTO {
     errors?: SampleValidationErrorDTO[];
     correctionOffer?: string[];
     oldValue?: string;
+    nrlData?: string;
 }
-interface SampleDataDTO extends Record<AVVAttributes, SampleDataEntryDTO> {}
-interface SampleMetaDTO {
+export interface SampleDataDTO
+    extends Record<AVVAttributes, SampleDataEntryDTO> {}
+export interface SampleMetaDTO {
     nrl: string;
     analysis: AnalysisDTO;
     urgency: string;
