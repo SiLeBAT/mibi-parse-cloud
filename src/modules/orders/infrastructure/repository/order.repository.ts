@@ -80,6 +80,12 @@ export class OrderRepository extends AbstractRepository<OrderObject> {
         };
     }
 
+    async findById(orderId: EntityId): Promise<OrderObject | undefined> {
+        const query = this.getQuery();
+        query.equalTo('objectId', orderId.value);
+        return query.first({ useMasterKey: true });
+    }
+
     async findByUser(userId: EntityId): Promise<OrderObject[]> {
         const userPointer = new Parse.User();
         userPointer.id = userId.value;

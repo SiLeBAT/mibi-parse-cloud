@@ -11,7 +11,8 @@ export const ObjectKeys = {
     ZomoPlan: 'Zomo_Plan',
     ZomoPlanFile: 'Zomo_Plan_File',
     Order: 'Order',
-    Sample: 'Sample'
+    Sample: 'Sample',
+    Result: 'Result'
 };
 
 export interface AVVCatalogAttributes extends Parse.Attributes {
@@ -142,3 +143,11 @@ export interface SampleAttributes extends Parse.Attributes {
 }
 
 export interface SampleObject extends Parse.Object<SampleAttributes> {}
+
+export interface ResultAttributes extends Parse.Attributes {
+    sample: SampleObject;
+    position: number;
+    resultData?: string;
+}
+
+export interface ResultObject extends Parse.Object<ResultAttributes> {}

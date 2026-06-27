@@ -14,6 +14,7 @@ import { cloud185UpdateTemplateFile } from './cloud185-update-template-file';
 import { cloud192CreateZomoPlanFile } from './cloud192-create-zomo-plan-file';
 import { mp197CreateOrder } from './mp197-create-order';
 import { mp197CreateSample } from './mp197-create-sample';
+import { mp228CreateResult } from './mp228-create-result';
 
 export interface UpdateFunc {
     (): Promise<boolean>;
@@ -38,5 +39,6 @@ export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     cloud185UpdateTemplateFile,
     cloud192CreateZomoPlanFile,
     mp197CreateOrder,
-    mp197CreateSample
+    mp197CreateSample,
+    mp228CreateResult
 ];
