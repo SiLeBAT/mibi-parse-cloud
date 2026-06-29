@@ -41,6 +41,15 @@
     "meta": {
       "type": "string",
       "required": false
+    },
+    "markedForDeletion": {
+      "type": "Boolean",
+      "required": true,
+      "defaultValue": false
+    },
+    "markedForDeletionAt": {
+      "type": "Date",
+      "required": false
     }
   },
   "classLevelPermissions": {

@@ -15,4 +15,15 @@ export class UserRepository {
         }
         throw new Error(`User with email ${email.value} not found`);
     }
+
+    async isDataSaveAgreed(userId: EntityId): Promise<boolean> {
+        const userPointer = new Parse.User();
+        userPointer.id = userId.value;
+
+        const userInfo = await new Parse.Query('User_Info')
+            .equalTo('user', userPointer)
+            .first({ useMasterKey: true });
+
+        return userInfo?.get('dataSaveAgreed') ?? false;
+    }
 }
