@@ -92,6 +92,9 @@ export class OrderRepository extends AbstractRepository<OrderObject> {
 
         const query = this.getQuery();
         query.equalTo('user', userPointer);
+        // Orders marked for deletion (consent withdrawn) are hidden from the
+        // user. notEqualTo(true) also matches legacy rows without the field.
+        query.notEqualTo('markedForDeletion', true);
         query.descending('createdAt');
 
         return query.find({ useMasterKey: true });
