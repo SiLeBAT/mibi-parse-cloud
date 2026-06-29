@@ -1,6 +1,6 @@
 import { UseCase } from '../../../shared/use-cases';
 import { Catalog, FileContent } from '../../domain';
-import { AVVCatalogParserAntiCorruptionLayer } from '../../legacy';
+import { avvCatalogXmlParser } from '../../infrastructure/xml-parser';
 
 export interface CreateFromFileContentProps {
     fileContent: FileContent;
@@ -14,7 +14,7 @@ class CreateAVVCatalogUseCase<T>
     async execute({
         fileContent
     }: CreateFromFileContentProps): Promise<Catalog<T>> {
-        return AVVCatalogParserAntiCorruptionLayer.create({ fileContent });
+        return avvCatalogXmlParser.parse<T>({ fileContent });
     }
 }
 

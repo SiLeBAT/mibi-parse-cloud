@@ -103,7 +103,7 @@ export interface NRLAttributes extends Parse.Attributes {
     standardProcedures: AnalysisProcedureObject[];
     optionalProcedures: AnalysisProcedureObject[];
     name: string;
-    selectors: string[];
+    selector: string[];
 }
 
 export interface NRLObject extends Parse.Object<NRLAttributes> {}

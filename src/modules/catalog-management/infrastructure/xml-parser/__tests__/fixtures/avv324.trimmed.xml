@@ -1,0 +1,55 @@
+<tns:Katalog id="20" xsi:schemaLocation="http://www.xml.katalogportal.bvl.bund.de/ https://katalogportal.bvl.bund.de/katalogportal/Katalogportal.xsd" xmlns:tns="http://www.xml.katalogportal.bvl.bund.de/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <tns:Metadaten>
+    <tns:Katalogname begriffsid="59000">
+      <tns:Name>Parameter</tns:Name>
+    </tns:Katalogname>
+    <tns:Katalognummer>324</tns:Katalognummer>
+    <tns:Sprache>Deutsch</tns:Sprache>
+    <tns:SpracheID>1</tns:SpracheID>
+    <tns:Katalogtyp>3</tns:Katalogtyp>
+    <tns:FacettenErlaubt>false</tns:FacettenErlaubt>
+    <tns:Versionsnummer>5.00</tns:Versionsnummer>
+    <tns:Veroeffentlicht>true</tns:Veroeffentlicht>
+    <tns:KodierungsTrennzeichen>,</tns:KodierungsTrennzeichen>
+    <tns:MerkmalWertTrennzeichen>-</tns:MerkmalWertTrennzeichen>
+    <tns:MehrereWerteTrennzeichen>:</tns:MehrereWerteTrennzeichen>
+    <tns:Arbeitsversion>false</tns:Arbeitsversion>
+    <tns:GueltigAb>2026-01-01+01:00</tns:GueltigAb>
+  </tns:Metadaten>
+  <tns:Eintraege>
+    <tns:Eintrag id="1" aktion="NOT CHANGED" basiseintrag="false">
+      <tns:Eintragsname begriffsid="100">
+        <tns:Name>Mikroorganismen</tns:Name>
+      </tns:Eintragsname>
+      <tns:Untereintraege>
+        <tns:Eintrag id="2" aktion="INSERT" basiseintrag="true">
+          <tns:Eintragsname begriffsid="200">
+            <tns:Name>Salmonella</tns:Name>
+          </tns:Eintragsname>
+        </tns:Eintrag>
+        <tns:Eintrag id="3" aktion="INSERT" basiseintrag="true">
+          <tns:Eintragsname begriffsid="300">
+            <tns:Name>Listeria monocytogenes</tns:Name>
+          </tns:Eintragsname>
+        </tns:Eintrag>
+        <tns:Eintrag id="4" aktion="INSERT" basiseintrag="true">
+          <tns:Eintragsname begriffsid="400">
+            <tns:Name>Campylobacter</tns:Name>
+          </tns:Eintragsname>
+        </tns:Eintrag>
+      </tns:Untereintraege>
+    </tns:Eintrag>
+    <tns:Eintrag id="5" aktion="NOT CHANGED" basiseintrag="false">
+      <tns:Eintragsname begriffsid="500">
+        <tns:Name>Sonstiges</tns:Name>
+      </tns:Eintragsname>
+      <tns:Untereintraege>
+        <tns:Eintrag id="6" aktion="INSERT" basiseintrag="true">
+          <tns:Eintragsname begriffsid="600">
+            <tns:Name>Salmonella</tns:Name>
+          </tns:Eintragsname>
+        </tns:Eintrag>
+      </tns:Untereintraege>
+    </tns:Eintrag>
+  </tns:Eintraege>
+</tns:Katalog>
