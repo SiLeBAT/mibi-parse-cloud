@@ -1,18 +1,30 @@
 import { XMLParser } from 'fast-xml-parser';
 import * as _ from 'lodash';
 
-import { pathogenRepository } from '../infrastructure/repository';
+import { getLogger } from '../../../shared/core/logging-context';
+import { Catalog, CatalogInformation, FileContentType } from '../../domain';
+import { CreateFromFileContentProps } from '../../use-cases/uploadAVVCatalog/create-avv-catalog.use-case';
+import { UnsupportedFileTypeError } from '../../use-cases/readFileContent';
+import { pathogenRepository } from '../repository';
+import { nrlRepository } from '../repository';
 import {
     AttributWert,
     Eintrag,
     Facette,
     FacettenZuordnung,
     KatalogInstance
-} from './xml-catalog.model';
+} from './catalog-xml.model';
 
-export interface LegacyCatalog<T> {
+interface ParsedCatalog<T> {
     data: T;
     uId: string;
+}
+
+interface ParsedCatalogProps<T> {
+    parsedCatalog: ParsedCatalog<T>;
+    catalogCode: string;
+    version: string;
+    validFrom: Date;
 }
 
 interface CatalogData {
@@ -107,7 +119,7 @@ interface MibiFacettenzuordnung {
     Festgelegt: boolean;
 }
 
-export class AVVCatalogParser {
+export class AVVCatalogXmlParser {
     private alwaysArray = [
         'katalog.eintragsTyp.eintraege.attributwerte.attribute',
         'katalog.eintragsTyp.eintraege.facettenZuordnungTyp.facettenzuordnungen',
@@ -194,24 +206,78 @@ export class AVVCatalogParser {
         '339': this.avv339.bind(this)
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    parseXML<T>(fileContent: string): Promise<LegacyCatalog<T>> {
+    public async parse<T>({
+        fileContent
+    }: CreateFromFileContentProps): Promise<Catalog<T>> {
+        const parsedProps = await this.parseFileContent<T>({ fileContent });
+        getLogger().info(
+            `Catalog parsed successfully: ${parsedProps.catalogCode} - ${parsedProps.version} - ${parsedProps.validFrom}`
+        );
+        const catalogInformation = await CatalogInformation.create({
+            catalogCode: parsedProps.catalogCode,
+            validFrom: parsedProps.validFrom,
+            version: parsedProps.version
+        });
+        return Catalog.create({
+            catalogInformation,
+            data: parsedProps.parsedCatalog.data,
+            uId: parsedProps.parsedCatalog.uId
+        });
+    }
+
+    private async parseFileContent<T>({
+        fileContent
+    }: CreateFromFileContentProps): Promise<ParsedCatalogProps<T>> {
+        switch (fileContent.type) {
+            case FileContentType.JSON: {
+                const parsedCatalog = JSON.parse(fileContent.content);
+                return {
+                    parsedCatalog,
+                    catalogCode: parsedCatalog.data.katalogNummer,
+                    version: parsedCatalog.data.version,
+                    validFrom: new Date(parsedCatalog.data.gueltigAb)
+                };
+            }
+            case FileContentType.XML: {
+                const parsedCatalog = await this.parseXML<T>(
+                    fileContent.content
+                );
+                const catalogCode = this.determineCatalogNumber(
+                    fileContent.content
+                );
+                const version = this.determineVersion(fileContent.content);
+                const validFromString = this.determineValidFrom(
+                    fileContent.content
+                );
+                const validFrom = new Date(validFromString);
+
+                return { parsedCatalog, catalogCode, version, validFrom };
+            }
+            default:
+                throw new UnsupportedFileTypeError(
+                    'Unsupported file type',
+                    new Error()
+                );
+        }
+    }
+
+    private parseXML<T>(fileContent: string): Promise<ParsedCatalog<T>> {
         const catalogCode = this.determineCatalogNumber(fileContent);
         // @ts-expect-error: Fix later
         return this.parsingFunctions[catalogCode](fileContent);
     }
 
-    determineCatalogNumber(fileContent: string): string {
+    private determineCatalogNumber(fileContent: string): string {
         const catalogData = this.parser.parse(fileContent);
         return catalogData.katalog.metadaten.katalognummer.toString();
     }
 
-    determineVersion(fileContent: string): string {
+    private determineVersion(fileContent: string): string {
         const catalogData = this.parser.parse(fileContent);
         return catalogData.katalog.metadaten.versionsnummer.toString();
     }
 
-    determineValidFrom(fileContent: string): string {
+    private determineValidFrom(fileContent: string): string {
         const catalogData = this.parser.parse(fileContent);
         return this.extractDateFromGueltigAbField(
             catalogData.katalog.metadaten.gueltigAb.toString()
@@ -231,7 +297,7 @@ export class AVVCatalogParser {
         };
     }
 
-    private async avv303(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+    private async avv303(xmlData: string): Promise<ParsedCatalog<CatalogData>> {
         // Katalogtyp: Monohierarchische Klassifikation mit Facetten
         // Betriebsarten und -taetigkeiten
 
@@ -267,7 +333,7 @@ export class AVVCatalogParser {
         });
     }
 
-    private async avv313(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+    private async avv313(xmlData: string): Promise<ParsedCatalog<CatalogData>> {
         // Katalogtyp: Monohierarchische Klassifikation
         // Amtliche Gemeindeschluessel
 
@@ -298,7 +364,7 @@ export class AVVCatalogParser {
         });
     }
 
-    private async avv316(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+    private async avv316(xmlData: string): Promise<ParsedCatalog<CatalogData>> {
         // Katalogtyp: Liste
         // Angaben zur Primaerproduktion
 
@@ -328,7 +394,7 @@ export class AVVCatalogParser {
         });
     }
 
-    private async avv319(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+    private async avv319(xmlData: string): Promise<ParsedCatalog<CatalogData>> {
         // Katalogtyp: Monohierarchische Klassifikation mit Facetten
         // Matrizes
 
@@ -371,7 +437,7 @@ export class AVVCatalogParser {
         });
     }
 
-    private async avv322(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+    private async avv322(xmlData: string): Promise<ParsedCatalog<CatalogData>> {
         // Katalogtyp: Liste
         // Kontrollprogramme und weitere Mitteilungsgruende
 
@@ -400,11 +466,15 @@ export class AVVCatalogParser {
         });
     }
 
-    private async avv324(xmlData: string): Promise<LegacyCatalog<AVV324Data>> {
+    private async avv324(xmlData: string): Promise<ParsedCatalog<AVV324Data>> {
         // Katalogtyp: Polyhierarchische Klassifikation
         // Parameter
-
-        const filter: string[] = ['DNA', 'Mikroorganismen', 'Bakterientoxine'];
+        const filter: string[] = [
+            'DNA',
+            'Mikroorganismen',
+            'Bakterientoxine',
+            'Futtermittelzusatzstoffe'
+        ];
 
         const catalog324: KatalogInstance = this.parser.parse(
             xmlData
@@ -429,11 +499,22 @@ export class AVVCatalogParser {
         );
 
         // tslint:disable-next-line
-        const avv324Unique: MibiEintrag[] = _.uniqWith(avv324, _.isEqual);
+        const avv324Unique: TempEintrag[] = _.uniqWith(avv324, _.isEqual);
+        const allRegexValues = await this.getAllNRLRegexValues();
+
+        // Keep only those entries whose (normalized) text matches one of the
+        // NRL regex selectors; discard all others.
+        const avv324Filtered = avv324Unique.filter((tempEintrag: TempEintrag) =>
+            this.matchesAnyRegex(
+                tempEintrag.Text.normalize('NFC'),
+                allRegexValues
+            )
+        );
+
         const additionalPathogens = await this.getAdditionalPathogens();
         const duplicatePathogens: string[] = [];
 
-        avv324Unique.forEach((tempEintrag: TempEintrag) => {
+        avv324Filtered.forEach((tempEintrag: TempEintrag) => {
             const normalizedText = tempEintrag.Text.normalize('NFC');
             if (additionalPathogens.includes(normalizedText)) {
                 duplicatePathogens.push(normalizedText);
@@ -479,7 +560,7 @@ export class AVVCatalogParser {
         };
     }
 
-    private async avv326(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+    private async avv326(xmlData: string): Promise<ParsedCatalog<CatalogData>> {
         // Katalogtyp: Monohierarchische Klassifikation
         // Probenarten und Untersuchungsgruende
 
@@ -508,7 +589,7 @@ export class AVVCatalogParser {
         });
     }
 
-    private async avv328(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+    private async avv328(xmlData: string): Promise<ParsedCatalog<CatalogData>> {
         // Katalogtyp: Monohierarchische Klassifikation
         // Programm- oder Projektnummern
 
@@ -537,7 +618,7 @@ export class AVVCatalogParser {
         });
     }
 
-    private async avv337(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+    private async avv337(xmlData: string): Promise<ParsedCatalog<CatalogData>> {
         // Katalogtyp: Monohierarchische Klassifikation
         // Zusatzangaben in der Kennzeichnung
 
@@ -566,7 +647,7 @@ export class AVVCatalogParser {
         });
     }
 
-    private async avv339(xmlData: string): Promise<LegacyCatalog<CatalogData>> {
+    private async avv339(xmlData: string): Promise<ParsedCatalog<CatalogData>> {
         // Katalogtyp: Monohierarchische Klassifikation mit Facetten
         // Tiere
 
@@ -918,7 +999,6 @@ export class AVVCatalogParser {
         return [gemeindeBezeichnung, plz];
     }
 
-    // Refactor this one first: DB access should be handled with a properly injected repository -> done!
     private async getAdditionalPathogens(): Promise<string[]> {
         const allPathogens = await pathogenRepository.getAllEntries();
 
@@ -926,5 +1006,22 @@ export class AVVCatalogParser {
             return pathogen.pathogen;
         });
         return pathogens;
+    }
+
+    private async getAllNRLRegexValues(): Promise<string[]> {
+        return nrlRepository.getAllRegexValues();
+    }
+
+    private matchesAnyRegex(value: string, regexValues: string[]): boolean {
+        return regexValues.some(regexValue => {
+            try {
+                return new RegExp(regexValue).test(value);
+            } catch (error) {
+                getLogger().error(
+                    `Invalid NRL regex selector "${regexValue}": ${error.message}`
+                );
+                return false;
+            }
+        });
     }
 }

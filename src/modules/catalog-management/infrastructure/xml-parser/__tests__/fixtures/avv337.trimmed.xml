@@ -1,0 +1,48 @@
+<tns:Katalog id="14" xsi:schemaLocation="http://www.xml.katalogportal.bvl.bund.de/ https://katalogportal.bvl.bund.de/katalogportal/Katalogportal.xsd" xmlns:tns="http://www.xml.katalogportal.bvl.bund.de/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <tns:Metadaten>
+    <tns:Katalogname begriffsid="59444">
+      <tns:Name>Zusatzangaben in der Kennzeichnung</tns:Name>
+    </tns:Katalogname>
+    <tns:Katalognummer>337</tns:Katalognummer>
+    <tns:Sprache>Deutsch</tns:Sprache>
+    <tns:SpracheID>1</tns:SpracheID>
+    <tns:Katalogtyp>2</tns:Katalogtyp>
+    <tns:FacettenErlaubt>false</tns:FacettenErlaubt>
+    <tns:Versionsnummer>9.00</tns:Versionsnummer>
+    <tns:Veroeffentlicht>true</tns:Veroeffentlicht>
+    <tns:KodierungsTrennzeichen>,</tns:KodierungsTrennzeichen>
+    <tns:MerkmalWertTrennzeichen>-</tns:MerkmalWertTrennzeichen>
+    <tns:MehrereWerteTrennzeichen>:</tns:MehrereWerteTrennzeichen>
+    <tns:Arbeitsversion>false</tns:Arbeitsversion>
+    <tns:GueltigAb>2026-01-01+01:00</tns:GueltigAb>
+  </tns:Metadaten>
+  <tns:Eintraege>
+    <tns:Eintrag id="12184" aktion="NOT CHANGED" basiseintrag="false">
+      <tns:Eintragsname begriffsid="21394">
+        <tns:Name>Kenntlichmachung/Kennzeichnung/Auslobung</tns:Name>
+      </tns:Eintragsname>
+      <tns:Untereintraege>
+        <tns:Eintrag id="211542" aktion="INSERT" basiseintrag="true">
+          <tns:Eintragsname begriffsid="185141">
+            <tns:Name>wasserabweisend</tns:Name>
+          </tns:Eintragsname>
+        </tns:Eintrag>
+        <tns:Eintrag id="211541" aktion="INSERT" basiseintrag="true">
+          <tns:Eintragsname begriffsid="213093">
+            <tns:Name>Ölabweisend</tns:Name>
+          </tns:Eintragsname>
+        </tns:Eintrag>
+        <tns:Eintrag id="211540" aktion="DELETE" basiseintrag="true">
+          <tns:Eintragsname begriffsid="213094">
+            <tns:Name>entfernter Eintrag</tns:Name>
+          </tns:Eintragsname>
+        </tns:Eintrag>
+      </tns:Untereintraege>
+    </tns:Eintrag>
+    <tns:Eintrag id="12185" aktion="NOT CHANGED" basiseintrag="true">
+      <tns:Eintragsname begriffsid="21395">
+        <tns:Name>Allergene und Spurenhinweise</tns:Name>
+      </tns:Eintragsname>
+    </tns:Eintrag>
+  </tns:Eintraege>
+</tns:Katalog>
