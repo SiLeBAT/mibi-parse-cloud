@@ -3,9 +3,7 @@ import { UseCase } from '../../../shared/use-cases';
 import { OrderDTO } from '../../dto';
 import {
     orderRepository,
-    OrderRepository,
-    userRepository,
-    UserRepository
+    OrderRepository
 } from '../../infrastructure/repository';
 import { OrderPersistenceMapper, SamplePersistenceMapper } from '../../mappers';
 import { OrderSavingError } from './save-order.error';
@@ -18,10 +16,7 @@ type SaveOrderInput = {
 export class SaveOrderUseCase
     implements UseCase<SaveOrderInput, Promise<OrderDTO>>
 {
-    constructor(
-        private orderRepo: OrderRepository,
-        private userRepo: UserRepository
-    ) {}
+    constructor(private orderRepo: OrderRepository) {}
 
     async execute({ order, userId }: SaveOrderInput): Promise<OrderDTO> {
         const samples = order.sampleSet.samples;
@@ -51,15 +46,6 @@ export class SaveOrderUseCase
             results
         });
 
-        // The order must be persisted for the BfR submission step (it needs the
-        // saved ids). When the user has not granted data-save consent, the order
-        // is immediately marked for deletion so it is hidden from the user's
-        // order list and surfaced in the dashboard for removal.
-        const consentGiven = await this.userRepo.isDataSaveAgreed(userId);
-        if (!consentGiven) {
-            orderAttrs.markedForDeletion = true;
-            orderAttrs.markedForDeletionAt = new Date();
-        }
         const sampleAttrsList = samples.map((sample, index) =>
             SamplePersistenceMapper.toPersistence(sample, index + 1)
         );
@@ -96,6 +82,6 @@ export class SaveOrderUseCase
     }
 }
 
-const saveOrder = new SaveOrderUseCase(orderRepository, userRepository);
+const saveOrder = new SaveOrderUseCase(orderRepository);
 
 export { saveOrder };

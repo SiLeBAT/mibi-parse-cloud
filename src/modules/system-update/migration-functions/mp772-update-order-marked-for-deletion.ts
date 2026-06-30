@@ -24,5 +24,29 @@ export async function mp772UpdateOrderMarkedForDeletion() {
         }
         return true;
     };
-    return updateSchema(schemaName, orderSchema, updateFunction, guardFunction);
+
+    const result = await updateSchema(
+        schemaName,
+        orderSchema,
+        updateFunction,
+        guardFunction
+    );
+
+    // The schema defaultValue only applies to orders created after the field is
+    // added — existing orders keep markedForDeletion undefined. Backfill them
+    // explicitly so the value is always defined (false).
+    const OrderClass = Parse.Object.extend(schemaName);
+    const ordersWithoutFlag = await new Parse.Query(OrderClass)
+        .doesNotExist('markedForDeletion')
+        .limit(100000)
+        .find({ useMasterKey: true });
+
+    if (ordersWithoutFlag.length > 0) {
+        ordersWithoutFlag.forEach(order =>
+            order.set('markedForDeletion', false)
+        );
+        await Parse.Object.saveAll(ordersWithoutFlag, { useMasterKey: true });
+    }
+
+    return result;
 }
