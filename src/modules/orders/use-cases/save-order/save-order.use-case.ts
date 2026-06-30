@@ -3,7 +3,9 @@ import { UseCase } from '../../../shared/use-cases';
 import { OrderDTO } from '../../dto';
 import {
     orderRepository,
-    OrderRepository
+    OrderRepository,
+    userRepository,
+    UserRepository
 } from '../../infrastructure/repository';
 import { OrderPersistenceMapper, SamplePersistenceMapper } from '../../mappers';
 import { OrderSavingError } from './save-order.error';
@@ -16,9 +18,20 @@ type SaveOrderInput = {
 export class SaveOrderUseCase
     implements UseCase<SaveOrderInput, Promise<OrderDTO>>
 {
-    constructor(private orderRepo: OrderRepository) {}
+    constructor(
+        private orderRepo: OrderRepository,
+        private userRepo: UserRepository
+    ) {}
 
     async execute({ order, userId }: SaveOrderInput): Promise<OrderDTO> {
+        // The order is only persisted when the user has granted data-save
+        // consent. Without consent the order is returned unchanged (no
+        // objectId), so the caller knows it was not stored.
+        const consentGiven = await this.userRepo.isDataSaveAgreed(userId);
+        if (!consentGiven) {
+            return order;
+        }
+
         const samples = order.sampleSet.samples;
 
         const pathogens = [
@@ -82,6 +95,6 @@ export class SaveOrderUseCase
     }
 }
 
-const saveOrder = new SaveOrderUseCase(orderRepository);
+const saveOrder = new SaveOrderUseCase(orderRepository, userRepository);
 
 export { saveOrder };
