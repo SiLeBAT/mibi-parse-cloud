@@ -10,7 +10,6 @@ import {
 } from '../../domain';
 import { SERVER_ERROR_CODE } from '../../domain/enums';
 import { OrderDTO, SampleDTO } from '../../dto';
-import { userRepository } from '../../infrastructure/repository';
 import { AttachSavedIdsMapper, SampleEntryDTOMapper } from '../../mappers';
 import { OrderDTOMapper } from '../../mappers/order-dto.mapper';
 import { createSubmitterId } from '../create-submitter-id';
@@ -116,40 +115,30 @@ const submitOrderController = async (
             }
         };
 
-        // The order is only persisted when the user has granted data-save
-        // consent. Without consent it is still submitted to the BfR, but not
-        // stored in the MiBi-Portal.
-        const consentGiven = await userRepository.isDataSaveAgreed(submitterId);
-
-        if (!consentGiven) {
-            try {
-                await submitOrderUseCase.execute({ order, submitterId });
-            } catch (submitError) {
-                throw new OrderSubmissionError(
-                    'Order submission failed.',
-                    submitError
-                );
-            }
-            return { order: validatedOrderDTO };
-        }
-
-        // Step 2: Save the order — throws OrderSavingError on failure (internal rollback already done).
+        // Step 2: Save the order — the use case only persists it if the user
+        // granted data-save consent; otherwise the returned DTO has no objectId.
+        // Throws OrderSavingError on failure (internal rollback already done).
         const savedOrderDTO = await saveOrder.execute({
             order: validatedOrderDTO,
             userId: submitterId
         });
 
-        // Step 3: Submit the order — on failure, roll back the save to keep the two steps transactional.
-        const enrichedOrder = AttachSavedIdsMapper.attach(order, savedOrderDTO);
+        // Step 3: Submit the order to the BfR — always, whether or not it was
+        // stored. If it was stored, submit the id-enriched order; on submission
+        // failure roll the save back (rollback is a no-op when nothing was
+        // stored).
+        const orderToSubmit = savedOrderDTO.objectId
+            ? AttachSavedIdsMapper.attach(order, savedOrderDTO)
+            : order;
         try {
             await submitOrderUseCase.execute({
-                order: enrichedOrder,
+                order: orderToSubmit,
                 submitterId
             });
         } catch (submitError) {
             await saveOrder.rollback(savedOrderDTO);
             throw new OrderSubmissionError(
-                'Order was saved but submission failed; the saved order and samples have been rolled back.',
+                'Order submission failed; any saved order and samples have been rolled back.',
                 submitError
             );
         }
