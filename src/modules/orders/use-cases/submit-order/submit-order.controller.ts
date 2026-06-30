@@ -10,6 +10,7 @@ import {
 } from '../../domain';
 import { SERVER_ERROR_CODE } from '../../domain/enums';
 import { OrderDTO, SampleDTO } from '../../dto';
+import { userRepository } from '../../infrastructure/repository';
 import { AttachSavedIdsMapper, SampleEntryDTOMapper } from '../../mappers';
 import { OrderDTOMapper } from '../../mappers/order-dto.mapper';
 import { createSubmitterId } from '../create-submitter-id';
@@ -114,6 +115,23 @@ const submitOrderController = async (
                 meta: requestDTO.order.sampleSet.meta
             }
         };
+
+        // The order is only persisted when the user has granted data-save
+        // consent. Without consent it is still submitted to the BfR, but not
+        // stored in the MiBi-Portal.
+        const consentGiven = await userRepository.isDataSaveAgreed(submitterId);
+
+        if (!consentGiven) {
+            try {
+                await submitOrderUseCase.execute({ order, submitterId });
+            } catch (submitError) {
+                throw new OrderSubmissionError(
+                    'Order submission failed.',
+                    submitError
+                );
+            }
+            return { order: validatedOrderDTO };
+        }
 
         // Step 2: Save the order — throws OrderSavingError on failure (internal rollback already done).
         const savedOrderDTO = await saveOrder.execute({
