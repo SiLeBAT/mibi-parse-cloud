@@ -26,13 +26,7 @@ export class CreateOrderListUseCase
     }: CreateOrderListInput): Promise<OrderEntryDTO[]> {
         const email = await Email.create({ value: userEmail });
         const userId: EntityId = await this.userRepo.getIdForEmail(email);
-
         const orders: OrderObject[] = await this.orderRepo.findByUser(userId);
-
-        console.log(
-            'CreateOrderListUseCase, execute, orders: ',
-            JSON.stringify(orders, null, 2)
-        );
 
         return orders.map(order => this.toOrderEntryDTO(order));
     }
