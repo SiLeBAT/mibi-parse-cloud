@@ -50,6 +50,14 @@
     "markedForDeletionAt": {
       "type": "Date",
       "required": false
+    },
+    "sampleIds": {
+      "type": "Array",
+      "required": false
+    },
+    "sampleIdsAVV": {
+      "type": "Array",
+      "required": false
     }
   },
   "classLevelPermissions": {

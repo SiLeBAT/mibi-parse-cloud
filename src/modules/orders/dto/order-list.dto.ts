@@ -6,6 +6,8 @@ export interface OrderEntryDTO {
     fileName: string;
     nrls: string[];
     pathogens: string[];
+    sampleIds: string[];
+    sampleIdsAVV: string[];
     results: string;
 }
 

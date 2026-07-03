@@ -43,6 +43,8 @@ export class CreateOrderListUseCase
             fileName: order.get('fileName') ?? meta.fileName ?? '',
             nrls: order.get('nrls') ?? [],
             pathogens: order.get('pathogens') ?? [],
+            sampleIds: order.get('sampleIds') ?? [],
+            sampleIdsAVV: order.get('sampleIdsAVV') ?? [],
             results: order.get('results') ?? ''
         };
     }

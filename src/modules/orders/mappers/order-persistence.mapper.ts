@@ -6,6 +6,8 @@ import { OrderDTO } from '../dto';
 type OrderAggregations = {
     pathogens: string[];
     nrls: string[];
+    sampleIds: string[];
+    sampleIdsAVV: string[];
     sampleCount: number;
     results: string;
 };
@@ -24,6 +26,8 @@ export class OrderPersistenceMapper extends Mapper {
             fileName: orderDTO.sampleSet.meta.fileName,
             pathogens: aggregations.pathogens,
             nrls: aggregations.nrls,
+            sampleIds: aggregations.sampleIds,
+            sampleIdsAVV: aggregations.sampleIdsAVV,
             sampleCount: aggregations.sampleCount,
             results: aggregations.results,
             meta: JSON.stringify(orderDTO.sampleSet.meta, null, 2)
