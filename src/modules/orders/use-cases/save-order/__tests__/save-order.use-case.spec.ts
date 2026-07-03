@@ -9,13 +9,17 @@ import { SaveOrderUseCase } from '../save-order.use-case';
 const USER_ID = EntityId.create({ value: 'user-1' });
 
 // Minimal order DTO: only the fields the use case reads
-// (pathogen_avv.value and sampleMeta.nrl).
+// (pathogen_avv.value, sample_id.value, sample_id_avv.value and sampleMeta.nrl).
 const orderDTO = (): OrderDTO =>
     ({
         sampleSet: {
             samples: [
                 {
-                    sampleData: { pathogen_avv: { value: 'avv-1' } },
+                    sampleData: {
+                        pathogen_avv: { value: 'avv-1' },
+                        sample_id: { value: 'sample-id-1' },
+                        sample_id_avv: { value: 'sample-id-avv-1' }
+                    },
                     sampleMeta: { nrl: 'NRL-AR' }
                 }
             ],

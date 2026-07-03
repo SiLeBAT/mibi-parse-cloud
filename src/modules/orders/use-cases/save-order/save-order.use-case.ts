@@ -50,11 +50,33 @@ export class SaveOrderUseCase
             )
         ];
 
+        const sampleIds = [
+            ...new Set(
+                samples
+                    .map(sample => sample.sampleData.sample_id.value)
+                    .filter((sampleIdValue): sampleIdValue is string =>
+                        Boolean(sampleIdValue)
+                    )
+            )
+        ];
+
+        const sampleIdsAVV = [
+            ...new Set(
+                samples
+                    .map(sample => sample.sampleData.sample_id_avv.value)
+                    .filter((sampleIdAVVValue): sampleIdAVVValue is string =>
+                        Boolean(sampleIdAVVValue)
+                    )
+            )
+        ];
+
         const results = `0/${samples.length}`;
 
         const orderAttrs = OrderPersistenceMapper.toPersistence(order, userId, {
             pathogens,
             nrls,
+            sampleIds,
+            sampleIdsAVV,
             sampleCount: samples.length,
             results
         });

@@ -17,6 +17,7 @@ import { mp197CreateSample } from './mp197-create-sample';
 import { mp228CreateResult } from './mp228-create-result';
 import { mp771UpdateUserInfoDataSave } from './mp771-update-user-info-data-save';
 import { mp772UpdateOrderMarkedForDeletion } from './mp772-update-order-marked-for-deletion';
+import { mp236UpdateOrder } from './mp236-update-order';
 
 export interface UpdateFunc {
     (): Promise<boolean>;
@@ -44,5 +45,6 @@ export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp197CreateSample,
     mp228CreateResult,
     mp771UpdateUserInfoDataSave,
-    mp772UpdateOrderMarkedForDeletion
+    mp772UpdateOrderMarkedForDeletion,
+    mp236UpdateOrder
 ];
