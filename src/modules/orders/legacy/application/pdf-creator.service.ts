@@ -14,6 +14,7 @@ import { Sample } from '../model/sample.entity';
 import { CatalogService } from './catalog.service';
 import { PDFConfigProviderService } from './pdf-config-provider.service';
 import { PDFService } from './pdf.service';
+import { limitTextToLines } from './pdf-text.util';
 
 type PdfPrefixText = { text: string; bold: boolean };
 type PdfText = (string | PdfPrefixText)[];
@@ -39,6 +40,15 @@ export class PDFCreatorService {
             telephone: 57,
             email: 57
         }
+    };
+
+    // The free-text analysis cells (Sonstiges / Vergleiche mit humanen Isolaten)
+    // must never grow beyond two rows, otherwise the metadata spills onto a
+    // second PDF page. The comment box holds ~120 characters across two rows,
+    // i.e. ~60 per row; anything beyond two rows is dropped.
+    private readonly META_ANALYSIS_COMMENT = {
+        maxCharsPerLine: 60,
+        maxLines: 2
     };
 
     private readonly config;
@@ -398,7 +408,14 @@ export class PDFCreatorService {
                     return strings.options.active;
             }
         };
-        const getStringFromText = (text: string): string => (text ? text : ' ');
+        const getStringFromText = (text: string): string => {
+            const limited = limitTextToLines(
+                text,
+                this.META_ANALYSIS_COMMENT.maxCharsPerLine,
+                this.META_ANALYSIS_COMMENT.maxLines
+            );
+            return limited ? limited : ' ';
+        };
         return {
             stack: [
                 {
