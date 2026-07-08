@@ -88,6 +88,10 @@ export interface UserInformationAttributes extends Parse.Attributes {
     lastName: string;
     dataSaveAgreed: boolean;
     dataSaveViewed: boolean;
+    emailNotificationsEnabled: boolean;
+    emailNotificationFrequency: string;
+    emailNotificationWeekday: string;
+    emailNotificationWeekOfMonth: string;
 }
 
 export interface UserInformationObject

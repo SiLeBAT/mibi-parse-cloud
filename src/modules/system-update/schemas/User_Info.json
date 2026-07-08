@@ -39,6 +39,26 @@
       "type": "Boolean",
       "required": true,
       "defaultValue": false
+    },
+    "emailNotificationsEnabled": {
+      "type": "Boolean",
+      "required": true,
+      "defaultValue": false
+    },
+    "emailNotificationFrequency": {
+      "type": "String",
+      "required": true,
+      "defaultValue": "daily"
+    },
+    "emailNotificationWeekday": {
+      "type": "String",
+      "required": true,
+      "defaultValue": "monday"
+    },
+    "emailNotificationWeekOfMonth": {
+      "type": "String",
+      "required": true,
+      "defaultValue": "1"
     }
   },
   "classLevelPermissions": {
