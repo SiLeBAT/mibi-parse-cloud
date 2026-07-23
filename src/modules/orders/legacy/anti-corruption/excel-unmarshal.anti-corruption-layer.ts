@@ -7,7 +7,10 @@ import {
     SampleEntryTuple,
     SubmissionFormInfo
 } from '../../domain';
-import { ExcelUnmarshalService } from '../application/excel-unmarshal.service';
+import {
+    ExcelUnmarshalService,
+    ParsedSampleSheetInput
+} from '../application/excel-unmarshal.service';
 import { SampleSheetService } from '../application/sample-sheet.service';
 import {
     UnmarshalSample,
@@ -21,22 +24,23 @@ export class ExcelUnmarshalAntiCorruptionLayer {
         private sampleSheetService: SampleSheetService
     ) {}
 
-    async convertExcelToJSJson(buffer: Buffer, fileName: string) {
+    /**
+     * MPS-312: build an Order from a sample sheet that the client already parsed to
+     * JSON. Only the NRL enrichment + legacy conversion run here; the .xlsx reading
+     * happens in the browser.
+     */
+    async convertParsedSheetToOrder(
+        parsedSheet: ParsedSampleSheetInput
+    ): Promise<Order<SampleEntry<SampleEntryTuple>[]>> {
         const legacySampleSheet: UnmarshalSampleSheet =
-            await this.excelUnmarshalService.convertExcelToJSJson(
-                buffer,
-                fileName
-            );
+            this.excelUnmarshalService.fromParsedSampleSheet(parsedSheet);
 
         const legacySampleSet =
             this.sampleSheetService.fromSampleSheetToSampleSet(
                 legacySampleSheet
             );
 
-        const order: Order<SampleEntry<SampleEntryTuple>[]> =
-            await this.convertFromLegacy(legacySampleSet);
-
-        return order;
+        return this.convertFromLegacy(legacySampleSet);
     }
 
     private async convertFromLegacy(
