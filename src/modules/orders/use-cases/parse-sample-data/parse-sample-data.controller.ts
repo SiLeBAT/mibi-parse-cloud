@@ -8,7 +8,7 @@ import { SampleEntryDTOMapper } from '../../mappers/sample-entry-dto.mapper';
 import { createSubmissionFileUseCase } from '../create-submission-file/create-submission-file.use-case';
 import { SampleEntry } from '../../domain/sample-entry.entity';
 import { ParseFromJSONUseCase } from './parse-from-json.use-case';
-import { ParseFromXLSXUseCase } from './parse-from-xlsx.use-case';
+import { ParseFromParsedSheetUseCase } from './parse-from-parsed-sheet.use-case';
 import { checkExcelVersionUseCase } from '../check-excel-version';
 import {
     ExcelVersionError,
@@ -19,7 +19,8 @@ import { SERVER_ERROR_CODE } from '../../domain/enums';
 
 enum RESOURCE_VIEW_TYPE {
     JSON,
-    XLSX
+    XLSX,
+    PARSED_SHEET
 }
 
 type ParseSampleDataResponse =
@@ -35,7 +36,7 @@ type ParseSampleDataResponse =
 type ParseSampleDataRequestParameters = {
     readonly data: string;
     readonly filename: string;
-    readonly type: 'xml' | 'json';
+    readonly type: 'json' | 'parsedsheet';
 };
 
 type ParseSampleDataRequest = HTTPRequest<ParseSampleDataRequestParameters>;
@@ -64,7 +65,7 @@ const parseSampleDataController = loggedController(
     async (
         request: ParseSampleDataRequest
     ): Promise<ParseSampleDataResponse | ErrorDTO> => {
-        const type = getResourceViewType(request.params.type);
+        const type = getInputViewType(request.params.type);
         const submissionFormInput: SubmissionFormInput =
             SubmissionFormInput.create({
                 data: request.params.data,
@@ -149,6 +150,19 @@ const parseSampleDataController = loggedController(
     }
 );
 
+// Resolves the *input* format from the request's `type` parameter (set by the
+// server/BFF). Since MPS-312 the client parses the .xlsx to JSON in the browser,
+// so the only input formats are 'parsedsheet' (browser-parsed sample sheet) and
+// 'json' (an order DTO, used by the JSON->xlsx marshalling path). Raw excel is no
+// longer parsed here.
+function getInputViewType(typeString: string = 'json'): RESOURCE_VIEW_TYPE {
+    const normalized = typeString.toLowerCase();
+    if (normalized === 'parsedsheet') {
+        return RESOURCE_VIEW_TYPE.PARSED_SHEET;
+    }
+    return RESOURCE_VIEW_TYPE.JSON;
+}
+
 function getResourceViewType(typeString: string = 'json'): RESOURCE_VIEW_TYPE {
     let returnType = RESOURCE_VIEW_TYPE.JSON;
     if (typeString.toLowerCase().includes('xml')) {
@@ -171,8 +185,8 @@ function CreateOrderUseCaseFactory(
     type: RESOURCE_VIEW_TYPE
 ): ParseSampleDataUseCase {
     switch (type) {
-        case RESOURCE_VIEW_TYPE.XLSX:
-            return new ParseFromXLSXUseCase();
+        case RESOURCE_VIEW_TYPE.PARSED_SHEET:
+            return new ParseFromParsedSheetUseCase();
         case RESOURCE_VIEW_TYPE.JSON:
         default: {
             return new ParseFromJSONUseCase();
@@ -196,11 +210,10 @@ const ParseSampleDataRequestValidation = {
             required: true,
             type: String,
             options: (val: string) => {
-                return (
-                    val.toLowerCase() === 'xml' || val.toLowerCase() === 'json'
-                );
+                const normalized = val.toLowerCase();
+                return normalized === 'json' || normalized === 'parsedsheet';
             },
-            error: "type must be 'xml' or 'json'"
+            error: "type must be 'json' or 'parsedsheet'"
         }
     }
 };
