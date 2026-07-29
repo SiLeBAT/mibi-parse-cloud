@@ -14,3 +14,7 @@ export interface OrderEntryDTO {
 export interface OrderCollectionDTO {
     orders: OrderEntryDTO[];
 }
+
+export interface OrderDeletionResultDTO {
+    deletedOrderCount: number;
+}

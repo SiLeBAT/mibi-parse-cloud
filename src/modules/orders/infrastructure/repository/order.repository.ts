@@ -3,6 +3,7 @@ import {
     ObjectKeys,
     OrderAttributes,
     OrderObject,
+    ResultObject,
     SampleAttributes,
     SampleObject
 } from '../../../shared/infrastructure/parse-types';
@@ -13,6 +14,11 @@ export type SavedOrderIds = {
     orderId: EntityId;
     sampleIds: EntityId[];
 };
+
+// Upper bound for the "find everything to delete" queries. A single user's
+// orders (and their samples/results) stay well below this; the limit only
+// guards against Parse's default page size of 100 silently truncating a delete.
+const MAX_DELETE_QUERY_LIMIT = 100000;
 
 export class OrderRepository extends AbstractRepository<OrderObject> {
     async saveOrder(
@@ -92,9 +98,6 @@ export class OrderRepository extends AbstractRepository<OrderObject> {
 
         const query = this.getQuery();
         query.equalTo('user', userPointer);
-        // Orders marked for deletion (consent withdrawn) are hidden from the
-        // user. notEqualTo(true) also matches legacy rows without the field.
-        query.notEqualTo('markedForDeletion', true);
         query.descending('createdAt');
 
         return query.find({ useMasterKey: true });
@@ -105,12 +108,53 @@ export class OrderRepository extends AbstractRepository<OrderObject> {
         const orderPointer: OrderObject = new OrderClass();
         orderPointer.id = orderId.value;
 
+        await this.destroyOrdersWithChildren([orderPointer]);
+    }
+
+    async deleteAllByUser(userId: EntityId): Promise<number> {
+        const userPointer = new Parse.User();
+        userPointer.id = userId.value;
+
+        const orderQuery = this.getQuery();
+        orderQuery.equalTo('user', userPointer);
+        orderQuery.limit(MAX_DELETE_QUERY_LIMIT);
+        const orders = await orderQuery.find({ useMasterKey: true });
+
+        await this.destroyOrdersWithChildren(orders);
+
+        return orders.length;
+    }
+
+    // Deletes the given orders together with every Sample pointing at them and
+    // every Result pointing at those samples. Destroyed leaf-first (results,
+    // then samples, then orders) so a failure never orphans a child whose
+    // parent is already gone.
+    private async destroyOrdersWithChildren(
+        orders: OrderObject[]
+    ): Promise<void> {
+        if (orders.length === 0) {
+            return;
+        }
+
         const sampleQuery = new Parse.Query<SampleObject>(ObjectKeys.Sample);
-        sampleQuery.equalTo('order', orderPointer);
+        sampleQuery.containedIn('order', orders);
+        sampleQuery.limit(MAX_DELETE_QUERY_LIMIT);
         const samples = await sampleQuery.find({ useMasterKey: true });
+
         if (samples.length > 0) {
+            const resultQuery = new Parse.Query<ResultObject>(
+                ObjectKeys.Result
+            );
+            resultQuery.containedIn('sample', samples);
+            resultQuery.limit(MAX_DELETE_QUERY_LIMIT);
+            const results = await resultQuery.find({ useMasterKey: true });
+
+            if (results.length > 0) {
+                await Parse.Object.destroyAll(results, { useMasterKey: true });
+            }
             await Parse.Object.destroyAll(samples, { useMasterKey: true });
         }
-        await orderPointer.destroy({ useMasterKey: true });
+
+        await Parse.Object.destroyAll(orders, { useMasterKey: true });
     }
 }

@@ -7,7 +7,11 @@ export {
     SampleMetaDTO,
     SampleSetDTO
 } from './submission.dto';
-export { OrderCollectionDTO, OrderEntryDTO } from './order-list.dto';
+export {
+    OrderCollectionDTO,
+    OrderDeletionResultDTO,
+    OrderEntryDTO
+} from './order-list.dto';
 export {
     ResultDataDTO,
     ResultDTO,

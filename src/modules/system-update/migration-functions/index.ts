@@ -16,7 +16,6 @@ import { mp197CreateOrder } from './mp197-create-order';
 import { mp197CreateSample } from './mp197-create-sample';
 import { mp228CreateResult } from './mp228-create-result';
 import { mp771UpdateUserInfoDataSave } from './mp771-update-user-info-data-save';
-import { mp772UpdateOrderMarkedForDeletion } from './mp772-update-order-marked-for-deletion';
 import { mp236UpdateOrder } from './mp236-update-order';
 import { mp772UpdateUserInfoEmailNotifications } from './mp772-update-user-info-email-notifications';
 
@@ -46,7 +45,6 @@ export const UPDATE_FUNCTION_ARRAY: UpdateFunc[] = [
     mp197CreateSample,
     mp228CreateResult,
     mp771UpdateUserInfoDataSave,
-    mp772UpdateOrderMarkedForDeletion,
     mp236UpdateOrder,
     mp772UpdateUserInfoEmailNotifications
 ];

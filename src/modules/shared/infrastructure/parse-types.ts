@@ -137,10 +137,6 @@ export interface OrderAttributes extends Parse.Attributes {
     sampleCount?: number;
     results?: string;
     meta?: string;
-    // Set when the user withdraws data-save consent: the order is hidden from
-    // the user's order list and surfaced in the dashboard for deletion.
-    markedForDeletion?: boolean;
-    markedForDeletionAt?: Date;
 }
 
 export interface OrderObject extends Parse.Object<OrderAttributes> {}
