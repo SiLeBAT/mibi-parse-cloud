@@ -92,7 +92,8 @@ function makeService() {
             mockAVVFormatProvider as any,
             mockValidationErrorProvider as any
         ),
-        mockValidationErrorProvider
+        mockValidationErrorProvider,
+        mockAVVFormatProvider
     };
 }
 
@@ -359,5 +360,67 @@ describe('FormValidatorService — single sample skips batch duplicate check', (
         const results = await service.validateSamples([s], {});
         expect(results).toHaveLength(1);
         expect(errorCount(results[0], 'sample_id')).toBe(0);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// AVV id format (error 72) — the state-specific regex must always be installed
+// ---------------------------------------------------------------------------
+
+describe('FormValidatorService — AVV id format regex', () => {
+    // Reaches into the mocked validator to read the constraint set the service
+    // actually handed over for a sample.
+    function constraintsPassedToValidator() {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createValidator } = require('../../model/validator.entity');
+        const validateSample = createValidator().validateSample as jest.Mock;
+        return validateSample.mock.calls[0][1];
+    }
+
+    beforeEach(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createValidator } = require('../../model/validator.entity');
+        (createValidator().validateSample as jest.Mock).mockClear();
+    });
+
+    it('installs the AVV formats when a state is given', async () => {
+        const { service, mockAVVFormatProvider } = makeService();
+        mockAVVFormatProvider.getFormat.mockReturnValue(['^yy[0-9]{7}$']);
+
+        await service.validateSamples(
+            [Sample.create(makeSampleData(), makeMeta())],
+            { state: 'HE' }
+        );
+
+        expect(mockAVVFormatProvider.getFormat).toHaveBeenCalledWith('HE');
+        expect(
+            constraintsPassedToValidator()['sample_id_avv'][
+                'matchesIdToSpecificYear'
+            ].regex
+        ).toEqual(['^yy[0-9]{7}$']);
+    });
+
+    it('installs the AVV formats when NO state is given', async () => {
+        // Regression guard: `getFormat()` returns the formats of every state when
+        // called without one. Skipping setStateSpecificConstraints for an empty
+        // state left `regex: []` in place, which makes matchesRegexPattern bail out
+        // and error 72 unreachable for anonymous validation requests.
+        const { service, mockAVVFormatProvider } = makeService();
+        mockAVVFormatProvider.getFormat.mockReturnValue([
+            '^yy[0-9]{7}$',
+            '^yyyy-[0-9]{7}$'
+        ]);
+
+        await service.validateSamples(
+            [Sample.create(makeSampleData(), makeMeta())],
+            { state: '' }
+        );
+
+        expect(mockAVVFormatProvider.getFormat).toHaveBeenCalledWith('');
+        expect(
+            constraintsPassedToValidator()['sample_id_avv'][
+                'matchesIdToSpecificYear'
+            ].regex
+        ).toEqual(['^yy[0-9]{7}$', '^yyyy-[0-9]{7}$']);
     });
 });

@@ -404,6 +404,30 @@ describe('matchesIdToSpecificYear', () => {
         );
         expect(result).toBeNull();
     });
+
+    it('skips the check when sampling_date is present but unparseable', () => {
+        // "00.01.2025" is not a date; it is reported on its own (error 12).
+        // Formatting the resulting invalid moment yields the string "Invalid date",
+        // which used to be spliced into the yy placeholder and rejected an id that
+        // is in fact well formed.
+        const result = matchesIdToSpecificYear(
+            '25-1234567-117',
+            { ...BASE_OPTIONS, regex: ['^yy-[0-9]{7}-[0-9]{3}$'] },
+            'sample_id_avv',
+            { sampling_date: '00.01.2025' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('still reports a genuinely mismatching id when sampling_date is valid', () => {
+        const result = matchesIdToSpecificYear(
+            'XX-INVALID-ID',
+            { ...BASE_OPTIONS, regex: ['^yy-[0-9]{7}-[0-9]{3}$'] },
+            'sample_id_avv',
+            { sampling_date: '01.01.2025' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
 });
 
 // ---------------------------------------------------------------------------
