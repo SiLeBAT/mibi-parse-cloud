@@ -112,19 +112,23 @@ function matchesIdToSpecificYear(
     if (!value) {
         return null;
     }
+
     let currentYear = moment();
     let nextYear = moment().add(1, 'year');
     let lastYear = moment().subtract(1, 'year');
     if (attributes[SAMPLING_DATE]) {
-        currentYear = moment(attributes[SAMPLING_DATE], 'DD.MM.YYYY');
-        nextYear = moment(attributes[SAMPLING_DATE], 'DD.MM.YYYY').add(
-            1,
-            'year'
-        );
-        lastYear = moment(attributes[SAMPLING_DATE], 'DD.MM.YYYY').subtract(
-            1,
-            'year'
-        );
+        const samplingDate = moment(attributes[SAMPLING_DATE], 'DD.MM.YYYY');
+        if (!samplingDate.isValid()) {
+            // A sampling date like "00.01.2025" is already reported on its own
+            // (error 12). Formatting an invalid moment yields the literal string
+            // "Invalid date", so carrying on here would splice that into every
+            // `yy`/`yyyy` placeholder and reject a perfectly well-formed id with a
+            // second, bogus error. There is no year to check against — skip.
+            return null;
+        }
+        currentYear = samplingDate;
+        nextYear = samplingDate.clone().add(1, 'year');
+        lastYear = samplingDate.clone().subtract(1, 'year');
     }
 
     const changedArray = _.flatMap(options.regex, (entry: string) => {
