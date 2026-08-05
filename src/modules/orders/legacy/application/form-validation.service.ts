@@ -209,12 +209,6 @@ export class FormValidatorService {
                 });
         }
 
-        // Always applied: `AVVFormatProvider.getFormat` falls back to the formats of
-        // ALL states when no state is known (anonymous validation, or a submitter
-        // whose institute carries no state). Guarding this on a truthy
-        // `options.state` left the AVV id format rule with its shipped empty regex
-        // list, which `matchesRegexPattern` treats as "nothing to check" — so error
-        // 72 could never be raised for those requests.
         newConstraints = this.setStateSpecificConstraints(
             newConstraints,
             options
