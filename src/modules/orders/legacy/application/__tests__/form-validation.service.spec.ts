@@ -424,3 +424,120 @@ describe('FormValidatorService — AVV id format regex', () => {
         ).toEqual(['^yy[0-9]{7}$', '^yyyy-[0-9]{7}$']);
     });
 });
+
+// ---------------------------------------------------------------------------
+// MPC-291: a rule's second message (yearError -> yearMessage) must be resolved
+// ---------------------------------------------------------------------------
+
+describe('FormValidatorService — secondary rule messages', () => {
+    function constraintsPassedToValidator() {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createValidator } = require('../../model/validator.entity');
+        const validateSample = createValidator().validateSample as jest.Mock;
+        return validateSample.mock.calls[0][1];
+    }
+
+    beforeEach(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createValidator } = require('../../model/validator.entity');
+        (createValidator().validateSample as jest.Mock).mockClear();
+    });
+
+    it('resolves yearError into yearMessage for the AVV id rule', async () => {
+        const { service } = makeService();
+
+        await service.validateSamples(
+            [Sample.create(makeSampleData(), makeMeta())],
+            {}
+        );
+
+        const rule =
+            constraintsPassedToValidator()['sample_id_avv'][
+                'matchesIdToSpecificYear'
+            ];
+        // Without this the validator cannot tell "wrong format" from "wrong year"
+        // and always falls back to the misleading format message (error 72).
+        expect(rule.yearError).toBe(127);
+        expect(rule.yearMessage).toEqual(MOCK_ERROR);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// MPC-291: a new error code must work before master-data has shipped it
+// ---------------------------------------------------------------------------
+
+describe('FormValidatorService — error message fallback', () => {
+    function constraintsPassedToValidator() {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createValidator } = require('../../model/validator.entity');
+        const validateSample = createValidator().validateSample as jest.Mock;
+        return validateSample.mock.calls[0][1];
+    }
+
+    beforeEach(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createValidator } = require('../../model/validator.entity');
+        (createValidator().validateSample as jest.Mock).mockClear();
+    });
+
+    it('uses the constraint fallback when the code is missing from the database', async () => {
+        const { service, mockValidationErrorProvider } = makeService();
+        // An environment where master-data has not run yet: 127 is unknown.
+        mockValidationErrorProvider.getError.mockImplementation(
+            (code: number) => {
+                if (code === 127) {
+                    throw new Error('Error code not found, code=127');
+                }
+                return MOCK_ERROR;
+            }
+        );
+
+        await service.validateSamples(
+            [Sample.create(makeSampleData(), makeMeta())],
+            {}
+        );
+
+        const rule =
+            constraintsPassedToValidator()['sample_id_avv'][
+                'matchesIdToSpecificYear'
+            ];
+        expect(rule.yearMessage.code).toBe(127);
+        expect(rule.yearMessage.message).toMatch(
+            /^Das Jahr in der Probenummer/
+        );
+    });
+
+    it('prefers the database message once the code is there', async () => {
+        const { service, mockValidationErrorProvider } = makeService();
+        const fromDatabase = { code: 127, level: 1, message: 'aus der DB' };
+        mockValidationErrorProvider.getError.mockImplementation(
+            (code: number) => (code === 127 ? fromDatabase : MOCK_ERROR)
+        );
+
+        await service.validateSamples(
+            [Sample.create(makeSampleData(), makeMeta())],
+            {}
+        );
+
+        expect(
+            constraintsPassedToValidator()['sample_id_avv'][
+                'matchesIdToSpecificYear'
+            ].yearMessage
+        ).toEqual(fromDatabase);
+    });
+
+    it('still throws for a missing code that has no fallback', async () => {
+        const { service, mockValidationErrorProvider } = makeService();
+        // A genuine misconfiguration must not be swallowed.
+        mockValidationErrorProvider.getError.mockImplementation(() => {
+            throw new Error('Error code not found');
+        });
+
+        await expect(
+            service.validateSamples(
+                [Sample.create(makeSampleData(), makeMeta())],
+                {}
+            )
+        ).rejects.toThrow('Error code not found');
+    });
+});

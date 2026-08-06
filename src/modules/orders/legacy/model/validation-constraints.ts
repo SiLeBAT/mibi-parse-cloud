@@ -223,6 +223,19 @@ export const baseConstraints: ValidationConstraints = {
     sample_id_avv: {
         matchesIdToSpecificYear: {
             error: 72,
+            // MPC-291: reported instead of 72 when the id matches a state format but
+            // for a different year than the sampling (or isolation) date.
+            yearError: 127,
+            // Used only until error 127 reaches an environment's `validationerrors`
+            // collection via master-data. The database wins once it is there, so keep
+            // this text in sync with data/db/validation-errors/validationerrors.json
+            // in the master-data repository.
+            yearMessageFallback: {
+                code: 127,
+                level: 1,
+                message:
+                    'Das Jahr in der Probenummer nach AVVData passt nicht zum Jahr im Datum der Probenahme (bzw. falls nicht vorhanden im Datum der Isolierung).'
+            },
             regex: []
         }
     },

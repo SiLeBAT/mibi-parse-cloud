@@ -2488,3 +2488,188 @@ describe('matchesZoMo (empty field allowed via "" entry)', () => {
         expect(result).toEqual(TEST_ERROR);
     });
 });
+
+// ---------------------------------------------------------------------------
+// matchesIdToSpecificYear — MPC-291: year mismatch vs. wrong format
+// ---------------------------------------------------------------------------
+
+describe('matchesIdToSpecificYear — year mismatch (MPC-291)', () => {
+    // Bayern's AVV format, the one from the ticket's test sheet.
+    const BY_FORMAT = ['^yy-[0-9]{7}-[0-9]{3}$'];
+    const YEAR_ERROR = {
+        code: 127,
+        level: 1,
+        message: 'Jahr passt nicht zum Datum'
+    };
+    const OPTIONS = {
+        ...BASE_OPTIONS,
+        regex: BY_FORMAT,
+        yearMessage: YEAR_ERROR
+    };
+
+    it('reports the year message when only the year is wrong', () => {
+        // The ticket's data row 5: a valid Bavarian id from 2019, sampled in 2017.
+        const result = matchesIdToSpecificYear(
+            '19-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '13.03.2017' }
+        );
+        expect(result).toEqual(YEAR_ERROR);
+    });
+
+    it('reports the format message when the format itself is wrong', () => {
+        const result = matchesIdToSpecificYear(
+            'not-an-avv-number',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '13.03.2017' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('returns null when format and year both match', () => {
+        const result = matchesIdToSpecificYear(
+            '19-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '13.03.2019' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('falls back to isolation_date when sampling_date is missing', () => {
+        const result = matchesIdToSpecificYear(
+            '19-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '', isolation_date: '13.03.2017' }
+        );
+        expect(result).toEqual(YEAR_ERROR);
+    });
+
+    it('accepts a matching year taken from isolation_date', () => {
+        const result = matchesIdToSpecificYear(
+            '19-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '', isolation_date: '13.03.2019' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('prefers sampling_date over isolation_date when both are given', () => {
+        const result = matchesIdToSpecificYear(
+            '19-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '13.03.2019', isolation_date: '13.03.2017' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('keeps the format message for formats that carry no year', () => {
+        // A state format without a yy/yyyy placeholder can never cause a year
+        // mismatch, so a failure there is a genuine format problem.
+        const result = matchesIdToSpecificYear(
+            '1234567',
+            { ...OPTIONS, regex: ['^[0-9]{5}$'] },
+            'sample_id_avv',
+            { sampling_date: '13.03.2017' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('keeps the format message when no date is given at all', () => {
+        // Without a date there is nothing to compare the year against, so the
+        // fallback (today +/- 1 year) is not something to blame the user for.
+        const result = matchesIdToSpecificYear(
+            '19-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            {}
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('falls back to the format message when no yearMessage is configured', () => {
+        const result = matchesIdToSpecificYear(
+            '19-1234567-127',
+            { ...BASE_OPTIONS, regex: BY_FORMAT },
+            'sample_id_avv',
+            { sampling_date: '13.03.2017' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// matchesIdToSpecificYear — MPC-291: the year must match the date exactly
+// ---------------------------------------------------------------------------
+
+describe('matchesIdToSpecificYear — exact year required', () => {
+    const BY_FORMAT = ['^yy-[0-9]{7}-[0-9]{3}$'];
+    const YEAR_ERROR = {
+        code: 127,
+        level: 1,
+        message: 'Jahr passt nicht zum Datum'
+    };
+    const OPTIONS = {
+        ...BASE_OPTIONS,
+        regex: BY_FORMAT,
+        yearMessage: YEAR_ERROR
+    };
+
+    it('accepts the exact year of the sampling date', () => {
+        const result = matchesIdToSpecificYear(
+            '19-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '13.03.2019' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('rejects a number from the year before the sampling date', () => {
+        const result = matchesIdToSpecificYear(
+            '18-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '13.03.2019' }
+        );
+        expect(result).toEqual(YEAR_ERROR);
+    });
+
+    it('rejects a number from the year after the sampling date', () => {
+        const result = matchesIdToSpecificYear(
+            '20-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '13.03.2019' }
+        );
+        expect(result).toEqual(YEAR_ERROR);
+    });
+
+    it('applies the same strictness to the isolation date', () => {
+        const result = matchesIdToSpecificYear(
+            '18-1234567-127',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '', isolation_date: '13.03.2019' }
+        );
+        expect(result).toEqual(YEAR_ERROR);
+    });
+
+    it('still allows the surrounding years when no date is given at all', () => {
+        // Nothing to compare against, so the year stays open and only the format
+        // is checked - otherwise every number would be rejected at a year boundary.
+        const lastYear = String(new Date().getFullYear() - 1).slice(-2);
+        const result = matchesIdToSpecificYear(
+            `${lastYear}-1234567-127`,
+            { ...OPTIONS },
+            'sample_id_avv',
+            {}
+        );
+        expect(result).toBeNull();
+    });
+});
