@@ -716,6 +716,12 @@ export interface MatchesZoMoOptions extends MatchesProgramZoMoOptions {
 
 export interface MatchIdToYearOptions extends ValidatorFunctionOptions {
     regex: string[];
+    /**
+     * MPC-291: message used when the id matches a state format but for a different
+     * year than the sampling/isolation date. Resolved from `yearError` alongside
+     * `message` in FormValidatorService.getConstraints.
+     */
+    yearMessage?: ValidationError;
 }
 
 export interface MatchRegexPatternOptions extends MatchIdToYearOptions {

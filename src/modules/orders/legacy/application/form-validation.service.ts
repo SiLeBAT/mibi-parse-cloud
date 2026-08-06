@@ -4,6 +4,7 @@ import {
     AnnotatedSampleDataEntry,
     SampleProperty,
     ValidationConstraints,
+    ValidationError,
     ValidationRule,
     ValidationRuleSet,
     Validator
@@ -62,6 +63,8 @@ const duplicatePathogenIdIdAVVPartialConfig: DuplicateIdConfig = {
 
 export class FormValidatorService {
     private validator: Validator;
+    /** Error codes already reported as missing from the database (see resolveError). */
+    private reportedFallbackCodes = new Set<number>();
 
     constructor(
         private catalogService: CatalogService,
@@ -219,10 +222,55 @@ export class FormValidatorService {
                 v2['message'] = this.validationErrorProvider.getError(
                     v2['error']
                 );
+                // MPC-291: a rule may offer a second, more specific message. Resolve
+                // it the same way so the validator can pick between them.
+                if (v2['yearError'] !== undefined) {
+                    v2['yearMessage'] = this.resolveError(
+                        v2['yearError'],
+                        v2['yearMessageFallback']
+                    );
+                }
             });
         });
 
         return newConstraints;
+    }
+
+    /**
+     * Looks a validation error up in the `validationerrors` collection, falling back
+     * to a message shipped with the constraint when the code is not there.
+     *
+     * Error texts normally live in the database and reach an environment through a
+     * master-data run, which is a separate, manually triggered job — while the cloud
+     * deploys itself. A brand-new code therefore exists in the code before it exists
+     * in the database, and `getError` throws for an unknown code, which would break
+     * validation for every sample until the data job happens to run.
+     *
+     * With a fallback the new message works the moment the cloud is deployed, and the
+     * database value silently takes over once master-data catches up — so the text
+     * stays editable there like every other message.
+     */
+    private resolveError(
+        code: number,
+        fallback?: ValidationError
+    ): ValidationError {
+        try {
+            return this.validationErrorProvider.getError(code);
+        } catch (error) {
+            if (!fallback) {
+                throw error;
+            }
+            // Constraints are rebuilt for every sample, so log once per code rather
+            // than once per row — a single sheet would otherwise emit this hundreds
+            // of times.
+            if (!this.reportedFallbackCodes.has(code)) {
+                this.reportedFallbackCodes.add(code);
+                console.log(
+                    `Validation error ${code} is not in the database yet, using the message shipped with the constraint. Run master-data to add it.`
+                );
+            }
+            return fallback;
+        }
     }
 
     private setStateSpecificConstraints(

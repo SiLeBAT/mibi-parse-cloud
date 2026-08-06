@@ -29,6 +29,7 @@ import { AVVCatalog } from './avvcatalog.entity';
 
 moment.locale('de');
 const SAMPLING_DATE = 'sampling_date';
+const ISOLATION_DATE = 'isolation_date';
 const NOT_KEY = 'not';
 
 function nrlExists(
@@ -112,48 +113,77 @@ function matchesIdToSpecificYear(
     if (!value) {
         return null;
     }
-    let currentYear = moment();
-    let nextYear = moment().add(1, 'year');
-    let lastYear = moment().subtract(1, 'year');
-    if (attributes[SAMPLING_DATE]) {
-        const samplingDate = moment(attributes[SAMPLING_DATE], 'DD.MM.YYYY');
-        if (!samplingDate.isValid()) {
+    const referenceDateValue =
+        attributes[SAMPLING_DATE] || attributes[ISOLATION_DATE] || '';
+
+    let hasReferenceDate = false;
+    // With a date to compare against, the year in the sample number must match it
+    // exactly. Without one there is nothing to compare, so the year is left open
+    // around today and only the format is checked.
+    let years = [
+        moment().subtract(1, 'year'),
+        moment(),
+        moment().add(1, 'year')
+    ];
+
+    if (referenceDateValue) {
+        const referenceDate = moment(referenceDateValue, 'DD.MM.YYYY');
+        if (!referenceDate.isValid()) {
             return null;
         }
-        currentYear = samplingDate;
-        nextYear = samplingDate.clone().add(1, 'year');
-        lastYear = samplingDate.clone().subtract(1, 'year');
+        years = [referenceDate];
+        hasReferenceDate = true;
     }
 
     const changedArray = _.flatMap(options.regex, (entry: string) => {
-        const result: string[] = [];
         if (entry.includes('yyyy')) {
-            const currentEntry = entry.replace(
-                'yyyy',
-                currentYear.format('YYYY')
+            return years.map(year =>
+                entry.replace('yyyy', year.format('YYYY'))
             );
-            const nextEntry = entry.replace('yyyy', nextYear.format('YYYY'));
-            const lastEntry = entry.replace('yyyy', lastYear.format('YYYY'));
-            result.push(lastEntry);
-            result.push(currentEntry);
-            result.push(nextEntry);
-        } else if (entry.includes('yy')) {
-            const currentEntry = entry.replace('yy', currentYear.format('YY'));
-            const nextEntry = entry.replace('yy', nextYear.format('YY'));
-            const lastEntry = entry.replace('yy', lastYear.format('YY'));
-            result.push(lastEntry);
-            result.push(currentEntry);
-            result.push(nextEntry);
-        } else {
-            result.push(entry);
         }
-        return result;
+        if (entry.includes('yy')) {
+            return years.map(year => entry.replace('yy', year.format('YY')));
+        }
+        return [entry];
     });
-    options.regex = changedArray;
-    return matchesRegexPattern(value, {
+
+    const formatError = matchesRegexPattern(value, {
         ...options,
-        ...{ ignoreNumbers: false }
+        regex: changedArray,
+        ignoreNumbers: false
     });
+
+    if (formatError === null) {
+        return null;
+    }
+
+    // MPC-291: tell the two failure modes apart. If the id matches one of the state
+    // formats for *some* year but not for the year of the sampling/isolation date,
+    // the format is fine and only the year is off — saying "the format seems
+    // incorrect" sends the user looking for a problem that is not there.
+    if (
+        hasReferenceDate &&
+        options.yearMessage &&
+        matchesFormatForAnyYear(value, options.regex)
+    ) {
+        return { ...options.yearMessage };
+    }
+
+    return formatError;
+}
+
+/**
+ * Does the value match one of the year-bearing state formats, ignoring which year?
+ * Formats without a `yy`/`yyyy` placeholder are skipped: they carry no year, so they
+ * can never be the cause of a year mismatch.
+ */
+function matchesFormatForAnyYear(value: string, regex: string[]): boolean {
+    return regex
+        .filter(entry => entry.includes('yy'))
+        .map(entry =>
+            entry.replace('yyyy', '[0-9]{4}').replace('yy', '[0-9]{2}')
+        )
+        .some(pattern => new RegExp(pattern).test(value));
 }
 
 function notEmptyIfOtherExists(
