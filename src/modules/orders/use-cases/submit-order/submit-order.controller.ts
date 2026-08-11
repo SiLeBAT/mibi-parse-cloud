@@ -10,13 +10,19 @@ import {
 } from '../../domain';
 import { SERVER_ERROR_CODE } from '../../domain/enums';
 import { OrderDTO, SampleDTO } from '../../dto';
+import {
+    AnalysisValidationFinding,
+    analysisValidationService
+} from '../../legacy/application/analysis-validation.service';
 import { AttachSavedIdsMapper, SampleEntryDTOMapper } from '../../mappers';
 import { OrderDTOMapper } from '../../mappers/order-dto.mapper';
+import { NRLId } from '../../../shared/domain/valueObjects/nrl-id.vo';
 import { createSubmitterId } from '../create-submitter-id';
 import { OrderSavingError, saveOrder } from '../save-order';
 import { validateOrder } from '../validate-order';
 import {
     AutoCorrectedInputError,
+    InvalidAnalysisError,
     InvalidInputError,
     OrderSubmissionError
 } from './submit-order.error';
@@ -56,6 +62,13 @@ export interface OrderSavingErrorDTO extends DefaultServerErrorDTO {
 
 export interface OrderSubmissionErrorDTO extends DefaultServerErrorDTO {
     order: OrderDTO;
+}
+
+export interface InvalidAnalysisErrorDTO extends DefaultServerErrorDTO {
+    order: OrderDTO;
+    // One entry per problem found, so an API client can react per issue instead
+    // of parsing the joined message.
+    findings: AnalysisValidationFinding[];
 }
 
 const submitOrderController = async (
@@ -102,6 +115,28 @@ const submitOrderController = async (
             throw new AutoCorrectedInputError(
                 'Has been auto-corrected',
                 new Error('Has been auto-corrected')
+            );
+        }
+
+        // Step 1b: The analysis data is not covered by the form validation
+        // above. Check it against the NRLs the order is split by, so a sender
+        // whose analysis cannot be submitted as given is told what is wrong
+        // instead of having the first sample's analysis applied to the rest.
+        const analysisFindings = analysisValidationService.validate(
+            order.sampleEntryCollection.map((entry, index) => ({
+                position: index + 1,
+                // An entry the sender left incomplete resolves to the unknown
+                // NRL and an empty analysis, which the validation skips; the
+                // form validation above is what reports missing data.
+                nrl: NRLId.create(entry.data?.nrl ?? '').value,
+                analysis: entry.data?.analysis ?? {}
+            }))
+        );
+        if (analysisFindings.length > 0) {
+            throw new InvalidAnalysisError(
+                'Invalid analysis data',
+                new Error('Invalid analysis data'),
+                analysisFindings
             );
         }
 
@@ -157,6 +192,18 @@ const submitOrderController = async (
                 code: SERVER_ERROR_CODE.AUTOCORRECTED_INPUT,
                 message: 'Has been auto-corrected',
                 order: requestDTO.order
+            };
+            return errorDTO;
+        } else if (error instanceof InvalidAnalysisError) {
+            const errorDTO: InvalidAnalysisErrorDTO = {
+                code: SERVER_ERROR_CODE.INVALID_ANALYSIS,
+                // The findings are specific enough to be the message; joining
+                // them keeps clients that only surface `message` informative.
+                message: error.findings
+                    .map(finding => finding.message)
+                    .join(' '),
+                order: requestDTO.order,
+                findings: error.findings
             };
             return errorDTO;
         } else if (error instanceof OrderSavingError) {
