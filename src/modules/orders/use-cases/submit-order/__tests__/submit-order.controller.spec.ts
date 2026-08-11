@@ -8,6 +8,7 @@ const mockSaveExecute = jest.fn();
 const mockRollback = jest.fn();
 const mockAttach = jest.fn();
 const mockSubmit = jest.fn();
+const mockValidateAnalysis = jest.fn();
 
 jest.mock('../../create-submitter-id', () => ({
     createSubmitterId: { execute: mockCreateSubmitterId }
@@ -29,8 +30,12 @@ jest.mock('../../save-order', () => ({
 jest.mock('../submit-order.use-case', () => ({
     submitOrderUseCase: { execute: mockSubmit }
 }));
+jest.mock('../../../legacy/application/analysis-validation.service', () => ({
+    analysisValidationService: { validate: mockValidateAnalysis }
+}));
 
 import { SampleSet } from '../../../domain';
+import { SERVER_ERROR_CODE } from '../../../domain/enums';
 import { submitOrderController } from '../submit-order.controller';
 
 const makeRequest = () =>
@@ -66,6 +71,7 @@ describe('submitOrderController', () => {
         });
         mockToDTO.mockReturnValue({});
         mockSubmit.mockResolvedValue(undefined);
+        mockValidateAnalysis.mockReturnValue([]);
     });
 
     afterEach(() => jest.restoreAllMocks());
@@ -109,5 +115,53 @@ describe('submitOrderController', () => {
             submitterId: expect.anything()
         });
         expect(result.order.objectId).toBe('order-1');
+    });
+
+    describe('invalid analysis data', () => {
+        const finding = {
+            issue: 'DIFFERENT_ANALYSIS_FOR_SAME_NRL',
+            nrl: 'NRL-Salm',
+            samples: [1, 2],
+            procedures: [],
+            message:
+                'Different analysis procedures were requested for samples of the same NRL (NRL-Salm).'
+        };
+
+        beforeEach(() => {
+            mockValidateAnalysis.mockReturnValue([finding]);
+            mockSaveExecute.mockResolvedValue({
+                sampleSet: { samples: [{}], meta: {} }
+            });
+        });
+
+        it('answers with the specific analysis error code and message', async () => {
+            const result = (await submitOrderController(makeRequest())) as {
+                code: number;
+                message: string;
+                findings: unknown[];
+            };
+
+            expect(result.code).toBe(SERVER_ERROR_CODE.INVALID_ANALYSIS);
+            expect(result.message).toBe(finding.message);
+            expect(result.findings).toEqual([finding]);
+        });
+
+        it('neither saves nor submits the order', async () => {
+            await submitOrderController(makeRequest());
+
+            expect(mockSaveExecute).not.toHaveBeenCalled();
+            expect(mockSubmit).not.toHaveBeenCalled();
+        });
+
+        it('joins the messages when several problems were found', async () => {
+            const second = { ...finding, message: 'Second problem.' };
+            mockValidateAnalysis.mockReturnValue([finding, second]);
+
+            const result = (await submitOrderController(makeRequest())) as {
+                message: string;
+            };
+
+            expect(result.message).toBe(`${finding.message} Second problem.`);
+        });
     });
 });

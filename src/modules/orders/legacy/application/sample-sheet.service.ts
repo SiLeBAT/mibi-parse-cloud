@@ -97,8 +97,10 @@ export class SampleSheetService {
         };
     }
 
-    // sample specific meta data not implemented yet,
-    // so use the first samples analysis
+    // A sample sheet has one analysis section for the whole NRL, while the
+    // analysis is held per sample, so the first sample's is used for the sheet.
+    // Submissions where the samples of one NRL disagree are rejected before
+    // they get here (AnalysisValidationService), so nothing is lost silently.
     private async calcSampleSheetAnalysis(
         nrl: NRL_ID_VALUE,
         partialAnalysis: Partial<Analysis>[]
