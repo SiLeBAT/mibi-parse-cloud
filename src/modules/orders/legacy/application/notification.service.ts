@@ -1,5 +1,3 @@
-import { EventEmitter } from 'events';
-
 import { logger } from '../../../../system/logging';
 import {
     Attachment,
@@ -8,13 +6,23 @@ import {
     NotificationMeta
 } from '../model/legacy.model';
 
-export class NotificationService {
-    private notificationName = 'mibi-notification';
-    private sender: EventEmitter = new EventEmitter();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type NotificationHandler = (notification: Notification<any, any>) => unknown;
 
-    sendNotification<T, V extends NotificationMeta>(
+export class NotificationService {
+    private handlers: NotificationHandler[] = [];
+
+    /**
+     * Delivers the notification and resolves once every handler is done.
+     *
+     * This used to emit on an EventEmitter, which is fire-and-forget: a handler
+     * that failed to send its mail could not report that back, so a submission
+     * that never reached the BfR still looked successful to the user. Awaiting
+     * the handlers is what lets that failure travel back to the caller.
+     */
+    async sendNotification<T, V extends NotificationMeta>(
         notification: Notification<T, V>
-    ): void {
+    ): Promise<void> {
         logger.info(`Sending notification:\n
             type: ${JSON.stringify(notification.type, null, 2)},\n
             payload: ${JSON.stringify(notification.payload, null, 2)},\n
@@ -25,13 +33,16 @@ export class NotificationService {
                 },
                 2
             )}`);
-        this.sender.emit(this.notificationName, notification);
+
+        for (const handler of this.handlers) {
+            await handler(notification);
+        }
     }
 
     addHandler<T, V extends NotificationMeta>(
-        handler: (notification: Notification<T, V>) => void
+        handler: (notification: Notification<T, V>) => unknown
     ): void {
-        this.sender.on(this.notificationName, handler);
+        this.handlers.push(handler as NotificationHandler);
     }
 
     createEmailNotificationMetaData(
