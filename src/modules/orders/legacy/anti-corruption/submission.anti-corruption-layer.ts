@@ -87,9 +87,14 @@ export class SubmissionAntiCorruptionLayer {
                 break;
         }
 
-        this.sendToNRLs(nrlPayloads, applicantMetaData);
+        // Awaited: a failure to reach the BfR has to abort the submission so
+        // the caller can tell the user their data did not arrive.
+        await this.sendToNRLs(nrlPayloads, applicantMetaData);
 
-        this.sendToUser(userPayloads, applicantMetaData);
+        // Not awaited into the failure path on purpose - see sendToUser. By the
+        // time we get here the NRLs have the data, so the submission stands
+        // even if the sender's own copy could not be delivered.
+        await this.sendToUser(userPayloads, applicantMetaData);
     }
 
     private createLegacySampleSet(
@@ -268,21 +273,28 @@ export class SubmissionAntiCorruptionLayer {
         applicantMetaData: ApplicantMetaData
     ): Promise<void> {
         try {
-            payloads.forEach(async payload => {
-                const orderNotificationMetaData =
-                    this.resolveOrderNotificationMetaData(
-                        applicantMetaData,
-                        payload.nrl
-                    );
+            // Promise.all, not forEach(async): forEach discards the promises it
+            // creates, so every rejection here used to be an unhandled one and
+            // the submission reported success regardless.
+            await Promise.all(
+                payloads.map(async payload => {
+                    const orderNotificationMetaData =
+                        this.resolveOrderNotificationMetaData(
+                            applicantMetaData,
+                            payload.nrl
+                        );
 
-                const newOrderNotification =
-                    await this.createNewOrderNotification(
-                        this.createNotificationAttachment(payload),
-                        orderNotificationMetaData
-                    );
+                    const newOrderNotification =
+                        await this.createNewOrderNotification(
+                            this.createNotificationAttachment(payload),
+                            orderNotificationMetaData
+                        );
 
-                this.notificationService.sendNotification(newOrderNotification);
-            });
+                    await this.notificationService.sendNotification(
+                        newOrderNotification
+                    );
+                })
+            );
         } catch (error) {
             this.logger.error(
                 'Unable to send notification to NRL ' + error.msg
@@ -306,12 +318,18 @@ export class SubmissionAntiCorruptionLayer {
                     applicantMetaData
                 );
 
-            this.notificationService.sendNotification(newOrderCopyNotification);
+            await this.notificationService.sendNotification(
+                newOrderCopyNotification
+            );
         } catch (error) {
+            // Deliberately not rethrown. The NRLs already have the order at
+            // this point, so failing the submission would roll back an order
+            // the BfR has actually received, and the user would be told their
+            // data never arrived when it did. Their copy of the confirmation
+            // is lost, which is logged for support to follow up.
             this.logger.error(
                 'Unable to send notification to User ' + error.msg
             );
-            throw error;
         }
     }
 

@@ -91,23 +91,29 @@ export class MailService {
                     });
             }
             if (templateFile) {
-                this.sendMail(data.payload, templateFile.toString('utf-8'), {
-                    ...data.meta,
-                    ...{
-                        from: this.mailConfiguration.fromAddress,
-                        replyTo: this.mailConfiguration.replyToAddress
+                // Awaited so a failing send rejects this handler instead of
+                // being lost; the caller needs to know the mail never went out.
+                await this.sendMail(
+                    data.payload,
+                    templateFile.toString('utf-8'),
+                    {
+                        ...data.meta,
+                        ...{
+                            from: this.mailConfiguration.fromAddress,
+                            replyTo: this.mailConfiguration.replyToAddress
+                        }
                     }
-                });
+                );
             }
         };
     }
 
-    private sendMail(
+    private async sendMail(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         templateData: any,
         templateFile: string,
         options: MailOptions
-    ) {
+    ): Promise<SentMessageInfo> {
         templateData.copyrightYear = new Date().getFullYear();
 
         const template = handlebars.compile(templateFile);
@@ -128,25 +134,18 @@ export class MailService {
             }
         };
         try {
-            transporter.sendMail(
-                mailOptions,
-                (error: Error | null, info: SentMessageInfo) => {
-                    if (error) {
-                        this.logger.error(
-                            `Error sending mail. error=${String(
-                                error
-                            )} mailSubject="${mailOptions.subject}"`
-                        );
-                        return error;
-                    } else {
-                        this.logger.info('Email sent', {
-                            subject: mailOptions.subject
-                        });
-                        this.logger.info(JSON.stringify(info));
-                        return info;
-                    }
-                }
+            // The callback form swallowed delivery failures: returning the
+            // error from the callback goes nowhere, and the surrounding
+            // try/catch only ever saw synchronous throws. Awaiting the promise
+            // form makes a refused or undeliverable mail reject here.
+            const info: SentMessageInfo = await transporter.sendMail(
+                mailOptions
             );
+            this.logger.info('Email sent', {
+                subject: mailOptions.subject
+            });
+            this.logger.info(JSON.stringify(info));
+            return info;
         } catch (error) {
             this.logger.error(
                 `Error sending mail. error=${error} mailSubject="${mailOptions.subject}"`
