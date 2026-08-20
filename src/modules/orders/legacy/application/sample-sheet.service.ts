@@ -18,20 +18,6 @@ import { Sample } from '../model/sample.entity';
 import { NRLService } from './nrl.service';
 
 export class SampleSheetService {
-    private readonly EMPTY_SAMPLE_SHEET_ANALYSIS: SampleSheetAnalysis = {
-        species: SampleSheetAnalysisOption.OMIT,
-        serological: SampleSheetAnalysisOption.OMIT,
-        resistance: SampleSheetAnalysisOption.OMIT,
-        vaccination: SampleSheetAnalysisOption.OMIT,
-        molecularTyping: SampleSheetAnalysisOption.OMIT,
-        toxin: SampleSheetAnalysisOption.OMIT,
-        esblAmpCCarbapenemasen: SampleSheetAnalysisOption.OMIT,
-        other: SampleSheetAnalysisOption.OMIT,
-        otherText: '',
-        compareHuman: SampleSheetAnalysisOption.OMIT,
-        compareHumanText: ''
-    };
-
     private readonly MAX_CHARACTERS = 120;
 
     constructor(private nrlService: NRLService) {}
@@ -48,13 +34,13 @@ export class SampleSheetService {
     fromSampleSheetToSampleSet(
         sampleSheet: UnmarshalSampleSheet
     ): UnmarshalSampleSet {
-        const returnNrl = this.tryGetSingleNRL(sampleSheet.samples);
-        const isInEnum = Object.values(NRL_ID_VALUE).includes(returnNrl);
-        const isNotUnknown = returnNrl !== NRL_ID_VALUE.UNKNOWN;
-
-        if (isInEnum && isNotUnknown) {
-            this.addMetaDataToSamples(sampleSheet);
-        }
+        // MPCL-832: the sheet's analysis section is applied whatever NRLs the
+        // samples belong to. It used to be applied only when the whole sheet
+        // resolved to one NRL, which silently discarded the sender's selection
+        // for sheets covering several NRLs and left the NRL defaults in place.
+        // Procedures an NRL does not offer are reported by the
+        // AnalysisValidationService on submission rather than dropped here.
+        this.addMetaDataToSamples(sampleSheet);
 
         return {
             samples: sampleSheet.samples,
@@ -72,14 +58,22 @@ export class SampleSheetService {
         sampleSet: SampleSet
     ): Promise<SampleSheetMetaData> {
         const nrl = this.tryGetSingleNRL(sampleSet.samples);
-        let analysis = this.EMPTY_SAMPLE_SHEET_ANALYSIS;
         let urgency = Urgency.NORMAL;
 
+        // MPCL-832: an order covering several NRLs has no single procedure
+        // catalogue to render the section from, so it is merged from all
+        // samples instead of being exported empty.
+        const analysis =
+            nrl === NRL_ID_VALUE.UNKNOWN
+                ? this.mergeSampleSheetAnalysis(
+                      sampleSet.samples.map(s => s.getAnalysis())
+                  )
+                : await this.calcSampleSheetAnalysis(
+                      nrl,
+                      sampleSet.samples.map(s => s.getAnalysis())
+                  );
+
         if (nrl !== NRL_ID_VALUE.UNKNOWN) {
-            analysis = await this.calcSampleSheetAnalysis(
-                nrl,
-                sampleSet.samples.map(s => s.getAnalysis())
-            );
             urgency = this.calcSampleSheetUrgency(
                 sampleSet.samples.map(s => s.getUrgency())
             );
@@ -141,6 +135,54 @@ export class SampleSheetService {
             : '';
 
         const otherText = firstAnalysis['other'] || '';
+
+        return {
+            species: getOptionFor('species'),
+            serological: getOptionFor('serological'),
+            resistance: getOptionFor('resistance'),
+            vaccination: getOptionFor('vaccination'),
+            molecularTyping: getOptionFor('molecularTyping'),
+            toxin: getOptionFor('toxin'),
+            esblAmpCCarbapenemasen: getOptionFor('esblAmpCCarbapenemasen'),
+            other: otherText
+                ? SampleSheetAnalysisOption.ACTIVE
+                : SampleSheetAnalysisOption.OMIT,
+            otherText: otherText,
+            compareHuman: isCompareHumanActive
+                ? SampleSheetAnalysisOption.ACTIVE
+                : SampleSheetAnalysisOption.OMIT,
+            compareHumanText: compareHumanText
+        };
+    }
+
+    // MPCL-832: the analysis section of an order whose samples belong to
+    // several NRLs. There is no single catalogue of procedures then, so
+    // standard and optional cannot be told apart and everything requested by
+    // at least one sample is marked as actively selected - which is what the
+    // sheet parser reads back when the exported file is uploaded again.
+    private mergeSampleSheetAnalysis(
+        partialAnalysis: Partial<Analysis>[]
+    ): SampleSheetAnalysis {
+        const getOptionFor = (key: keyof Analysis): SampleSheetAnalysisOption =>
+            partialAnalysis.some(analysis => analysis[key] === true)
+                ? SampleSheetAnalysisOption.ACTIVE
+                : SampleSheetAnalysisOption.OMIT;
+
+        // The free texts are single fields on the sheet, so the first one
+        // filled in wins.
+        const otherText =
+            partialAnalysis
+                .map(analysis => analysis.other || '')
+                .find(text => text !== '') || '';
+        const compareHumanText =
+            partialAnalysis
+                .map(analysis => analysis.compareHuman?.value || '')
+                .find(text => text !== '') || '';
+        const isCompareHumanActive =
+            !!compareHumanText ||
+            partialAnalysis.some(
+                analysis => analysis.compareHuman?.active === true
+            );
 
         return {
             species: getOptionFor('species'),
