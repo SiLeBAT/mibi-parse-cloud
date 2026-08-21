@@ -6,6 +6,9 @@ import { ValueObject, ValueObjectProps } from './value-object';
 interface ServerConfigBaseProps extends ValueObjectProps {
     appName?: string;
     excelVersion?: string[];
+    // Free text rather than a validated number: the portal only ever prints it,
+    // and a German support line may carry an extension or a country prefix.
+    supportPhone?: string;
 }
 
 interface ServerConfigProps extends ServerConfigBaseProps {
@@ -21,6 +24,7 @@ interface ServerConfigStringProps extends ServerConfigBaseProps {
 export class ServerConfig extends ValueObject<ServerConfigProps> {
     private static serverConfigSchema = object({
         appName: string().trim().max(30, 'Must be 30 characters or less'),
+        supportPhone: string().trim().max(30, 'Must be 30 characters or less'),
         excelVersion: array()
             // cast array elements into strings, accept single non-array values by wrapping them
             .transform((_val, orig) => {
@@ -47,6 +51,9 @@ export class ServerConfig extends ValueObject<ServerConfigProps> {
     }
     get supportContact(): Email | null {
         return this.props.supportContact || null;
+    }
+    get supportPhone(): string | null {
+        return this.props.supportPhone || null;
     }
 
     get excelVersion(): string[] | null {
@@ -75,7 +82,8 @@ export class ServerConfig extends ValueObject<ServerConfigProps> {
 
         const serverConfigProps: ServerConfigProps = {
             appName: validatedProps.appName,
-            excelVersion: validatedProps.excelVersion
+            excelVersion: validatedProps.excelVersion,
+            supportPhone: validatedProps.supportPhone
         };
         if (!isEmpty(props.jobRecipient) && !isUndefined(props.jobRecipient)) {
             serverConfigProps.jobRecipient = await Email.create({

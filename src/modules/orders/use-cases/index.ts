@@ -3,6 +3,7 @@ import './check-template-files';
 import './create-order-list';
 import './create-submission-file';
 import './delete-orders-by-user';
+import './flag-customer-copy-failure';
 import './get-samples-with-results';
 import './parse-sample-data';
 import './save-order';

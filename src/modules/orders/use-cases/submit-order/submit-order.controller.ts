@@ -17,7 +17,9 @@ import {
 import { AttachSavedIdsMapper, SampleEntryDTOMapper } from '../../mappers';
 import { OrderDTOMapper } from '../../mappers/order-dto.mapper';
 import { NRLId } from '../../../shared/domain/valueObjects/nrl-id.vo';
+import { getServerConfig } from '../../../shared/use-cases/get-server-config';
 import { createSubmitterId } from '../create-submitter-id';
+import { flagCustomerCopyFailure } from '../flag-customer-copy-failure';
 import { OrderSavingError, saveOrder } from '../save-order';
 import { validateOrder } from '../validate-order';
 import {
@@ -38,6 +40,10 @@ type SubmitOrderRequest = HTTPRequest<SubmitOrderRequestParameters>;
 
 type SubmitOrderResponseDTO = {
     order: OrderDTO;
+    // False when the NRLs received the order but the sender's own copy could
+    // not be mailed. The submission succeeded either way; the client uses this
+    // to decide which of the two messages the sender is shown.
+    customerCopySent: boolean;
 };
 
 type SampleEntryCollection = SampleEntry<AnnotatedSampleDataEntry>[];
@@ -45,6 +51,11 @@ type SampleEntryCollection = SampleEntry<AnnotatedSampleDataEntry>[];
 type ErrorDTO = {
     code: number;
     message: string;
+    // The support line to offer the sender, empty when none is configured.
+    // Carried on the response rather than served from the system-info endpoint
+    // because that endpoint is answered by the legacy server from its own
+    // configuration, which knows nothing about this value.
+    supportPhone?: string;
 };
 
 export interface DefaultServerErrorDTO extends ErrorDTO {}
@@ -70,6 +81,17 @@ export interface InvalidAnalysisErrorDTO extends DefaultServerErrorDTO {
     // of parsing the joined message.
     findings: AnalysisValidationFinding[];
 }
+
+// Never allowed to turn a submission failure into a config failure: if the
+// configuration cannot be read, the sender still gets their error message, just
+// without a phone number in it.
+const resolveSupportPhone = async (): Promise<string> => {
+    try {
+        return (await getServerConfig.execute()).supportPhone || '';
+    } catch (_error) {
+        return '';
+    }
+};
 
 const submitOrderController = async (
     request: SubmitOrderRequest
@@ -165,11 +187,12 @@ const submitOrderController = async (
         const orderToSubmit = savedOrderDTO.objectId
             ? AttachSavedIdsMapper.attach(order, savedOrderDTO)
             : order;
+        let customerCopySent: boolean;
         try {
-            await submitOrderUseCase.execute({
+            ({ customerCopySent } = await submitOrderUseCase.execute({
                 order: orderToSubmit,
                 submitterId
-            });
+            }));
         } catch (submitError) {
             await saveOrder.rollback(savedOrderDTO);
             throw new OrderSubmissionError(
@@ -178,24 +201,35 @@ const submitOrderController = async (
             );
         }
 
-        return { order: savedOrderDTO };
+        // Step 4: The NRLs have the data, so the order stands. If the sender's
+        // own copy did not go out, flag the stored order - support cannot be
+        // told by mail when mail is what failed.
+        if (!customerCopySent) {
+            await flagCustomerCopyFailure.execute({
+                orderId: savedOrderDTO.objectId
+            });
+        }
+
+        return { order: savedOrderDTO, customerCopySent };
     } catch (error) {
+        let errorDTO: ErrorDTO;
+
         if (error instanceof InvalidInputError) {
-            const errorDTO: InvalidInputErrorDTO = {
+            const dto: InvalidInputErrorDTO = {
                 code: SERVER_ERROR_CODE.INVALID_INPUT,
                 message: 'Contains errors',
                 order: requestDTO.order
             };
-            return errorDTO;
+            errorDTO = dto;
         } else if (error instanceof AutoCorrectedInputError) {
-            const errorDTO: AutoCorrectedInputErrorDTO = {
+            const dto: AutoCorrectedInputErrorDTO = {
                 code: SERVER_ERROR_CODE.AUTOCORRECTED_INPUT,
                 message: 'Has been auto-corrected',
                 order: requestDTO.order
             };
-            return errorDTO;
+            errorDTO = dto;
         } else if (error instanceof InvalidAnalysisError) {
-            const errorDTO: InvalidAnalysisErrorDTO = {
+            const dto: InvalidAnalysisErrorDTO = {
                 code: SERVER_ERROR_CODE.INVALID_ANALYSIS,
                 // The findings are specific enough to be the message; joining
                 // them keeps clients that only surface `message` informative.
@@ -205,7 +239,7 @@ const submitOrderController = async (
                 order: requestDTO.order,
                 findings: error.findings
             };
-            return errorDTO;
+            errorDTO = dto;
         } else if (error instanceof OrderSavingError) {
             const dto: OrderSavingErrorDTO = {
                 code: SERVER_ERROR_CODE.ORDER_SAVING_FAILED,
@@ -213,7 +247,7 @@ const submitOrderController = async (
                     'The order was validated successfully but could not be saved to the database. Please try again.',
                 order: requestDTO.order
             };
-            return dto;
+            errorDTO = dto;
         } else if (error instanceof OrderSubmissionError) {
             const dto: OrderSubmissionErrorDTO = {
                 code: SERVER_ERROR_CODE.ORDER_SUBMISSION_FAILED,
@@ -221,14 +255,19 @@ const submitOrderController = async (
                     'The order was saved successfully but the submission step failed. The saved order has been rolled back. Please try again.',
                 order: requestDTO.order
             };
-            return dto;
+            errorDTO = dto;
         } else {
             const dto: DefaultServerErrorDTO = {
                 code: SERVER_ERROR_CODE.UNKNOWN_ERROR,
                 message: 'An unknown error occured'
             };
-            return dto;
+            errorDTO = dto;
         }
+
+        // Attached to every failure, not just the submission one: the sender is
+        // shown the same "nothing was sent" banner whichever way the request
+        // was refused, and that banner is where the support line belongs.
+        return { ...errorDTO, supportPhone: await resolveSupportPhone() };
     } finally {
         setLoggingContext(null);
     }

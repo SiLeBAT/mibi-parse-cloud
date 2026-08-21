@@ -86,6 +86,18 @@ export class OrderRepository extends AbstractRepository<OrderObject> {
         };
     }
 
+    // Records that the order reached the NRLs but the sender never got their
+    // copy. Written with the master key because the failure is discovered
+    // server-side, after the request that created the order.
+    async markCustomerCopyFailed(orderId: EntityId): Promise<void> {
+        const OrderClass = Parse.Object.extend(ObjectKeys.Order);
+        const orderObject: OrderObject = new OrderClass();
+        orderObject.id = orderId.value;
+        orderObject.set('customerCopyFailed', true);
+
+        await orderObject.save(null, { useMasterKey: true });
+    }
+
     async findById(orderId: EntityId): Promise<OrderObject | undefined> {
         const query = this.getQuery();
         query.equalTo('objectId', orderId.value);

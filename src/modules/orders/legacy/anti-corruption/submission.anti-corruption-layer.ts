@@ -36,6 +36,13 @@ import {
 } from './../model/legacy.model';
 import { fromUrgencyStringToEnum } from './urgency.mapper';
 
+export type SubmissionResult = {
+    // False when the NRLs received the order but the sender's own copy could
+    // not be delivered. The submission still counts as successful - the data is
+    // at the BfR - but the sender has to be told a different story.
+    customerCopySent: boolean;
+};
+
 export class SubmissionAntiCorruptionLayer {
     private logger = getLogger();
     private readonly DEFAULT_FILE_NAME = 'Einsendebogen';
@@ -52,7 +59,7 @@ export class SubmissionAntiCorruptionLayer {
     async sendSamples(
         order: Order<SampleEntry<AnnotatedSampleDataEntry>[]>,
         submitter: Submitter
-    ): Promise<void> {
+    ): Promise<SubmissionResult> {
         const applicantMetaData: ApplicantMetaData =
             this.createLegacyApplicationMetaData(submitter, order.comment);
 
@@ -87,14 +94,22 @@ export class SubmissionAntiCorruptionLayer {
                 break;
         }
 
-        // Awaited: a failure to reach the BfR has to abort the submission so
-        // the caller can tell the user their data did not arrive.
+        // Awaited and allowed to throw: a failure to reach the BfR has to abort
+        // the submission so the caller can tell the user their data did not
+        // arrive. The NRLs go first because the copy the sender receives is the
+        // Probenbegleitschein they print and attach to their isolates - sending
+        // that out for an order the NRLs never got would be misleading.
         await this.sendToNRLs(nrlPayloads, applicantMetaData);
 
-        // Not awaited into the failure path on purpose - see sendToUser. By the
-        // time we get here the NRLs have the data, so the submission stands
-        // even if the sender's own copy could not be delivered.
-        await this.sendToUser(userPayloads, applicantMetaData);
+        // Reported rather than thrown - see sendToUser. By the time we get here
+        // the NRLs have the data, so the submission stands even if the sender's
+        // own copy could not be delivered.
+        const customerCopySent = await this.sendToUser(
+            userPayloads,
+            applicantMetaData
+        );
+
+        return { customerCopySent };
     }
 
     private createLegacySampleSet(
@@ -303,10 +318,12 @@ export class SubmissionAntiCorruptionLayer {
         }
     }
 
+    // Resolves to true when the sender received their copy, false when it could
+    // not be delivered.
     private async sendToUser(
         payloads: Payload[],
         applicantMetaData: ApplicantMetaData
-    ): Promise<void> {
+    ): Promise<boolean> {
         try {
             const attachments = payloads.map(file =>
                 this.createNotificationAttachment(file)
@@ -321,15 +338,20 @@ export class SubmissionAntiCorruptionLayer {
             await this.notificationService.sendNotification(
                 newOrderCopyNotification
             );
+
+            return true;
         } catch (error) {
             // Deliberately not rethrown. The NRLs already have the order at
             // this point, so failing the submission would roll back an order
             // the BfR has actually received, and the user would be told their
-            // data never arrived when it did. Their copy of the confirmation
-            // is lost, which is logged for support to follow up.
+            // data never arrived when it did. The caller is told the copy is
+            // missing instead, so it can flag the order and word the message to
+            // the sender accordingly.
             this.logger.error(
                 'Unable to send notification to User ' + error.msg
             );
+
+            return false;
         }
     }
 

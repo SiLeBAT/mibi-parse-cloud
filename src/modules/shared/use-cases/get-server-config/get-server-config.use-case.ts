@@ -21,6 +21,7 @@ export class GetServerConfigUseCase implements UseCase<null, ServerConfig> {
             appName: config.get('appName') || '',
             jobRecipient: config.get('jobRecipient') || '',
             supportContact: config.get('supportContact') || '',
+            supportPhone: config.get('supportPhone') || '',
             excelVersion: config.get('excelVersion') || ''
         });
     }

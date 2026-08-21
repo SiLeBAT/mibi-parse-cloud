@@ -137,6 +137,10 @@ export interface OrderAttributes extends Parse.Attributes {
     sampleCount?: number;
     results?: string;
     meta?: string;
+    // Set when the order reached the NRLs but the sender's own copy could not
+    // be mailed. Support cannot be told about this by mail - mail is what
+    // failed - so the order itself carries the evidence.
+    customerCopyFailed?: boolean;
 }
 
 export interface OrderObject extends Parse.Object<OrderAttributes> {}
