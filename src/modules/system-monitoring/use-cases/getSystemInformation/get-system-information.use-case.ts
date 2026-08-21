@@ -20,13 +20,13 @@ class GetSystemInformationUseCase implements UseCase<null, SystemInformation> {
         const lastChange =
             await this.packageInformationProvider.getDateOfLastChange();
 
-        const supportContact = (await this.getServerConfig.execute())
-            .supportContact;
+        const serverConfig = await this.getServerConfig.execute();
 
         const systemInformation: SystemInformation = SystemInformation.create({
             version,
             lastChange,
-            supportContact
+            supportContact: serverConfig.supportContact,
+            supportPhone: serverConfig.supportPhone
         });
         return systemInformation;
     }

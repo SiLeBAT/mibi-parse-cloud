@@ -49,6 +49,10 @@
     "sampleIdsAVV": {
       "type": "Array",
       "required": false
+    },
+    "customerCopyFailed": {
+      "type": "Boolean",
+      "required": false
     }
   },
   "classLevelPermissions": {

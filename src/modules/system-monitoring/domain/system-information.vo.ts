@@ -9,6 +9,10 @@ interface SystemInformationProps extends ValueObjectProps {
     version: SemanticVersion;
     lastChange: Date;
     supportContact: Email | null;
+    // The channel to fall back on when mail is the thing that is broken, so it
+    // is served alongside the support address rather than hard-coded in the
+    // client.
+    supportPhone: string | null;
 }
 
 export class SystemInformation extends ValueObject<SystemInformationProps> {
@@ -18,7 +22,8 @@ export class SystemInformation extends ValueObject<SystemInformationProps> {
             lastChange: this.dateOfLastChange.toString(),
             supportContact: this.supportContact
                 ? this.supportContact.toString()
-                : ''
+                : '',
+            supportPhone: this.supportPhone || ''
         });
     }
 
@@ -32,6 +37,10 @@ export class SystemInformation extends ValueObject<SystemInformationProps> {
 
     get supportContact(): Email | null {
         return this.props.supportContact;
+    }
+
+    get supportPhone(): string | null {
+        return this.props.supportPhone;
     }
     private constructor(props: SystemInformationProps) {
         super(props);

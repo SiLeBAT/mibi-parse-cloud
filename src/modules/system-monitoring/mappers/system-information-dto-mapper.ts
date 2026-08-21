@@ -9,7 +9,8 @@ export class SystemInformationDTOMapper extends Mapper {
             lastChange: systemInformation.dateOfLastChange.toString(),
             supportContact: systemInformation.supportContact
                 ? systemInformation.supportContact.toString()
-                : ''
+                : '',
+            supportPhone: systemInformation.supportPhone || ''
         };
     }
 }

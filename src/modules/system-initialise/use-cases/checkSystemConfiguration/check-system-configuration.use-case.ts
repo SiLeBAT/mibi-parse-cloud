@@ -10,11 +10,13 @@ class CheckSystemConfigurationUseCase implements UseCase<null, null> {
             const appName = config.get('appName');
             const jobRecipient = config.get('jobRecipient');
             const supportContact = config.get('supportContact');
+            const supportPhone = config.get('supportPhone');
             const excelVersion = config.get('excelVersion');
 
             this.checkValue('appName', appName, 'MiBi-Portal');
             this.checkValue('jobRecipient', jobRecipient);
             this.checkValue('supportContact', supportContact);
+            this.checkValue('supportPhone', supportPhone);
             this.checkValue('excelVersion', excelVersion);
         } catch (_error) {
             logger.error(
