@@ -18,6 +18,10 @@ const fakeResult = (id: string, sampleId: string, position: number) => ({
 let sampleData: unknown[];
 let resultData: unknown[];
 
+// Limits applied per query class, so a test can assert both queries were
+// bounded rather than left on Parse's default page size of 100.
+let appliedLimits: Record<string, number>;
+
 class MockQuery {
     constructor(private className: string) {}
     equalTo() {
@@ -27,6 +31,10 @@ class MockQuery {
         return this;
     }
     containedIn() {
+        return this;
+    }
+    limit(value: number) {
+        appliedLimits[this.className] = value;
         return this;
     }
     find() {
@@ -52,6 +60,10 @@ describe('SampleRepository.findByOrderWithResults', () => {
     const repo = new SampleRepository(ObjectKeys.Sample);
     const orderId = EntityId.create({ value: 'order1' });
 
+    beforeEach(() => {
+        appliedLimits = {};
+    });
+
     it('groups results under their sample by the sample pointer id', async () => {
         sampleData = [fakeSample('s1', 1), fakeSample('s2', 2)];
         // s1 has two results, s2 has none
@@ -76,5 +88,29 @@ describe('SampleRepository.findByOrderWithResults', () => {
         // only the sample query ran, never the result query
         expect(resultSpy).toHaveBeenCalledTimes(1);
         resultSpy.mockRestore();
+    });
+
+    it("returns every sample of an order larger than Parse's default page size", async () => {
+        sampleData = Array.from({ length: 204 }, (_, i) =>
+            fakeSample(`s${i + 1}`, i + 1)
+        );
+        resultData = sampleData.map((_, i) =>
+            fakeResult(`r${i + 1}`, `s${i + 1}`, 1)
+        );
+
+        const out = await repo.findByOrderWithResults(orderId);
+
+        expect(out).toHaveLength(204);
+        expect(out[203].results.map(r => r.id)).toEqual(['r204']);
+    });
+
+    it('bounds both queries so Parse does not truncate at 100', async () => {
+        sampleData = [fakeSample('s1', 1)];
+        resultData = [fakeResult('r1', 's1', 1)];
+
+        await repo.findByOrderWithResults(orderId);
+
+        expect(appliedLimits[ObjectKeys.Sample]).toBeGreaterThan(100);
+        expect(appliedLimits[ObjectKeys.Result]).toBeGreaterThan(100);
     });
 });
