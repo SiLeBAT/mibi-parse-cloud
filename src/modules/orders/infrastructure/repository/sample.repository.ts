@@ -12,6 +12,12 @@ export type SampleWithResults = {
     results: ResultObject[];
 };
 
+// Upper bound for the results-view queries. Without an explicit limit Parse
+// falls back to its default page size of 100, which silently truncated orders
+// of more than 100 samples. An order holds at most a few hundred samples, and
+// each sample a handful of results, so both stay well below this bound.
+const MAX_RESULTS_VIEW_QUERY_LIMIT = 100000;
+
 export class SampleRepository extends AbstractRepository<SampleObject> {
     async findByOrderWithResults(
         orderId: EntityId
@@ -23,6 +29,7 @@ export class SampleRepository extends AbstractRepository<SampleObject> {
         const sampleQuery = this.getQuery();
         sampleQuery.equalTo('order', orderPointer);
         sampleQuery.ascending('position');
+        sampleQuery.limit(MAX_RESULTS_VIEW_QUERY_LIMIT);
         const samples = await sampleQuery.find({ useMasterKey: true });
 
         if (samples.length === 0) {
@@ -32,6 +39,7 @@ export class SampleRepository extends AbstractRepository<SampleObject> {
         const resultQuery = new Parse.Query<ResultObject>(ObjectKeys.Result);
         resultQuery.containedIn('sample', samples);
         resultQuery.ascending('position');
+        resultQuery.limit(MAX_RESULTS_VIEW_QUERY_LIMIT);
         const results = await resultQuery.find({ useMasterKey: true });
 
         const resultsBySampleId = new Map<string, ResultObject[]>();
