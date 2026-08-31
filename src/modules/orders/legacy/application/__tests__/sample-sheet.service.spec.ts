@@ -21,7 +21,10 @@ import { SampleSheetService } from '../sample-sheet.service';
 const SPECIES = 0;
 const SEROLOGICAL = 1;
 const RESISTANCE = 2;
+const VACCINATION = 3;
+const TYPING = 4;
 const TOXIN = 5;
+const ESBL = 6;
 
 function makeNRLConfig(
     nrlId: NRL_ID_VALUE,
@@ -64,6 +67,32 @@ const SALM = makeNRLConfig(
 );
 // NRL-Campy: species standard, toxin optional.
 const CAMPY = makeNRLConfig(NRL_ID_VALUE.NRL_Campy, [SPECIES], [TOXIN]);
+// NRL-Listeria: molecular typing standard, species optional.
+const LISTERIA = makeNRLConfig(NRL_ID_VALUE.NRL_Listeria, [TYPING], [SPECIES]);
+
+// The NRLs as configured in the master data, where between them nearly every
+// procedure is standard for at least one NRL. This is what makes a sheet
+// covering all NRLs - V18_AlleNRLs.xlsx - the interesting case.
+const ALL_NRLS = [
+    makeNRLConfig(NRL_ID_VALUE.NRL_AR, [RESISTANCE, ESBL], []),
+    makeNRLConfig(NRL_ID_VALUE.NRL_Campy, [SPECIES], [RESISTANCE, TYPING]),
+    makeNRLConfig(
+        NRL_ID_VALUE.NRL_VTEC,
+        [SPECIES, SEROLOGICAL],
+        [TYPING, TOXIN]
+    ),
+    makeNRLConfig(
+        NRL_ID_VALUE.NRL_Staph,
+        [SPECIES, TYPING],
+        [RESISTANCE, TOXIN]
+    ),
+    makeNRLConfig(NRL_ID_VALUE.NRL_Listeria, [SPECIES, TYPING], [SEROLOGICAL]),
+    makeNRLConfig(
+        NRL_ID_VALUE.NRL_Salm,
+        [SEROLOGICAL, RESISTANCE, VACCINATION],
+        [TYPING]
+    )
+];
 
 const EMPTY_ADDRESS: Address = {
     instituteName: '',
@@ -226,11 +255,26 @@ describe('SampleSheetService', () => {
             const sheet = await service.fromSampleSetToSampleSheet(sampleSet);
 
             expect(sheet.meta.analysis).toMatchObject({
-                species: ACTIVE,
+                // Standard for both NRLs, so always carried out.
+                species: STANDARD,
                 serological: ACTIVE,
                 toxin: ACTIVE,
                 resistance: OMIT
             });
+        });
+
+        it('ignores a procedure a sample only has because it is standard for its NRL', async () => {
+            const service = makeService([CAMPY, LISTERIA]);
+            const sampleSet = makeSampleSet([
+                // Species is standard for NRL-Campy and merely optional and
+                // unselected for NRL-Listeria, so the sender did not ask for it.
+                makeSample(NRL_ID_VALUE.NRL_Campy, { species: true }),
+                makeSample(NRL_ID_VALUE.NRL_Listeria, { species: false })
+            ]);
+
+            const sheet = await service.fromSampleSetToSampleSheet(sampleSet);
+
+            expect(sheet.meta.analysis.species).toBe(OMIT);
         });
 
         it('keeps the free texts of a sheet covering several NRLs', async () => {
@@ -253,16 +297,18 @@ describe('SampleSheetService', () => {
             });
         });
 
-        it('exports an empty section when nothing is selected', async () => {
+        it('exports nothing but the standard procedures when nothing is selected', async () => {
             const service = makeService([SALM, CAMPY]);
             const sampleSet = makeSampleSet([
-                makeSample(NRL_ID_VALUE.NRL_Salm, { species: false }),
-                makeSample(NRL_ID_VALUE.NRL_Campy, { species: false })
+                makeSample(NRL_ID_VALUE.NRL_Salm, { species: true }),
+                makeSample(NRL_ID_VALUE.NRL_Campy, { species: true })
             ]);
 
             const sheet = await service.fromSampleSetToSampleSheet(sampleSet);
 
-            expect(sheet.meta.analysis).toEqual(makeSheetAnalysis());
+            expect(sheet.meta.analysis).toEqual(
+                makeSheetAnalysis({ species: STANDARD })
+            );
         });
 
         it('still marks standard procedures as such for a single NRL', async () => {
@@ -318,8 +364,34 @@ describe('SampleSheetService', () => {
         expect(exported.meta.analysis).toEqual({
             ...uploaded,
             // The species procedure is standard for both NRLs and is therefore
-            // always on, which the uploaded sheet did not mark.
-            species: ACTIVE
+            // always carried out, which the uploaded sheet did not mark.
+            species: STANDARD
         });
+    });
+
+    // MPCL-832, second report: with only some procedures selected the export
+    // came back with every box ticked, independently of the uploaded sheet.
+    // Between them the NRLs have nearly every procedure as standard, so a
+    // sheet covering all of them collected the whole catalogue.
+    it('exports only the selected procedures of a sheet covering all NRLs', async () => {
+        const service = makeService(ALL_NRLS);
+        const uploaded = makeSheetAnalysis({ toxin: ACTIVE });
+        const sheet: UnmarshalSampleSheet = {
+            samples: ALL_NRLS.map(nrl => makeUnmarshalSample(nrl.nrlId)),
+            meta: makeSheetMeta(uploaded)
+        };
+
+        const sampleSet = service.fromSampleSheetToSampleSet(sheet);
+        const exported = await service.fromSampleSetToSampleSheet(
+            makeSampleSet(
+                sampleSet.samples.map(sample =>
+                    makeSample(sample.meta.nrl, sample.meta.analysis)
+                )
+            )
+        );
+
+        // No procedure is standard for every one of these NRLs, so the section
+        // is exactly what the sender ticked.
+        expect(exported.meta.analysis).toEqual(uploaded);
     });
 });

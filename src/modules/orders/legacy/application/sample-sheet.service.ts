@@ -66,7 +66,10 @@ export class SampleSheetService {
         const analysis =
             nrl === NRL_ID_VALUE.UNKNOWN
                 ? this.mergeSampleSheetAnalysis(
-                      sampleSet.samples.map(s => s.getAnalysis())
+                      sampleSet.samples.map(s => ({
+                          nrl: s.getNRL(),
+                          analysis: s.getAnalysis()
+                      }))
                   )
                 : await this.calcSampleSheetAnalysis(
                       nrl,
@@ -156,32 +159,64 @@ export class SampleSheetService {
     }
 
     // MPCL-832: the analysis section of an order whose samples belong to
-    // several NRLs. There is no single catalogue of procedures then, so
-    // standard and optional cannot be told apart and everything requested by
-    // at least one sample is marked as actively selected - which is what the
-    // sheet parser reads back when the exported file is uploaded again.
+    // several NRLs. There is no single catalogue of procedures then, so the
+    // section is reconstructed from the samples.
+    //
+    // A sample's analysis is the sender's selection with the standard
+    // procedures of its own NRL forced on top (see Sample.setAnalysis), so a
+    // standard procedure says nothing about what the sender ticked and has to
+    // be ignored per sample - otherwise a sheet covering every NRL comes back
+    // with every box ticked, because between them the NRLs have nearly every
+    // procedure as standard. What remains after dropping them is the
+    // selection itself. A procedure that is standard for every NRL in the
+    // order is always carried out and is marked as such.
     private mergeSampleSheetAnalysis(
-        partialAnalysis: Partial<Analysis>[]
+        samples: { nrl: NRL_ID_VALUE; analysis: Partial<Analysis> }[]
     ): SampleSheetAnalysis {
-        const getOptionFor = (key: keyof Analysis): SampleSheetAnalysisOption =>
-            partialAnalysis.some(analysis => analysis[key] === true)
+        const standardProcedures = new Map<NRL_ID_VALUE, Partial<Analysis>>();
+        const isStandardFor = (nrl: NRL_ID_VALUE, key: keyof Analysis) => {
+            if (!standardProcedures.has(nrl)) {
+                standardProcedures.set(
+                    nrl,
+                    this.nrlService.getStandardAnalysisFor(nrl)
+                );
+            }
+            return standardProcedures.get(nrl)?.[key] !== undefined;
+        };
+
+        const getOptionFor = (
+            key: keyof Analysis
+        ): SampleSheetAnalysisOption => {
+            if (
+                samples.length > 0 &&
+                samples.every(sample => isStandardFor(sample.nrl, key))
+            ) {
+                return SampleSheetAnalysisOption.STANDARD;
+            }
+
+            return samples.some(
+                sample =>
+                    sample.analysis[key] === true &&
+                    !isStandardFor(sample.nrl, key)
+            )
                 ? SampleSheetAnalysisOption.ACTIVE
                 : SampleSheetAnalysisOption.OMIT;
+        };
 
         // The free texts are single fields on the sheet, so the first one
-        // filled in wins.
+        // filled in wins. They are never standard procedures.
         const otherText =
-            partialAnalysis
-                .map(analysis => analysis.other || '')
+            samples
+                .map(sample => sample.analysis.other || '')
                 .find(text => text !== '') || '';
         const compareHumanText =
-            partialAnalysis
-                .map(analysis => analysis.compareHuman?.value || '')
+            samples
+                .map(sample => sample.analysis.compareHuman?.value || '')
                 .find(text => text !== '') || '';
         const isCompareHumanActive =
             !!compareHumanText ||
-            partialAnalysis.some(
-                analysis => analysis.compareHuman?.active === true
+            samples.some(
+                sample => sample.analysis.compareHuman?.active === true
             );
 
         return {
