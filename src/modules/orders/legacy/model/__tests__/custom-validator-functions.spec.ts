@@ -2673,3 +2673,76 @@ describe('matchesIdToSpecificYear — exact year required', () => {
         expect(result).toBeNull();
     });
 });
+
+// ---------------------------------------------------------------------------
+// matchesIdToSpecificYear - MPC-291: a format without a year must not mask a
+// year mismatch. A sender who is not logged in is checked against every state
+// at once, so Hessen's "any nine digits" would otherwise switch the year check
+// off for every nine digit id in the country - sample 7 of the ticket's test
+// sheet went unreported for exactly this reason.
+// ---------------------------------------------------------------------------
+
+describe('matchesIdToSpecificYear - year-less formats do not mask a mismatch', () => {
+    const BW_FORMAT = '^yy[0-9]{7}$';
+    const HE_FORMAT = '^[0-9]{9}$';
+    const YEAR_ERROR = {
+        code: 127,
+        level: 1,
+        message: 'Jahr passt nicht zum Datum'
+    };
+    const OPTIONS = {
+        ...BASE_OPTIONS,
+        regex: [BW_FORMAT, HE_FORMAT],
+        yearMessage: YEAR_ERROR
+    };
+
+    it('reports the year message although a year-less format accepts the id', () => {
+        const result = matchesIdToSpecificYear(
+            '251234567',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '10.08.2026' }
+        );
+        expect(result).toEqual(YEAR_ERROR);
+    });
+
+    it('stays silent when the year in the id matches the date', () => {
+        const result = matchesIdToSpecificYear(
+            '261234567',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '10.08.2026' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('accepts an id that only a year-less format can explain', () => {
+        const result = matchesIdToSpecificYear(
+            '12345',
+            { ...OPTIONS, regex: ['^yy-[0-9]{7}$', '^[0-9]{5}$'] },
+            'sample_id_avv',
+            { sampling_date: '10.08.2026' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('reports the format message when no format fits at all', () => {
+        const result = matchesIdToSpecificYear(
+            '12345678',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '10.08.2026' }
+        );
+        expect(result).toEqual(TEST_ERROR);
+    });
+
+    it('stays silent when no state formats are configured', () => {
+        const result = matchesIdToSpecificYear(
+            '251234567',
+            { ...OPTIONS, regex: [] },
+            'sample_id_avv',
+            { sampling_date: '10.08.2026' }
+        );
+        expect(result).toBeNull();
+    });
+});
