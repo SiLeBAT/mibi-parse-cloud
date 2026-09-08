@@ -135,25 +135,27 @@ function matchesIdToSpecificYear(
         hasReferenceDate = true;
     }
 
-    const changedArray = _.flatMap(options.regex, (entry: string) => {
+    // Nothing to compare against, e.g. because the state formats have not been
+    // loaded. Reporting every id as malformed would be worse than staying quiet.
+    if (!options.regex.length) {
+        return null;
+    }
+
+    const yearFormats = options.regex.filter(entry => entry.includes('yy'));
+    const yearlessFormats = options.regex.filter(
+        entry => !entry.includes('yy')
+    );
+
+    const datedFormats = _.flatMap(yearFormats, (entry: string) => {
         if (entry.includes('yyyy')) {
             return years.map(year =>
                 entry.replace('yyyy', year.format('YYYY'))
             );
         }
-        if (entry.includes('yy')) {
-            return years.map(year => entry.replace('yy', year.format('YY')));
-        }
-        return [entry];
+        return years.map(year => entry.replace('yy', year.format('YY')));
     });
 
-    const formatError = matchesRegexPattern(value, {
-        ...options,
-        regex: changedArray,
-        ignoreNumbers: false
-    });
-
-    if (formatError === null) {
+    if (matchesAnyPattern(value, datedFormats)) {
         return null;
     }
 
@@ -161,6 +163,12 @@ function matchesIdToSpecificYear(
     // formats for *some* year but not for the year of the sampling/isolation date,
     // the format is fine and only the year is off — saying "the format seems
     // incorrect" sends the user looking for a problem that is not there.
+    //
+    // This is deliberately decided before the year-less formats below. A format
+    // without a `yy` placeholder — Hessen's "any nine digits" — would otherwise
+    // accept the id on its length alone and hide the year mismatch. Since a logged
+    // out sender is checked against all states at once, a single such format would
+    // switch the year check off for every id of that shape, country-wide.
     if (
         hasReferenceDate &&
         options.yearMessage &&
@@ -169,7 +177,15 @@ function matchesIdToSpecificYear(
         return { ...options.yearMessage };
     }
 
-    return formatError;
+    if (matchesAnyPattern(value, yearlessFormats)) {
+        return null;
+    }
+
+    return { ...options.message };
+}
+
+function matchesAnyPattern(value: string, patterns: string[]): boolean {
+    return patterns.some(pattern => new RegExp(pattern).test(value));
 }
 
 /**
