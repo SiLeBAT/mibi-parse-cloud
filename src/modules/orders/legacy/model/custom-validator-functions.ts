@@ -164,24 +164,55 @@ function matchesIdToSpecificYear(
     // the format is fine and only the year is off — saying "the format seems
     // incorrect" sends the user looking for a problem that is not there.
     //
-    // This is deliberately decided before the year-less formats below. A format
-    // without a `yy` placeholder — Hessen's "any nine digits" — would otherwise
-    // accept the id on its length alone and hide the year mismatch. Since a logged
-    // out sender is checked against all states at once, a single such format would
-    // switch the year check off for every id of that shape, country-wide.
-    if (
-        hasReferenceDate &&
-        options.yearMessage &&
-        matchesFormatForAnyYear(value, options.regex)
-    ) {
-        return { ...options.yearMessage };
+    // This is decided before the year-less formats below, because a format without a
+    // `yy` placeholder — Hessen accepts any nine digits — would otherwise accept the
+    // id on its length alone and hide the mismatch. A sender who is not logged in is
+    // checked against all states at once, so one such format would switch the year
+    // check off for every id of that shape, country-wide.
+    const fitsYearlessFormat = matchesAnyPattern(value, yearlessFormats);
+    if (hasReferenceDate && options.yearMessage) {
+        // An id a year-less format already explains is ambiguous: `123456789` is a
+        // valid Hessen id, and reading it as a Baden-Württemberg id from 2012 would
+        // be far-fetched. Only a neighbouring year makes the "wrong year" reading the
+        // more likely one — that is the case the ticket is about, last year's number
+        // or a mistyped year. Ids no year-less format can explain stay unambiguous
+        // and are reported whatever year they carry.
+        const looksLikeAWrongYear = fitsYearlessFormat
+            ? matchesAnyPattern(value, neighbouringFormats(yearFormats, years))
+            : matchesFormatForAnyYear(value, options.regex);
+
+        if (looksLikeAWrongYear) {
+            return { ...options.yearMessage };
+        }
     }
 
-    if (matchesAnyPattern(value, yearlessFormats)) {
+    if (fitsYearlessFormat) {
         return null;
     }
 
     return { ...options.message };
+}
+
+/**
+ * The year-bearing formats filled in with the years around the reference date. Used
+ * to decide whether an ambiguous id reads as one of those formats from a nearby year.
+ */
+function neighbouringFormats(
+    yearFormats: string[],
+    years: moment.Moment[]
+): string[] {
+    const neighbours = _.flatMap(years, year => [
+        year.clone().subtract(1, 'year'),
+        year.clone().add(1, 'year')
+    ]);
+
+    return _.flatMap(yearFormats, (entry: string) =>
+        neighbours.map(year =>
+            entry.includes('yyyy')
+                ? entry.replace('yyyy', year.format('YYYY'))
+                : entry.replace('yy', year.format('YY'))
+        )
+    );
 }
 
 function matchesAnyPattern(value: string, patterns: string[]): boolean {
