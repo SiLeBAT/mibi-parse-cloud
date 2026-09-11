@@ -2706,6 +2706,29 @@ describe('matchesIdToSpecificYear - year-less formats do not mask a mismatch', (
         expect(result).toEqual(YEAR_ERROR);
     });
 
+    it('leaves a valid id of the year-less state alone (ticket sample 9)', () => {
+        // 123456789 is a proper Hessen id. Reading it as a Baden-Württemberg id
+        // from 2012 would be far-fetched, so the year-less format decides.
+        const result = matchesIdToSpecificYear(
+            '123456789',
+            { ...OPTIONS },
+            'sample_id_avv',
+            { sampling_date: '10.08.2026' }
+        );
+        expect(result).toBeNull();
+    });
+
+    it('still reports an unambiguous id whatever year it carries', () => {
+        // No year-less format explains this one, so the distance does not matter.
+        const result = matchesIdToSpecificYear(
+            '12-1234567-127',
+            { ...OPTIONS, regex: ['^yy-[0-9]{7}-[0-9]{3}$', '^[0-9]{9}$'] },
+            'sample_id_avv',
+            { sampling_date: '10.08.2026' }
+        );
+        expect(result).toEqual(YEAR_ERROR);
+    });
+
     it('stays silent when the year in the id matches the date', () => {
         const result = matchesIdToSpecificYear(
             '261234567',
