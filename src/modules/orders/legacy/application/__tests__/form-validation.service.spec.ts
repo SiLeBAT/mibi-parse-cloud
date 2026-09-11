@@ -463,10 +463,10 @@ describe('FormValidatorService — secondary rule messages', () => {
 });
 
 // ---------------------------------------------------------------------------
-// MPC-291: a new error code must work before master-data has shipped it
+// MPC-291: the year message is maintained in the validation errors table
 // ---------------------------------------------------------------------------
 
-describe('FormValidatorService — error message fallback', () => {
+describe('FormValidatorService — year message source', () => {
     function constraintsPassedToValidator() {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { createValidator } = require('../../model/validator.entity');
@@ -480,9 +480,30 @@ describe('FormValidatorService — error message fallback', () => {
         (createValidator().validateSample as jest.Mock).mockClear();
     });
 
-    it('uses the constraint fallback when the code is missing from the database', async () => {
+    it('takes the text for code 127 from the validation errors table', async () => {
         const { service, mockValidationErrorProvider } = makeService();
-        // An environment where master-data has not run yet: 127 is unknown.
+        const fromTable = { code: 127, level: 1, message: 'aus der Tabelle' };
+        mockValidationErrorProvider.getError.mockImplementation(
+            (code: number) => (code === 127 ? fromTable : MOCK_ERROR)
+        );
+
+        await service.validateSamples(
+            [Sample.create(makeSampleData(), makeMeta())],
+            {}
+        );
+
+        expect(mockValidationErrorProvider.getError).toHaveBeenCalledWith(127);
+        expect(
+            constraintsPassedToValidator()['sample_id_avv'][
+                'matchesIdToSpecificYear'
+            ].yearMessage
+        ).toEqual(fromTable);
+    });
+
+    it('fails when code 127 is missing from the validation errors table', async () => {
+        const { service, mockValidationErrorProvider } = makeService();
+        // There is no text shipped with the code any more, so a missing entry is a
+        // configuration error and must surface instead of being papered over.
         mockValidationErrorProvider.getError.mockImplementation(
             (code: number) => {
                 if (code === 127) {
@@ -492,52 +513,11 @@ describe('FormValidatorService — error message fallback', () => {
             }
         );
 
-        await service.validateSamples(
-            [Sample.create(makeSampleData(), makeMeta())],
-            {}
-        );
-
-        const rule =
-            constraintsPassedToValidator()['sample_id_avv'][
-                'matchesIdToSpecificYear'
-            ];
-        expect(rule.yearMessage.code).toBe(127);
-        expect(rule.yearMessage.message).toMatch(
-            /^Das Jahr in der Probenummer/
-        );
-    });
-
-    it('prefers the database message once the code is there', async () => {
-        const { service, mockValidationErrorProvider } = makeService();
-        const fromDatabase = { code: 127, level: 1, message: 'aus der DB' };
-        mockValidationErrorProvider.getError.mockImplementation(
-            (code: number) => (code === 127 ? fromDatabase : MOCK_ERROR)
-        );
-
-        await service.validateSamples(
-            [Sample.create(makeSampleData(), makeMeta())],
-            {}
-        );
-
-        expect(
-            constraintsPassedToValidator()['sample_id_avv'][
-                'matchesIdToSpecificYear'
-            ].yearMessage
-        ).toEqual(fromDatabase);
-    });
-
-    it('still throws for a missing code that has no fallback', async () => {
-        const { service, mockValidationErrorProvider } = makeService();
-        // A genuine misconfiguration must not be swallowed.
-        mockValidationErrorProvider.getError.mockImplementation(() => {
-            throw new Error('Error code not found');
-        });
-
         await expect(
             service.validateSamples(
                 [Sample.create(makeSampleData(), makeMeta())],
                 {}
             )
-        ).rejects.toThrow('Error code not found');
+        ).rejects.toThrow('Error code not found, code=127');
     });
 });
