@@ -19,7 +19,7 @@ export class SystemInformation extends ValueObject<SystemInformationProps> {
     public toString(): string {
         return JSON.stringify({
             version: this.semanticVersion.toString(),
-            lastChange: this.dateOfLastChange.toString(),
+            lastChange: this.dateOfLastChange.toISOString(),
             supportContact: this.supportContact
                 ? this.supportContact.toString()
                 : '',

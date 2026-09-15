@@ -6,7 +6,7 @@ export class SystemInformationDTOMapper extends Mapper {
     static toDTO(systemInformation: SystemInformation): SystemInformationDTO {
         return {
             version: systemInformation.semanticVersion.toString(),
-            lastChange: systemInformation.dateOfLastChange.toString(),
+            lastChange: systemInformation.dateOfLastChange.toISOString(),
             supportContact: systemInformation.supportContact
                 ? systemInformation.supportContact.toString()
                 : '',
