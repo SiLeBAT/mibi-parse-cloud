@@ -235,7 +235,9 @@ export class AVVCatalogXmlParser {
                     parsedCatalog,
                     catalogCode: parsedCatalog.data.katalogNummer,
                     version: parsedCatalog.data.version,
-                    validFrom: new Date(parsedCatalog.data.gueltigAb)
+                    validFrom: this.toValidFromDate(
+                        parsedCatalog.data.gueltigAb
+                    )
                 };
             }
             case FileContentType.XML: {
@@ -249,7 +251,7 @@ export class AVVCatalogXmlParser {
                 const validFromString = this.determineValidFrom(
                     fileContent.content
                 );
-                const validFrom = new Date(validFromString);
+                const validFrom = this.toValidFromDate(validFromString);
 
                 return { parsedCatalog, catalogCode, version, validFrom };
             }
@@ -743,11 +745,21 @@ export class AVVCatalogXmlParser {
         return tempEintraege;
     }
 
+    // GueltigAb is an xs:date and may carry a timezone: "2026-01-01+01:00",
+    // "2026-01-01Z" or "2026-01-01-05:00". The timezone does not change the
+    // day a catalog is valid from, so only the date is kept.
     private extractDateFromGueltigAbField(dateGueltigAb: string): string {
-        const dateArray = dateGueltigAb.split('+');
-        const gueltigAb = dateArray[0];
+        const date = /^\s*(\d{4}-\d{2}-\d{2})/.exec(dateGueltigAb);
 
-        return gueltigAb;
+        return date ? date[1] : dateGueltigAb;
+    }
+
+    // validFrom is a calendar date. It is stored as UTC midnight and read back
+    // in UTC, so it stays the same day wherever the server runs.
+    private toValidFromDate(gueltigAb: string): Date {
+        const date = this.extractDateFromGueltigAbField(gueltigAb);
+
+        return new Date(`${date}T00:00:00.000Z`);
     }
 
     private collectEintraege(eintraege: Eintrag[], eintragsListe: Eintrag[]) {
