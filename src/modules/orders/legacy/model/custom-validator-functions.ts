@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
+import { parseCalendarDate, todayInBerlin } from '../../../shared/domain/date';
 import { NRL_ID_VALUE } from '../../../shared/domain/valueObjects';
 import { CatalogService } from '../application/catalog.service';
 import {
@@ -120,14 +121,15 @@ function matchesIdToSpecificYear(
     // With a date to compare against, the year in the sample number must match it
     // exactly. Without one there is nothing to compare, so the year is left open
     // around today and only the format is checked.
+    const today = todayInBerlin();
     let years = [
-        moment().subtract(1, 'year'),
-        moment(),
-        moment().add(1, 'year')
+        today.clone().subtract(1, 'year'),
+        today,
+        today.clone().add(1, 'year')
     ];
 
     if (referenceDateValue) {
-        const referenceDate = moment(referenceDateValue, 'DD.MM.YYYY');
+        const referenceDate = parseCalendarDate(referenceDateValue);
         if (!referenceDate.isValid()) {
             return null;
         }
@@ -1240,15 +1242,7 @@ function atLeastOneOf(
 function dateAllowEmpty(value: string, options: AtLeastOneOfOptions) {
     if (isEmptyString(value)) {
         return null;
-    } else if (
-        moment
-            .utc(
-                value,
-                ['DD.MM.YYYY', 'D.MM.YYYY', 'D.M.YYYY', 'DD.M.YYYY'],
-                true
-            )
-            .isValid()
-    ) {
+    } else if (parseCalendarDate(value).isValid()) {
         return null;
     } else {
         return { ...options.message };
@@ -1279,7 +1273,7 @@ function referenceDate(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     attributes: any
 ) {
-    if (moment.utc(value, 'DD-MM-YYYY').isValid()) {
+    if (parseCalendarDate(value).isValid()) {
         let referenceDateId;
         let refereceOperation;
         let referenceDate;
@@ -1295,14 +1289,12 @@ function referenceDate(
         }
 
         if (attributes[referenceDateId]) {
-            referenceDate = moment.utc(
-                attributes[referenceDateId],
-                'DD-MM-YYYY'
-            );
+            referenceDate = parseCalendarDate(attributes[referenceDateId]);
         } else if (referenceDateId === 'NOW') {
-            referenceDate = moment();
+            // Today in Berlin: not the host's date, and not the UTC date.
+            referenceDate = todayInBerlin();
         } else {
-            referenceDate = moment.utc(referenceDateId, 'DD-MM-YYYY');
+            referenceDate = parseCalendarDate(String(referenceDateId));
         }
 
         if (options.earliest) {
@@ -1323,7 +1315,7 @@ function referenceDate(
 
         if (
             !referenceDate.isValid() ||
-            refereceOperation(moment.utc(value, 'DD-MM-YYYY'), referenceDate)
+            refereceOperation(parseCalendarDate(value), referenceDate)
         ) {
             return null;
         } else {
