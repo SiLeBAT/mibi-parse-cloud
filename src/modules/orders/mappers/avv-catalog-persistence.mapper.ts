@@ -1,3 +1,4 @@
+import { toCalendarDateString } from '../../shared/domain/date';
 import { AVVCatalog } from '../../shared/domain/valueObjects';
 import { AVVCatalogObject } from '../../shared/infrastructure/parse-types';
 import { Mapper, MappingError } from '../../shared/mappers';
@@ -8,13 +9,16 @@ export class AVVCatalogPersistenceMapper extends Mapper {
     ): Promise<AVVCatalog> {
         try {
             const validFromDate = avvCatalogObject.get('validFrom');
-            const year = validFromDate.getFullYear();
-            const month = `${validFromDate.getMonth() + 1}`.padStart(2, '0');
-            const day = `${validFromDate.getDate()}`.padStart(2, '0');
+            if (
+                !(validFromDate instanceof Date) ||
+                Number.isNaN(validFromDate.getTime())
+            ) {
+                throw new Error('validFrom date missing or invalid');
+            }
 
             return await AVVCatalog.create({
                 name: avvCatalogObject.get('catalogCode'),
-                validFrom: `${year}-${month}-${day}`,
+                validFrom: toCalendarDateString(validFromDate),
                 version: avvCatalogObject.get('version'),
                 data: avvCatalogObject.get('catalogData')
             });

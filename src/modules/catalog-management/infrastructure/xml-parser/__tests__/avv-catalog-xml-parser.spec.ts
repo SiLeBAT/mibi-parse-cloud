@@ -23,8 +23,8 @@ describe('AVVCatalogXmlParser (XML)', () => {
 
         expect(catalog.catalogInformation.catalogCode).toEqual('337');
         expect(catalog.catalogInformation.version).toEqual('9.00');
-        expect(catalog.catalogInformation.validFrom).toEqual(
-            new Date('2026-01-01')
+        expect(catalog.catalogInformation.validFrom.toISOString()).toEqual(
+            '2026-01-01T00:00:00.000Z'
         );
     });
 
@@ -64,6 +64,36 @@ describe('AVVCatalogXmlParser (XML)', () => {
     });
 });
 
+describe('AVVCatalogXmlParser (GueltigAb with a timezone)', () => {
+    const FIXTURE = path.join(__dirname, 'fixtures', 'avv337.trimmed.xml');
+    const xml = fs.readFileSync(FIXTURE, 'utf-8');
+
+    const withGueltigAb = (gueltigAb: string) => {
+        const changed = xml.replace(
+            /<tns:GueltigAb>[^<]*</,
+            '<tns:GueltigAb>' + gueltigAb + '<'
+        );
+        expect(changed).not.toEqual(xml);
+        return changed;
+    };
+
+    it.each([
+        ['2026-01-01Z'],
+        ['2026-01-01-05:00'],
+        ['2026-01-01T00:00:00+01:00']
+    ])(
+        'reads %s as valid from 1 January 2026, stored as UTC midnight',
+        async gueltigAb => {
+            const { catalog, json } = await parseXml(withGueltigAb(gueltigAb));
+
+            expect(catalog.catalogInformation.validFrom.toISOString()).toEqual(
+                '2026-01-01T00:00:00.000Z'
+            );
+            expect(json.data.gueltigAb).toEqual('2026-01-01');
+        }
+    );
+});
+
 describe('AVVCatalogXmlParser (JSON)', () => {
     it('round-trips an already-parsed JSON catalog', async () => {
         const data = {
@@ -89,8 +119,8 @@ describe('AVVCatalogXmlParser (JSON)', () => {
 
         expect(catalog.catalogInformation.catalogCode).toEqual('337');
         expect(catalog.catalogInformation.version).toEqual('9.00');
-        expect(catalog.catalogInformation.validFrom).toEqual(
-            new Date('2026-01-01')
+        expect(catalog.catalogInformation.validFrom.toISOString()).toEqual(
+            '2026-01-01T00:00:00.000Z'
         );
         expect(json).toEqual({ data, uId: 'Kode' });
     });

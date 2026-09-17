@@ -67,7 +67,7 @@ class AVVCatalogCache {
                     .map(Number);
                 return {
                     catalogDateStr,
-                    catalogDateTime: new Date(year, month - 1, day).getTime()
+                    catalogDateTime: Date.UTC(year, month - 1, day)
                 };
             });
             catalogDates.sort(
@@ -79,7 +79,7 @@ class AVVCatalogCache {
 
     private findCatalogDate(catalogName: string, samplingDate: string) {
         const [day, month, year] = samplingDate.split('.').map(Number);
-        const samplingDateTime = new Date(year, month - 1, day).getTime();
+        const samplingDateTime = Date.UTC(year, month - 1, day);
 
         const catalogDates = this.avvCatalogDates[catalogName];
         let result;
