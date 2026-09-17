@@ -437,30 +437,30 @@ describe('matchesIdToSpecificYear', () => {
 describe('referenceDate', () => {
     it('returns null when isolation date is after sampling date (earliest option)', () => {
         const result = referenceDate(
-            '15-03-2024',
+            '15.03.2024',
             { ...BASE_OPTIONS, earliest: 'sampling_date' },
             'isolation_date',
-            { sampling_date: '01-03-2024' }
+            { sampling_date: '01.03.2024' }
         );
         expect(result).toBeNull();
     });
 
     it('returns error when isolation date is before sampling date (earliest option)', () => {
         const result = referenceDate(
-            '01-03-2024',
+            '01.03.2024',
             { ...BASE_OPTIONS, earliest: 'sampling_date' },
             'isolation_date',
-            { sampling_date: '15-03-2024' }
+            { sampling_date: '15.03.2024' }
         );
         expect(result).toEqual(TEST_ERROR);
     });
 
     it('returns null when both dates are the same (earliest)', () => {
         const result = referenceDate(
-            '01-03-2024',
+            '01.03.2024',
             { ...BASE_OPTIONS, earliest: 'sampling_date' },
             'isolation_date',
-            { sampling_date: '01-03-2024' }
+            { sampling_date: '01.03.2024' }
         );
         expect(result).toBeNull();
     });
@@ -470,13 +470,13 @@ describe('referenceDate', () => {
             'not-a-date',
             { ...BASE_OPTIONS, earliest: 'sampling_date' },
             'isolation_date',
-            { sampling_date: '01-03-2024' }
+            { sampling_date: '01.03.2024' }
         );
         expect(result).toBeNull();
     });
 
     it('uses NOW as reference when referenceDateId is "NOW"', () => {
-        const tomorrow = moment().add(1, 'day').format('DD-MM-YYYY');
+        const tomorrow = moment().add(1, 'day').format('DD.MM.YYYY');
         const result = referenceDate(
             tomorrow,
             { ...BASE_OPTIONS, earliest: 'NOW' },
@@ -487,17 +487,17 @@ describe('referenceDate', () => {
     });
 
     it('applies modifier when provided with earliest option', () => {
-        // Sampling date 10-03-2024 + modifier -1 year → reference is 10-03-2023
-        // Isolation date 15-06-2023 → after 10-03-2023 → valid
+        // Sampling date 10.03.2024 + modifier -1 year → reference is 10.03.2023
+        // Isolation date 15.06.2023 → after 10.03.2023 → valid
         const result = referenceDate(
-            '15-06-2023',
+            '15.06.2023',
             {
                 ...BASE_OPTIONS,
                 earliest: 'sampling_date',
                 modifier: { value: 1, unit: 'year' }
             },
             'isolation_date',
-            { sampling_date: '10-03-2024' }
+            { sampling_date: '10.03.2024' }
         );
         expect(result).toBeNull();
     });
@@ -1610,44 +1610,44 @@ describe('matchesProgramZoMo (with ZomoPlan data)', () => {
 describe('referenceDate (latest option)', () => {
     it('returns null when value is on or before the latest reference', () => {
         const result = referenceDate(
-            '01-03-2024',
+            '01.03.2024',
             { ...BASE_OPTIONS, latest: 'sampling_date' },
             'isolation_date',
-            { sampling_date: '15-03-2024' }
+            { sampling_date: '15.03.2024' }
         );
         expect(result).toBeNull();
     });
 
     it('returns error when value is after the latest reference', () => {
         const result = referenceDate(
-            '20-03-2024',
+            '20.03.2024',
             { ...BASE_OPTIONS, latest: 'sampling_date' },
             'isolation_date',
-            { sampling_date: '15-03-2024' }
+            { sampling_date: '15.03.2024' }
         );
         expect(result).toEqual(TEST_ERROR);
     });
 
     it('applies modifier when provided with latest option', () => {
-        // reference = 01-03-2024 + 1 year = 01-03-2025; value 15-06-2024 < 01-03-2025 → null
+        // reference = 01.03.2024 + 1 year = 01.03.2025; value 15.06.2024 < 01.03.2025 → null
         const result = referenceDate(
-            '15-06-2024',
+            '15.06.2024',
             {
                 ...BASE_OPTIONS,
                 latest: 'sampling_date',
                 modifier: { value: 1, unit: 'year' }
             },
             'isolation_date',
-            { sampling_date: '01-03-2024' }
+            { sampling_date: '01.03.2024' }
         );
         expect(result).toBeNull();
     });
 
     it('uses a static date string as reference when key is not in attributes and not NOW', () => {
-        // earliest = '01-03-2024' literal; value '15-03-2024' >= '01-03-2024' → null
+        // earliest = '01.03.2024' literal; value '15.03.2024' >= '01.03.2024' → null
         const result = referenceDate(
-            '15-03-2024',
-            { ...BASE_OPTIONS, earliest: '01-03-2024' },
+            '15.03.2024',
+            { ...BASE_OPTIONS, earliest: '01.03.2024' },
             'some_date',
             {}
         );
@@ -1656,8 +1656,120 @@ describe('referenceDate (latest option)', () => {
 
     it('throws when neither earliest nor latest is provided', () => {
         expect(() =>
-            referenceDate('01-03-2024', BASE_OPTIONS, 'some_field' as any, {})
+            referenceDate('01.03.2024', BASE_OPTIONS, 'some_field' as any, {})
         ).toThrow();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Date checks against today: "today" is the date in Berlin
+// ---------------------------------------------------------------------------
+
+describe('date checks against today', () => {
+    // 00:30 on 17 September 2026 in Berlin - still 16 September in UTC.
+    const justAfterMidnightInBerlin = new Date('2026-09-16T22:30:00.000Z');
+    // 23:30 on 16 September 2026 in Berlin.
+    const justBeforeMidnightInBerlin = new Date('2026-09-16T21:30:00.000Z');
+    // 00:30 on 1 January 2027 in Berlin - still 2026 in UTC.
+    const newYearInBerlin = new Date('2026-12-31T23:30:00.000Z');
+
+    const at = (now: Date) => jest.useFakeTimers({ now });
+
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
+    describe('futureDate (latest: NOW)', () => {
+        const futureDate = (value: string) =>
+            referenceDate(
+                value,
+                { ...BASE_OPTIONS, latest: 'NOW' },
+                'sampling_date',
+                {}
+            );
+
+        it('accepts a sample taken today, also just after midnight in Berlin', () => {
+            at(justAfterMidnightInBerlin);
+            expect(futureDate('17.09.2026')).toBeNull();
+        });
+
+        it('rejects a sample dated tomorrow', () => {
+            at(justAfterMidnightInBerlin);
+            expect(futureDate('18.09.2026')).toEqual(TEST_ERROR);
+        });
+
+        it('rejects tomorrow shortly before midnight in Berlin', () => {
+            at(justBeforeMidnightInBerlin);
+            expect(futureDate('17.09.2026')).toEqual(TEST_ERROR);
+        });
+    });
+
+    describe('oldSample (earliest: NOW, ten years back)', () => {
+        const oldSample = (value: string) =>
+            referenceDate(
+                value,
+                {
+                    ...BASE_OPTIONS,
+                    earliest: 'NOW',
+                    modifier: { value: 10, unit: 'year' }
+                },
+                'sampling_date',
+                {}
+            );
+
+        it('accepts a sample taken exactly ten years before today in Berlin', () => {
+            at(justAfterMidnightInBerlin);
+            expect(oldSample('17.09.2016')).toBeNull();
+        });
+
+        it('rejects a sample taken one day earlier', () => {
+            at(justAfterMidnightInBerlin);
+            expect(oldSample('16.09.2016')).toEqual(TEST_ERROR);
+        });
+    });
+
+    describe('matchesIdToSpecificYear without a sampling date', () => {
+        const options = {
+            ...BASE_OPTIONS,
+            regex: ['yyyy-L-\\d{5}-\\d{1}-\\d{1}']
+        };
+
+        it('allows next year, counted from the year in Berlin', () => {
+            at(newYearInBerlin);
+            expect(
+                matchesIdToSpecificYear(
+                    '2028-L-00001-1-1',
+                    options,
+                    'sample_id_avv',
+                    {}
+                )
+            ).toBeNull();
+        });
+
+        it('no longer allows the year before last', () => {
+            at(newYearInBerlin);
+            expect(
+                matchesIdToSpecificYear(
+                    '2025-L-00001-1-1',
+                    options,
+                    'sample_id_avv',
+                    {}
+                )
+            ).toEqual(TEST_ERROR);
+        });
+    });
+
+    it('adds no comparison error to a date that cannot be read', () => {
+        // A two-digit year is reported on its own, by dateAllowEmpty (error 12).
+        at(justAfterMidnightInBerlin);
+        expect(
+            referenceDate(
+                '18.09.26',
+                { ...BASE_OPTIONS, latest: 'NOW' },
+                'sampling_date',
+                {}
+            )
+        ).toBeNull();
     });
 });
 
