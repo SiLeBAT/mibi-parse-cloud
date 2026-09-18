@@ -1,4 +1,5 @@
 import { isEmpty } from 'lodash';
+import { currentYearInBerlin } from '../../domain/date';
 import { ZomoPlan } from '../../domain/valueObjects';
 
 type ZomoPlanCacheData = {
@@ -68,7 +69,7 @@ class ZomoPlanCache {
     }
 
     private isYearValid(year: number) {
-        const currentYear: number = new Date().getFullYear();
+        const currentYear: number = currentYearInBerlin();
         const allowedYears = [currentYear - 1, currentYear];
 
         return allowedYears.includes(year);
