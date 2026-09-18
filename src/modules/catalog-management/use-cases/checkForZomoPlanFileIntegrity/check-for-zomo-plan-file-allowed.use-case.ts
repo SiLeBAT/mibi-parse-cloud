@@ -1,3 +1,4 @@
+import { currentYearInBerlin } from '../../../shared/domain/date';
 import { UseCase } from '../../../shared/use-cases';
 import { ZomoPlanFileInformation } from '../../domain';
 
@@ -14,7 +15,7 @@ class CheckForZomoPlanFileAllowedUseCase
     async execute(
         zomoPlanFileInformation: ZomoPlanFileInformation
     ): Promise<ZomoPlanFilesAllowed> {
-        const currentYear: number = new Date().getFullYear();
+        const currentYear: number = currentYearInBerlin();
         const allowedYears = [currentYear - 1, currentYear, currentYear + 1];
         const yearAllowed = allowedYears.includes(
             parseInt(zomoPlanFileInformation.year, 10)
