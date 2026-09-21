@@ -10,6 +10,7 @@
     "build": "npm run tsc && npm run cp:view",
     "cp:view": "copyfiles ./src/**/views/**/* ./lib",
     "test": "jest --config=jest.config.js",
+    "test:timezones": "node tools/test-timezones.js",
     "prebuild": "npm run clean",
     "clean": "npx rimraf lib/* dist/*",
     "lint": "npx eslint .",
