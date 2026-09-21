@@ -32,3 +32,11 @@ The helpers in `src/modules/shared/domain/date` implement these rules:
 | `toCalendarDateString(date)` | writes a stored calendar date as "YYYY-MM-DD"            |
 
 Both `now?` parameters exist so tests can pass a fixed clock.
+
+A date bug is easy to miss on a machine in Berlin, because it only shows up in
+another timezone. Before merging a change that touches dates, run the tests in
+UTC, in Berlin time and in a timezone behind UTC:
+
+```
+npm run test:timezones
+```
