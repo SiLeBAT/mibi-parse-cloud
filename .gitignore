@@ -62,3 +62,4 @@ server-patch.patch
 /tmp
 /logs
 /scripts
+/.tools-build

@@ -1,0 +1,18 @@
+{
+    // Standalone build for the node-side helper scripts in tools/. They are not
+    // part of the cloud code, so the main tsconfig (src/ only) does not build
+    // them and they never end up in lib/.
+    "compilerOptions": {
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "target": "ES2022",
+        "lib": ["es2022"],
+        "types": ["node"],
+        "outDir": "../.tools-build",
+        "rootDir": ".",
+        "strict": true,
+        "skipLibCheck": true,
+        "sourceMap": false
+    },
+    "include": ["./**/*.ts"]
+}
