@@ -11,6 +11,7 @@ import './set-avv-catalog-cache';
 import './set-nrl-cache';
 import './set-plz-cache';
 import './set-search-alias-cache';
+import './store-results';
 import './submit-order';
 import './validate-order';
 

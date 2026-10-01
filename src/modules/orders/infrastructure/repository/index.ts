@@ -3,6 +3,7 @@ import { AVVCatalogRepository } from './avvcatalog.repository';
 import { ZomoPlanRepository } from './zomo-plan.repository';
 import { NRLRepository } from './nrl.repository';
 import { OrderRepository } from './order.repository';
+import { ResultRepository } from './result.repository';
 import { SampleRepository } from './sample.repository';
 import { PLZRepository } from './plz.repository';
 import { SearchAliasRepository } from './search-alias.repository';
@@ -17,6 +18,7 @@ const nrlRepository = new NRLRepository(ObjectKeys.NRL);
 const plzRepository = new PLZRepository(ObjectKeys.AllowedPLZ);
 const orderRepository = new OrderRepository(ObjectKeys.Order);
 const sampleRepository = new SampleRepository(ObjectKeys.Sample);
+const resultRepository = new ResultRepository(ObjectKeys.Result);
 
 export {
     avvCatalogRepository,
@@ -29,6 +31,8 @@ export {
     OrderRepository,
     sampleRepository,
     SampleRepository,
+    resultRepository,
+    ResultRepository,
     PLZRepository,
     plzRepository,
     searchAliasRepository,
