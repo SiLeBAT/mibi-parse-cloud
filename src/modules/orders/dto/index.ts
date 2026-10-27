@@ -14,7 +14,15 @@ export {
 } from './order-list.dto';
 export {
     ResultDataDTO,
+    ResultDataValueDTO,
     ResultDTO,
     SampleWithResultsDTO,
     SamplesWithResultsCollectionDTO
 } from './samples-with-results.dto';
+export {
+    StoredResultDTO,
+    StoredResultsOrderDTO,
+    StoreResultsCollectionDTO,
+    StoreResultsEntryDTO,
+    StoreResultsPayloadDTO
+} from './store-results.dto';

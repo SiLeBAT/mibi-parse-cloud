@@ -98,6 +98,21 @@ export class OrderRepository extends AbstractRepository<OrderObject> {
         await orderObject.save(null, { useMasterKey: true });
     }
 
+    // Keeps the order list's progress column in step with the results that have
+    // arrived. The value is the "<samples with results>/<samples>" string first
+    // written as "0/N" when the order was saved.
+    async updateResultsCounter(
+        orderId: EntityId,
+        results: string
+    ): Promise<void> {
+        const OrderClass = Parse.Object.extend(ObjectKeys.Order);
+        const orderObject: OrderObject = new OrderClass();
+        orderObject.id = orderId.value;
+        orderObject.set('results', results);
+
+        await orderObject.save(null, { useMasterKey: true });
+    }
+
     async findById(orderId: EntityId): Promise<OrderObject | undefined> {
         const query = this.getQuery();
         query.equalTo('objectId', orderId.value);
