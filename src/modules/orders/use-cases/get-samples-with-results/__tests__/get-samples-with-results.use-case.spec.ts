@@ -91,6 +91,44 @@ describe('GetSamplesWithResultsUseCase', () => {
         ]);
     });
 
+    it('returns numbers and null in resultData with their JSON type intact', async () => {
+        // The LIMS sends values as JSON as they are, and they are stored that
+        // way, so the read path must not coerce them to text on the way out -
+        // the client distinguishes null (no measurement) from a value.
+        const { useCase } = makeUseCase({
+            samplesWithResults: [
+                {
+                    sample: fakeObject('s1', {
+                        position: 1,
+                        sampleData: '{}',
+                        sampleMeta: '{}'
+                    }),
+                    results: [
+                        fakeObject('r1', {
+                            position: 1,
+                            resultData: JSON.stringify({
+                                Gattung: 'Yersinia',
+                                Biotyp: 4,
+                                'MHK CHL': null
+                            })
+                        })
+                    ]
+                }
+            ]
+        });
+
+        const result = await useCase.execute({
+            orderId: ORDER_ID,
+            userEmail: USER_EMAIL
+        });
+
+        expect(result[0].results[0].resultData).toEqual({
+            Gattung: 'Yersinia',
+            Biotyp: 4,
+            'MHK CHL': null
+        });
+    });
+
     it('returns an empty results array for a sample without results', async () => {
         const { useCase } = makeUseCase({
             samplesWithResults: [
