@@ -28,6 +28,10 @@
     "validFrom": {
       "type": "Date",
       "required": false
+    },
+    "uploadWarning": {
+      "type": "String",
+      "required": false
     }
   },
   "classLevelPermissions": {

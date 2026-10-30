@@ -21,6 +21,7 @@ export interface AVVCatalogAttributes extends Parse.Attributes {
     catalogFile: Parse.File;
     catalogCode: string;
     catalogData: string;
+    uploadWarning?: string;
 }
 
 export interface AVVCatalogObject extends Parse.Object<AVVCatalogAttributes> {}
