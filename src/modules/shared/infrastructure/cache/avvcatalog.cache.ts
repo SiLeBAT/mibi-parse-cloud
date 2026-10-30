@@ -14,9 +14,34 @@ type AVVCatalogDates = {
         catalogDateTime: number;
     }[];
 };
+
+type AVVCatalogVersions = {
+    [key: string]: {
+        [key: string]: string;
+    };
+};
+
+// Compares version strings segment by segment as integers, e.g. 9.10 > 9.9
+function compareVersions(versionA: string, versionB: string): number {
+    const toSegments = (version: string) =>
+        version.split('.').map(segment => Number(segment) || 0);
+    const segmentsA = toSegments(versionA);
+    const segmentsB = toSegments(versionB);
+    const length = Math.max(segmentsA.length, segmentsB.length);
+
+    for (let i = 0; i < length; i++) {
+        const difference = (segmentsA[i] ?? 0) - (segmentsB[i] ?? 0);
+        if (difference !== 0) {
+            return difference;
+        }
+    }
+    return 0;
+}
+
 class AVVCatalogCache {
     private cacheData: AVVCatalogCacheData = {};
     private avvCatalogDates: AVVCatalogDates = {};
+    private avvCatalogVersions: AVVCatalogVersions = {};
 
     setAVVCatalogs(avvCatalogs: AVVCatalog[]) {
         this.updateCacheData(avvCatalogs);
@@ -39,6 +64,7 @@ class AVVCatalogCache {
     removeAllData() {
         this.cacheData = {};
         this.avvCatalogDates = {};
+        this.avvCatalogVersions = {};
     }
 
     private updateCacheData(avvCatalogs: AVVCatalog[]) {
@@ -47,11 +73,26 @@ class AVVCatalogCache {
         avvCatalogs.forEach(avvCatalog => {
             const catalogNameKey = `avv${avvCatalog.name}`;
             const catalogDate = avvCatalog.validFrom;
-            const catalogData = JSON.parse(avvCatalog.data);
-
             this.cacheData[catalogNameKey] =
                 this.cacheData[catalogNameKey] || {};
-            this.cacheData[catalogNameKey][catalogDate] = catalogData;
+            this.avvCatalogVersions[catalogNameKey] =
+                this.avvCatalogVersions[catalogNameKey] || {};
+
+            // Several catalogs can share a validFrom date: keep the highest version
+            const storedVersion =
+                this.avvCatalogVersions[catalogNameKey][catalogDate];
+            if (
+                storedVersion !== undefined &&
+                compareVersions(avvCatalog.version, storedVersion) <= 0
+            ) {
+                return;
+            }
+
+            this.cacheData[catalogNameKey][catalogDate] = JSON.parse(
+                avvCatalog.data
+            );
+            this.avvCatalogVersions[catalogNameKey][catalogDate] =
+                avvCatalog.version;
         });
 
         this.updateCatalogDates();
@@ -119,4 +160,4 @@ class AVVCatalogCache {
 
 const avvCatalogCache = new AVVCatalogCache();
 
-export { avvCatalogCache, AVVCatalogCache };
+export { avvCatalogCache, AVVCatalogCache, compareVersions };

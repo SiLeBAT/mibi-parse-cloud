@@ -6,6 +6,7 @@ import { ParseHookRequest } from '../../../shared/infrastructure';
 import { AVVCatalogObject } from '../../../shared/infrastructure/parse-types';
 import { AVVCatalogMapper } from '../../mappers';
 import { checkForCatalogDuplication } from '../checkForCatalogDuplication';
+import { checkForCatalogSameValidFrom } from '../checkForCatalogSameValidFrom';
 import { CatalogDuplicationError } from './create-avv-catalog.error';
 import { readFileContent } from '../readFileContent';
 import { createAVVCatalog } from './create-avv-catalog.use-case';
@@ -23,6 +24,7 @@ export const beforeAVVCatalogSaveHook = async (
     const avvCatalogObject: AVVCatalogObject = request.object;
     const originalFile = avvCatalogObject.get('catalogFile');
     const isUpdate = Boolean(avvCatalogObject.id);
+    let uploadWarning: string | null = null;
     try {
         setLoggingContext(request.log);
 
@@ -43,10 +45,18 @@ export const beforeAVVCatalogSaveHook = async (
                     new Error()
                 );
             }
+            uploadWarning = await checkForCatalogSameValidFrom.execute(
+                catalog.catalogInformation
+            );
             destroyFile(originalFile);
         }
 
         await AVVCatalogMapper.toPersistence(catalog, avvCatalogObject);
+        if (uploadWarning) {
+            // The catalog is saved anyway, the warning is shown in its row in the dashboard
+            getLogger().warn(uploadWarning);
+            avvCatalogObject.set('uploadWarning', uploadWarning);
+        }
     } catch (error) {
         if (error instanceof CatalogDuplicationError) {
             destroyFile(originalFile);
