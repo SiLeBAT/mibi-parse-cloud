@@ -1,3 +1,3 @@
-import './updateSchema';
+import './seedDefaultData';
 
 import './checkReferentialIntegrity';
