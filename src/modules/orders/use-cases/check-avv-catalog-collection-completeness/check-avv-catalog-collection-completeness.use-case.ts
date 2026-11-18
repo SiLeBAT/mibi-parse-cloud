@@ -7,12 +7,12 @@ class CheckAVVCollectionCompletenessUseCase implements UseCase<null, null> {
     private requiredCatalogNames: string[] = [
         'avv303',
         'avv313',
-        'avv316',
         'avv319',
         'avv322',
         'avv324',
         'avv326',
         'avv328',
+        'avv337',
         'avv339'
     ];
 
