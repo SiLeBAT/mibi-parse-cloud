@@ -167,6 +167,8 @@ export const sampleSheetMetaStrings = {
 };
 
 export const sampleSheetSamplesStrings = {
+    pathogenSortHint:
+        'Aus Effizienzgründen wurden die Isolatdaten nach Erregername aufsteigend sortiert.',
     titles: {
         sample_id: 'Ihre Probe-nummer',
         sample_id_avv: 'Probe-nummer nach AVV Data',

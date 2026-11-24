@@ -15,6 +15,7 @@ import { CatalogService } from './catalog.service';
 import { PDFConfigProviderService } from './pdf-config-provider.service';
 import { PDFService } from './pdf.service';
 import { limitTextToLines } from './pdf-text.util';
+import { sortSamplesByPathogen } from './pdf-sample-sort.util';
 
 type PdfPrefixText = { text: string; bold: boolean };
 type PdfText = (string | PdfPrefixText)[];
@@ -99,15 +100,24 @@ export class PDFCreatorService {
     }
 
     private createDocDefinition(sampleSheet: SampleSheet) {
+        const sortByPathogen = this.isSortedByPathogen(sampleSheet.meta.nrl);
         return {
             info: { ...this.config.fileInfo },
             ...this.createPageConfig(),
             defaultStyle: this.configProvider.defaultStyle,
             styles: this.configProvider.styles,
-            content: this.createContent(sampleSheet),
+            content: this.createContent(sampleSheet, sortByPathogen),
+            header: (currentPage: number) =>
+                this.createHeader(currentPage, sortByPathogen),
             footer: (currentPage: number, pageCount: number) =>
                 this.createFooter(currentPage, pageCount)
         };
+    }
+
+    // MPC-921: only the NRL-AR (and no other BfR lab, not even NRL-AR-Kleb)
+    // gets its sample rows sorted by pathogen in the PDF.
+    private isSortedByPathogen(nrl: NRL_ID_VALUE): boolean {
+        return nrl === NRL_ID_VALUE.NRL_AR;
     }
 
     private createPageConfig() {
@@ -125,13 +135,16 @@ export class PDFCreatorService {
         };
     }
 
-    private createContent(sampleSheet: SampleSheet) {
+    private createContent(sampleSheet: SampleSheet, sortByPathogen: boolean) {
+        const samples = sortByPathogen
+            ? sortSamplesByPathogen(sampleSheet.samples)
+            : sampleSheet.samples;
         return [
             {
                 ...this.createMeta(sampleSheet.meta),
                 pageBreak: 'after'
             },
-            this.createSamples(sampleSheet.samples)
+            this.createSamples(samples)
         ];
     }
 
@@ -1163,6 +1176,24 @@ export class PDFCreatorService {
         return {
             text: `${text}: `,
             bold: true
+        };
+    }
+
+    // Header
+
+    // Page 1 holds the meta data; every following page holds the samples
+    // table. For pathogen-sorted PDFs a hint is printed above that table, in
+    // the footer's font, inside the top page margin.
+    private createHeader(currentPage: number, sortByPathogen: boolean) {
+        if (!sortByPathogen || currentPage === 1) {
+            return null;
+        }
+        const margins = this.config.footer.margins;
+        const topMargin = this.config.page.margins.top;
+        return {
+            text: this.strings.samples.pathogenSortHint,
+            style: 'footer',
+            margin: [margins.left, topMargin / 2, margins.right, 0]
         };
     }
 
